@@ -169,114 +169,137 @@
     https://**put_your_bitrix24_address**/rest/tasks.task.list
     ```
 
-- JS
+- TS
 
-    ```javascript
-    // callListMethod: Получает все данные сразу.
-    // Используйте только для небольших выборок (< 1000 элементов) из-за высокой
-    // нагрузки на память.
+    ```ts
+    import { type B24Frame } from '@bitrix24/b24jssdk'
+
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    declare const $b24: B24Frame
+
+    // Shape of a single task in result.tasks (limited to the selected fields)
+    type TaskListItem = {
+      id: string
+      title: string
+      status: string
+      deadline: string | null
+      responsibleId: string
+    }
 
     try {
-    const response = await $b24.callListMethod(
-        'tasks.task.list',
-        {
-        order: {
-            'DEADLINE': 'asc',
-            'PRIORITY': 'desc'
-        },
-        filter: {
-            '!STATUS': 6,
-            '>=DEADLINE': new Date().toISOString().split('T')[0],
-            'RESPONSIBLE_ID': 547,
-            '::SUBFILTER-PARAMS': { 'FAVORITE': 'Y' }
-        },
-        select: [
+      const response = await $b24.actions.v2.call.make<{ tasks: TaskListItem[] }>({
+        method: 'tasks.task.list',
+        params: {
+          // Sorting: nearest deadline first, then higher priority
+          order: { DEADLINE: 'asc', PRIORITY: 'desc' },
+          filter: {
+            '!STATUS': 6, // exclude deferred tasks
+            '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue
+            RESPONSIBLE_ID: 547, // tasks of a specific responsible person
+            '::SUBFILTER-PARAMS': { FAVORITE: 'Y' } // favorites only
+          },
+          // Request only the fields you need
+          select: [
             'ID', 'TITLE', 'DESCRIPTION', 'STATUS', 'subStatus',
             'DEADLINE', 'CREATED_DATE', 'RESPONSIBLE_ID',
             'ACCOMPLICES', 'AUDITORS', 'TAGS', 'COUNTERS',
             'PRIORITY', 'MARK'
-        ],
-        params: {
-            'WITH_TIMER_INFO': true,
-            'WITH_RESULT_INFO': true,
-            'WITH_PARSED_DESCRIPTION': true,
+          ],
+          // Extra computed data
+          params: {
+            WITH_TIMER_INFO: true,
+            WITH_RESULT_INFO: true,
+            WITH_PARSED_DESCRIPTION: true
+          },
+          // Page offset (not the page number): the page size is fixed at 50, so the
+          // Nth page is start = (N - 1) * 50. For full traversal prefer auto-pagination
+          // via $b24.actions.v2.fetchList.make({ method, params }).
+          start: 0
         },
-        },
-        (progress) => { console.log('Progress:', progress) }
-    );
-    const items = response.getData() || [];
-    for (const entity of items) { console.log('Entity:', entity) }
+        requestId: 'tasks-task-list'
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const tasks = response.getData()!.result.tasks
+        const total = response.getTotal() // total number of matched records (for paging)
+        console.info(`Loaded ${tasks.length} of ${total} tasks`)
+        for (const task of tasks) {
+          console.info(`#${task.id}: ${task.title}`)
+        }
+      }
     } catch (error) {
-    console.error('Request failed', error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
+    ```
 
-    // fetchListMethod: Выбирает данные по частям с помощью итератора.
-    // Используйте для больших объемов данных для эффективного потребления памяти.
+- UMD
 
-    try {
-    const generator = $b24.fetchListMethod('tasks.task.list', {
-        order: {
-        'DEADLINE': 'asc',
-        'PRIORITY': 'desc'
-        },
-        filter: {
-        '!STATUS': 6,
-        '>=DEADLINE': new Date().toISOString().split('T')[0],
-        'RESPONSIBLE_ID': 547,
-        '::SUBFILTER-PARAMS': { 'FAVORITE': 'Y' }
-        },
-        select: [
-        'ID', 'TITLE', 'DESCRIPTION', 'STATUS', 'subStatus',
-        'DEADLINE', 'CREATED_DATE', 'RESPONSIBLE_ID',
-        'ACCOMPLICES', 'AUDITORS', 'TAGS', 'COUNTERS',
-        'PRIORITY', 'MARK'
-        ],
-        params: {
-        'WITH_TIMER_INFO': true,
-        'WITH_RESULT_INFO': true,
-        'WITH_PARSED_DESCRIPTION': true,
-        },
-    }, 'ID');
-    for await (const page of generator) {
-        for (const entity of page) { console.log('Entity:', entity) }
-    }
-    } catch (error) {
-    console.error('Request failed', error)
-    }
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function listTasks() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-    // callMethod: Ручное управление постраничной навигацией через параметр start.
-    // Используйте для точного контроля над пакетами запросов.
-    // Для больших данных менее эффективен, чем fetchListMethod.
+          const response = await $b24.actions.v2.call.make({
+            method: 'tasks.task.list',
+            params: {
+              // Sorting: nearest deadline first, then higher priority
+              order: { DEADLINE: 'asc', PRIORITY: 'desc' },
+              filter: {
+                '!STATUS': 6, // exclude deferred tasks
+                '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue
+                RESPONSIBLE_ID: 547, // tasks of a specific responsible person
+                '::SUBFILTER-PARAMS': { FAVORITE: 'Y' } // favorites only
+              },
+              // Request only the fields you need
+              select: [
+                'ID', 'TITLE', 'DESCRIPTION', 'STATUS', 'subStatus',
+                'DEADLINE', 'CREATED_DATE', 'RESPONSIBLE_ID',
+                'ACCOMPLICES', 'AUDITORS', 'TAGS', 'COUNTERS',
+                'PRIORITY', 'MARK'
+              ],
+              // Extra computed data
+              params: {
+                WITH_TIMER_INFO: true,
+                WITH_RESULT_INFO: true,
+                WITH_PARSED_DESCRIPTION: true
+              },
+              // Page offset (not the page number): the page size is fixed at 50, so the
+              // Nth page is start = (N - 1) * 50. For full traversal prefer auto-pagination
+              // via $b24.actions.v2.fetchList.make({ method, params }).
+              start: 0
+            },
+            requestId: 'tasks-task-list'
+          })
 
-    try {
-    const response = await $b24.callMethod('tasks.task.list', {
-        order: {
-        'DEADLINE': 'asc',
-        'PRIORITY': 'desc'
-        },
-        filter: {
-        '!STATUS': 6,
-        '>=DEADLINE': new Date().toISOString().split('T')[0],
-        'RESPONSIBLE_ID': 547,
-        '::SUBFILTER-PARAMS': { 'FAVORITE': 'Y' }
-        },
-        select: [
-        'ID', 'TITLE', 'DESCRIPTION', 'STATUS', 'subStatus',
-        'DEADLINE', 'CREATED_DATE', 'RESPONSIBLE_ID',
-        'ACCOMPLICES', 'AUDITORS', 'TAGS', 'COUNTERS',
-        'PRIORITY', 'MARK'
-        ],
-        params: {
-        'WITH_TIMER_INFO': true,
-        'WITH_RESULT_INFO': true,
-        'WITH_PARSED_DESCRIPTION': true,
-        },
-    }, 0);
-    const result = response.getData().result || [];
-    for (const entity of result) { console.log('Entity:', entity) }
-    } catch (error) {
-    console.error('Request failed', error)
-    }
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const tasks = response.getData().result.tasks
+          const total = response.getTotal() // total number of matched records (for paging)
+          console.info(`Loaded ${tasks.length} of ${total} tasks`)
+          for (const task of tasks) {
+            console.info(`#${task.id}: ${task.title}`)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', listTasks)
+    </script>
     ```
 
 - PHP
