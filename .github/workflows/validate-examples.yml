@@ -1,0 +1,104 @@
+name: validate-examples
+
+# Validates the actualized b24jssdk TS + UMD examples via .actualize/validate.py
+# and runs the offline unit tests for the tooling itself.
+# The .actualize/ tooling must already be on the default branch, so the tooling
+# PR is merged before this workflow can check documentation PRs.
+#
+# Security notes:
+#   - on pull_request the checkout is the PR *merge ref* (PR-controlled), so jobs
+#     are restricted to same-repo PRs; fork PRs do not run the npm/tsc/python chain;
+#   - the token is read-only (permissions: contents: read) and not persisted;
+#   - validate.py only type-checks (tsc) and parses (node --check) — it never
+#     executes the example code; npm runs with --ignore-scripts from a lockfile.
+
+on:
+  pull_request:
+    paths:
+      - 'api-reference/**/*.md'
+      - '.actualize/**'
+      - '.github/workflows/validate-examples.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-tooling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Unit tests (offline, stdlib)
+        run: python -m unittest discover -s .actualize/tests -p 'test_*.py' -v
+
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Run on push to main, and on PRs from this repository only (skip forks).
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache typecheck toolchain
+        uses: actions/cache@v4
+        with:
+          path: .actualize/.tscheck
+          key: tscheck-${{ runner.os }}-${{ hashFiles('.actualize/typecheck/package-lock.json') }}
+
+      - name: Collect changed example files
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          # guard against a missing/zero base (new branch, first push, force-push)
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-list --max-parents=0 HEAD | tail -1)"
+            echo "base unavailable; falling back to root commit ${base}"
+          fi
+          git diff --name-only "$base" HEAD -- 'api-reference/**/*.md' > changed.txt
+          echo "Changed example files:"; cat changed.txt || true
+
+      - name: Validate TS + UMD examples
+        run: |
+          rc=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            [ -f "$f" ] || continue
+            # only validate files that carry the actualized "- TS" tab
+            if grep -qE '^- TS$' "$f"; then
+              echo "::group::validate $f"
+              python3 .actualize/validate.py "$f" || rc=1
+              echo "::endgroup::"
+            fi
+          done < changed.txt
+          exit $rc
+
+      - name: Verify ledger drift (push to main, informational)
+        if: github.event_name == 'push'
+        continue-on-error: true
+        run: python3 .actualize/record.py --verify-all

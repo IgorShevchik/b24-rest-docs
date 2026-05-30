@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Keep GitHub Actions used by the example-validation workflow up to date.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Surface SDK / TypeScript updates for the typecheck environment.
+  # Direct-only and never auto-merged: a bump is the signal to re-run
+  # validate.py over the ledger before merging (see .actualize/FOLLOWUPS.md).
+  - package-ecosystem: npm
+    directory: /.actualize/typecheck
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-type: direct
+    commit-message:
+      prefix: deps(typecheck)
