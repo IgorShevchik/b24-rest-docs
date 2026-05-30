@@ -1,3 +1,4 @@
 # local typecheck sandbox (installs @bitrix24/b24jssdk, not committed)
 .tscheck/
+.tscheck-w*/
 __pycache__/

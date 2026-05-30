@@ -40,12 +40,15 @@ PY
   # stub claude: parse <PATH> from the -p prompt, then act on the file name:
   #   *skip*  -> leave unchanged (SKIP)        *fail* -> inject FAILVALIDATE (FAIL)
   #   else    -> append a benign edit (PASS)
+  # If STUB_ESCAPE_FILE is set, the stub ALSO writes to that path — simulating a
+  # prompt-injected agent stepping outside its lane (for the blast-radius test).
   cat > "$REPO/bin/claude" <<'SH'
 #!/usr/bin/env bash
 prompt=""; prev=""
 for a in "$@"; do [ "$prev" = "-p" ] && prompt="$a"; prev="$a"; done
 path=$(printf '%s\n' "$prompt" | grep -oE '<PATH>[^<]+</PATH>' | head -1 | sed 's/<PATH>//; s|</PATH>||')
 [ -n "$path" ] || exit 0
+[ -n "${STUB_ESCAPE_FILE:-}" ] && printf 'pwned\n' >> "$STUB_ESCAPE_FILE"
 case "$path" in
   *skip*) : ;;                                   # no change
   *fail*) printf '\nFAILVALIDATE\n' >> "$path" ;;
@@ -54,6 +57,19 @@ esac
 exit 0
 SH
   chmod +x "$REPO/bin/claude"
+
+  # stub validate.py that RECORDS the --project it was handed, so a test can assert
+  # the runner passes an isolated per-worker sandbox dir (parallel-validation seam).
+  cat > "$REPO/.actualize/validate_proj_probe.py" <<'PY'
+import sys
+proj = ""
+if "--project" in sys.argv:
+    proj = sys.argv[sys.argv.index("--project") + 1]
+with open(sys.argv[0] + ".seen", "a") as f:
+    f.write(proj + "\n")
+text = open(sys.argv[1], encoding="utf-8").read()
+sys.exit(1 if "FAILVALIDATE" in text else 0)
+PY
 
   # test docs: each must carry the legacy token so the real remaining.py lists it
   for n in pass1 pass2 skip1 fail1; do
@@ -125,6 +141,34 @@ check "commit has pass2"               "printf '%s' \"\$files\" | grep -q 'pass2
 check "commit has ledger"              "printf '%s' \"\$files\" | grep -q 'ledger.tsv'"
 check "commit excludes fail1 (scope)"  "! printf '%s' \"\$files\" | grep -q 'fail1.md'"
 check "commit excludes skip1 (scope)"  "! printf '%s' \"\$files\" | grep -q 'skip1.md'"
+rm -rf "$REPO"
+
+# 6) BLAST-RADIUS: agent writes OUTSIDE the plan -> abort, revert, nothing committed
+make_repo
+# the stub will also scribble into a sibling file not in the batch plan
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 \
+        STUB_ESCAPE_FILE="$REPO/api-reference/tasks/INJECTED.md" \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "escape aborts (exit 1)"         "[ $rc -eq 1 ]"
+check "escape prints SECURITY ABORT"   "printf '%s' \"\$out\" | grep -q 'SECURITY ABORT'"
+check "escape names the stray file"    "printf '%s' \"\$out\" | grep -q 'INJECTED.md'"
+check "no commit after escape"         "[ \"\$(git -C \"\$REPO\" rev-list --count HEAD)\" -eq 1 ]"
+check "planned edits reverted"         "[ -z \"\$(git -C \"\$REPO\" status --porcelain)\" ]"
+check "stray untracked file removed"   "[ ! -f \"\$REPO/api-reference/tasks/INJECTED.md\" ]"
+check "nothing recorded in ledger"     "! grep -qE 'pass1|pass2' \"\$REPO/.actualize/ledger.tsv\""
+rm -rf "$REPO"
+
+# 7) PARALLEL VALIDATION: runner passes an isolated --project per validated file
+make_repo
+# swap the real validate.py for the probe that logs the --project it received,
+# and COMMIT the swap so the clean-tree precondition is satisfied
+cp "$REPO/.actualize/validate_proj_probe.py" "$REPO/.actualize/validate.py"
+git -C "$REPO" commit -q -am "swap validate probe"
+( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+    bash .actualize/run-batch.sh api-reference/tasks 10 2 ) >/dev/null 2>&1
+seen="$REPO/.actualize/validate.py.seen"
+check "validate.py invoked with --project" "[ -s \"\$seen\" ]"
+check "project dir is a per-worker sandbox" "grep -q '.tscheck-w' \"\$seen\""
 rm -rf "$REPO"
 
 # ============================ result ==========================================
