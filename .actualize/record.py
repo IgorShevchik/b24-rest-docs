@@ -106,8 +106,10 @@ def verify(paths=None):
         if not os.path.isfile(full):
             print(f"MISSING  {r}")
             drift += 1
-        elif sha256(full) != recorded:
-            print(f"DRIFT    {r}  recorded {recorded[:12]} != current {sha256(full)[:12]}")
+            continue
+        current = sha256(full)
+        if current != recorded:
+            print(f"DRIFT    {r}  recorded {recorded[:12]} != current {current[:12]}")
             drift += 1
         else:
             print(f"OK       {r}")

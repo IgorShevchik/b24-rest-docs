@@ -86,6 +86,25 @@ class ExtractTests(unittest.TestCase):
     def test_forbidden_token(self):
         self._assert_fail(VALID.replace("actions.v2.call.make", "callMethod", 1))
 
+    def test_all_forbidden_tokens(self):
+        # every banned token must trip extract(), not just callMethod
+        for banned in validate.FORBIDDEN:
+            with self.subTest(token=banned):
+                # inject the token as a comment line inside the TS block
+                bad = VALID.replace("declare const $b24: B24Frame",
+                                    f"declare const $b24: B24Frame\n// {banned}()", 1)
+                self._assert_fail(bad)
+
+    def test_missing_umd_tab(self):
+        # symmetric to test_missing_ts_tab: TS present, UMD removed
+        self._assert_fail(VALID.replace("- UMD\n", "", 1))
+
+    def test_v3_accepted(self):
+        # actions.v3 must be accepted just like v2
+        ts, umd = validate.extract(write_md(VALID.replace("actions.v2.", "actions.v3.")))
+        self.assertIn("actions.v3.", ts)
+        self.assertIn("actions.v3.", umd)
+
     def test_ts_without_actions(self):
         self._assert_fail(replace_nth(VALID, "$b24.actions.v2.call.make", "$b24.callApi", 1))
 
@@ -227,10 +246,28 @@ class RemainingTests(unittest.TestCase):
             f.write("date\tfile\tsha256\tstatus\tmethod\n")
             f.write("d\tx/a.md\tsha\tdone\tm\n")
             f.write("d\tx/b.md\tsha\tpending\tm\n")
+            f.write("d\tx/c.md\tsha\treviewed\tm\n")
         with mock.patch.object(remaining, "LEDGER", ledger):
             done = remaining.done_set()
-        self.assertIn("x/a.md", done)
-        self.assertNotIn("x/b.md", done)
+        self.assertIn("x/a.md", done)          # done counts
+        self.assertIn("x/c.md", done)          # reviewed counts too (DONE set)
+        self.assertNotIn("x/b.md", done)       # pending does not
+
+
+class ValidateCliGuardTests(unittest.TestCase):
+    """validate.py main() refuses paths outside the repo (the guard is in main(),
+    not extract(), so exercise it via the CLI)."""
+
+    def test_path_outside_repo_rejected(self):
+        import subprocess
+        here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        script = os.path.join(here, "validate.py")
+        r = subprocess.run(
+            [sys.executable, script, "/etc/hostname"],
+            capture_output=True, text=True, timeout=30,
+        )
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("outside the repository", r.stdout + r.stderr)
 
 
 if __name__ == "__main__":
