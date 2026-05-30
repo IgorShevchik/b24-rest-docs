@@ -36,12 +36,13 @@
 
 Используем **`actions.v2.call.make` c параметром `start`** (одностраничный вызов).
 Причина: list-хелперы `callList.make` / `fetchList.make` пагинируют по id-курсору и
-**игнорируют `order`** — а сортировка в примерах обычно важна.
+**не принимают `order`** (он исключён из типа их параметров — передача = ошибка `tsc`), а
+сортировка в примерах обычно важна.
 - читаем массив из `result.<key>` (например `result.tasks`, `result.items`);
 - НАД `const response` оставляем комментарий-подсказку, что для полной выборки есть **два**
   хелпера: `$b24.actions.v2.callList.make()` (вернёт весь массив разом) и
   `$b24.actions.v2.fetchList.make()` (async-генератор по чанкам) — с пометкой `NOTE:`, что
-  оба игнорируют `order`;
+  оба не принимают `order` (исключён из типа параметров);
 - `response.getTotal()` НЕ используем (deprecated, removed в SDK 2.0) — показываем размер
   страницы через `result.<key>.length`.
 
@@ -107,6 +108,8 @@ try {
 ```
 
 ## Таб UMD (полная инициализация)
+
+В UMD `call.make` вызывается **без** generic-параметра `<T>` (это plain JS, не TS).
 
 ```html
 <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
@@ -182,7 +185,7 @@ try {
 - [ ] нет `callMethod` / `callListMethod` / `fetchListMethod` в jsSDK-примере
 - [ ] нет вызовов `processResult` / `processData`
 - [ ] комментарии и значения на английском
-- [ ] пояснит. комментарии (ES-модуль, `$b24`) — первыми строками; `import type { B24Frame }` (+`ISODate` для дат)
+- [ ] пояснит. комментарии (ES-модуль, `$b24`) — первыми строками; в TS `import type { B24Frame }` (+`ISODate` для дат), в UMD — `B24Js.*` без import
 - [ ] `requestId` через `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
 - [ ] `getData()!` в TS / `getData()` в UMD; для списков — `.length` (НЕ `getTotal()`, он deprecated)
 - [ ] для списков — подсказка про `callList.make` и `fetchList.make` (с `NOTE` про игнор `order`)

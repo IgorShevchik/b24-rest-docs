@@ -22,9 +22,12 @@ VALID = """# Page
 - TS
 
 ```ts
-import { type B24Frame } from '@bitrix24/b24jssdk'
+// This snippet is an ES module: top-level await requires type="module" or a bundler.
+// $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+import { Text } from '@bitrix24/b24jssdk'
+import type { B24Frame } from '@bitrix24/b24jssdk'
 declare const $b24: B24Frame
-const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} })
+const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, requestId: Text.getUuidRfc4122() })
 ```
 
 - UMD
@@ -33,7 +36,7 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} }
 <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
 <script>
 const $b24 = await B24Js.initializeB24Frame()
-const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} })
+const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, requestId: B24Js.Text.getUuidRfc4122() })
 </script>
 ```
 
@@ -42,6 +45,8 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} }
 
 
 def replace_nth(s, old, new, n):
+    if n < 1:
+        return s
     i = -1
     for _ in range(n):
         i = s.find(old, i + 1)
@@ -136,6 +141,9 @@ class HelperTests(unittest.TestCase):
     def test_replace_nth_out_of_range_is_noop(self):
         # fewer than n occurrences -> original string returned unchanged
         self.assertEqual(replace_nth("a-a", "a", "X", 5), "a-a")
+
+    def test_replace_nth_zero_is_noop(self):
+        self.assertEqual(replace_nth("a-a-a", "a", "X", 0), "a-a-a")
 
 
 class CleanTests(unittest.TestCase):
@@ -252,6 +260,11 @@ class LedgerTests(unittest.TestCase):
             f.write("plain text, no tabs, no method")
         self.assertEqual(record.detect_method(path), "no-method.md")
 
+    def test_detect_method_from_tabs(self):
+        self.assertEqual(
+            record.detect_method(self._md("m.md", method="tasks.task.list")),
+            "tasks.task.list")
+
 
 class RemainingTests(unittest.TestCase):
     def test_legacy_regex_matches_deprecated(self):
@@ -276,6 +289,51 @@ class RemainingTests(unittest.TestCase):
             done = remaining.done_set()
         self.assertIn("x/a.md", done)
         self.assertNotIn("x/b.md", done)
+
+
+class ValidateMainTests(unittest.TestCase):
+    def _run_main(self, path):
+        with mock.patch.object(sys, "argv", ["validate.py", path]):
+            with self.assertRaises(SystemExit) as e:
+                validate.main()
+        return e.exception.code
+
+    def test_main_rejects_path_outside_repo(self):
+        # the path-guard runs before any npm/tsc work, so this needs no toolchain
+        self.assertEqual(self._run_main("/etc/hostname"), 1)
+
+    def test_main_file_not_found(self):
+        missing = os.path.join(validate.REPO, "definitely-missing-xyz-123.md")
+        self.assertEqual(self._run_main(missing), 1)
+
+
+class FixtureAnchorTests(unittest.TestCase):
+    # guards the substring anchors the replace-based ExtractTests rely on, so a
+    # future VALID edit that drops one fails loudly instead of silently no-op'ing
+    def test_valid_fixture_has_expected_anchors(self):
+        for anchor in ("- TS\n", "- UMD\n", "{% endlist %}", "actions.v2.call.make"):
+            self.assertIn(anchor, VALID)
+        self.assertEqual(VALID.count("$b24.actions.v2.call.make"), 2)
+
+
+class DocsConsistencyTests(unittest.TestCase):
+    ACTUALIZE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    def _read(self, name):
+        with open(os.path.join(self.ACTUALIZE, name), encoding="utf-8") as f:
+            return f.read()
+
+    def test_prompt_encodes_current_conventions(self):
+        p = self._read("PROMPT.md")
+        for token in ("Text.getUuidRfc4122()", "import type { B24Frame }",
+                      "callList.make", "fetchList.make"):
+            self.assertIn(token, p)
+
+    def test_readme_in_sync_with_prompt(self):
+        readme = self._read("README.md")
+        self.assertIn("Text.getUuidRfc4122()", readme)
+        # the deprecated getTotal() must not be recommended as the list pattern
+        self.assertNotIn("для списков — `getTotal()`", readme)
 
 
 if __name__ == "__main__":

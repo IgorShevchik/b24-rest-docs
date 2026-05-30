@@ -19,8 +19,8 @@
    `processResult` / `processData`.
 6. **Списочные методы**: один вариант — `call.make` со `start` (сохраняет `order`). Над
    `const response` — комментарий про **оба** хелпера `callList.make` / `fetchList.make` с
-   `NOTE`, что они игнорируют `order`. `response.getTotal()` НЕ используется (deprecated/removed
-   2.0.0) — размер страницы через `.length`.
+   `NOTE`, что они НЕ принимают `order` (исключён из их типа — `tsc`-ошибка при передаче).
+   `response.getTotal()` НЕ используется (deprecated/removed 2.0.0) — размер страницы через `.length`.
 7. **Тип `<T>`** в TS соответствует разделу «Обработка ответа» страницы; поля-даты — `ISODate | null`.
 8. **Текст страницы вне табов не изменён** (если изменения уже закоммичены:
    `git show HEAD -- <PATH>` должен затрагивать только блок `{% list tabs %}`). Табы
