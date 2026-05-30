@@ -164,13 +164,20 @@ try {
 
 ## Валидация (обязательно)
 
+> **В batch-режиме (`run-batch.sh`)** шаги ниже выполняет ОРКЕСТРАТОР, а не ты: у агента нет
+> инструмента Bash (`--allowed-tools Read Edit Grep`). Просто внеси правку и остановись —
+> валидацию и запись в ledger сделает раннер. Команды ниже — для **ручного** прогона.
+
 1. `python3 .actualize/validate.py <PATH>` → должно быть `PASS`. Проверяет: структуру табов
    (нет `- JS`, есть `- TS`/`- UMD`); извлекает блоки ТОЛЬКО внутри `{% list tabs %}`;
    запрещённые токены (`callMethod`/`callListMethod`/`fetchListMethod`/`processResult`/`processData`);
-   `tsc --strict` против ПИННИНГ-версии `@bitrix24/b24jssdk` (= 0 ошибок); `node --check` UMD.
+   наличие `$b24.actions.v{2,3}.*` в **обоих** табах; `tsc --strict` против ПИННИНГ-версии
+   `@bitrix24/b24jssdk` (= 0 ошибок); `node --check` UMD.
 2. Если `FAIL` — исправь код и повтори, пока не `PASS`.
 
 ## Отметка о выполнении
+
+> В batch-режиме это тоже делает оркестратор — ручной шаг ниже не нужен.
 
 После `PASS`: `python3 .actualize/record.py <PATH> done` — идемпотентный upsert (одна строка на
 файл: дата, sha256, статус, метод) в `.actualize/ledger.tsv`. Контроль дрейфа:

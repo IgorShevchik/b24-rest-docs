@@ -41,6 +41,9 @@ jobs:
       - name: Unit tests (offline, stdlib)
         run: python -m unittest discover -s .actualize/tests -p 'test_*.py' -v
 
+      - name: run-batch.sh orchestration tests (offline, stubbed agent)
+        run: bash .actualize/tests/test_run_batch.sh
+
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
