@@ -56,3 +56,8 @@ python3 .actualize/record.py --verify-all
   пред-существующие `processData()` — это вне области правок.
 - Версия: по умолчанию `actions.v2`; `actions.v3` — для `rest-v3/**` и ответов `result.item`.
 - Списочные методы: один вариант — `call.make` со `start` (+ комментарий про `fetchList.make`).
+
+## Отложенные пункты
+
+Стратегические задачи (политика версий SDK, batch-runner на ~1547 файлов) — в
+[`FOLLOWUPS.md`](FOLLOWUPS.md) (GitHub Issues в репозитории отключены).
