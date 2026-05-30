@@ -193,8 +193,8 @@
       // tasks.task.list returns a single page (max 50 records). For the whole result set
       // use a list helper: $b24.actions.v2.callList.make() returns every record as one
       // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-      // NOTE: both list helpers paginate by an id cursor and therefore IGNORE `order` —
-      // keep this call.make + `start` variant when the sort order matters.
+      // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+      // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
       const response = await $b24.actions.v2.call.make<{ tasks: TaskListItem[] }>({
         method: 'tasks.task.list',
         params: {
@@ -258,8 +258,8 @@
           // tasks.task.list returns a single page (max 50 records). For the whole result set
           // use a list helper: $b24.actions.v2.callList.make() returns every record as one
           // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-          // NOTE: both list helpers paginate by an id cursor and therefore IGNORE `order` —
-          // keep this call.make + `start` variant when the sort order matters.
+          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.task.list',
             params: {
