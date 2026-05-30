@@ -58,8 +58,24 @@ def write_md(content):
 
 
 class ExtractTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = []
+        self.addCleanup(self._cleanup)
+
+    def _cleanup(self):
+        for p in self._tmp:
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+
+    def _write(self, content):
+        path = write_md(content)
+        self._tmp.append(path)
+        return path
+
     def test_valid_returns_ts_and_umd(self):
-        ts, umd = validate.extract(write_md(VALID))
+        ts, umd = validate.extract(self._write(VALID))
         self.assertIn("actions.v2.", ts)
         self.assertIn("actions.v2.", umd)
         self.assertNotIn("<script", umd)  # inner JS only
@@ -67,12 +83,12 @@ class ExtractTests(unittest.TestCase):
     def test_region_isolation_ignores_outside_blocks(self):
         # a ```ts block OUTSIDE the tabs region must not be counted
         md = "```ts\nconst ignored = true\n```\n\n" + VALID
-        ts, _ = validate.extract(write_md(md))
+        ts, _ = validate.extract(self._write(md))
         self.assertIn("crm.lead.add", ts)
 
     def _assert_fail(self, content):
         with self.assertRaises(SystemExit):
-            validate.extract(write_md(content))
+            validate.extract(self._write(content))
 
     def test_legacy_js_tab(self):
         self._assert_fail(VALID.replace("- TS\n", "- JS\n\n```js\nx\n```\n\n- TS\n", 1))
@@ -80,8 +96,28 @@ class ExtractTests(unittest.TestCase):
     def test_missing_ts_tab(self):
         self._assert_fail(VALID.replace("- TS\n", "", 1))
 
+    def test_missing_umd_tab(self):
+        self._assert_fail(VALID.replace("- UMD\n", "", 1))
+
     def test_two_ts_blocks(self):
         self._assert_fail(VALID.replace("{% endlist %}", "```ts\nconst x = 1\n```\n\n{% endlist %}"))
+
+    def test_two_html_blocks(self):
+        self._assert_fail(VALID.replace(
+            "{% endlist %}", "```html\n<script>const x = 1</script>\n```\n\n{% endlist %}"))
+
+    def test_no_tabs_region(self):
+        # tab names present but no {% list tabs %} … {% endlist %} wrapper
+        self._assert_fail("# Page\n\n- TS\n- UMD\n\n```ts\nconst r = 1\n```\n")
+
+    def test_umd_script_without_logic(self):
+        # an html block whose only <script> is the external src (no inline body) must fail
+        self._assert_fail(
+            "# Page\n\n{% list tabs %}\n\n- TS\n\n"
+            "```ts\nconst r = await $b24.actions.v2.call.make({ method: 'x', params: {} })\n```\n\n"
+            "- UMD\n\n```html\n"
+            '<script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>\n'
+            "```\n\n{% endlist %}\n")
 
     def test_forbidden_token(self):
         self._assert_fail(VALID.replace("actions.v2.call.make", "callMethod", 1))
@@ -91,6 +127,15 @@ class ExtractTests(unittest.TestCase):
 
     def test_umd_without_actions(self):
         self._assert_fail(replace_nth(VALID, "$b24.actions.v2.call.make", "$b24.callApi", 2))
+
+
+class HelperTests(unittest.TestCase):
+    def test_replace_nth_targets_only_the_nth(self):
+        self.assertEqual(replace_nth("a-a-a", "a", "X", 2), "a-X-a")
+
+    def test_replace_nth_out_of_range_is_noop(self):
+        # fewer than n occurrences -> original string returned unchanged
+        self.assertEqual(replace_nth("a-a", "a", "X", 5), "a-a")
 
 
 class CleanTests(unittest.TestCase):
