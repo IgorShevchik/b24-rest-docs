@@ -15,17 +15,21 @@
 #   - clean-tree precondition: with RUN=1 it refuses to start unless the working
 #     tree is clean, so a batch can only ever commit its own edits;
 #   - blast-radius check: after the edit phase it verifies the agent changed ONLY
-#     files from the planned batch. A prompt-injection in some .md that makes the
-#     agent touch other files (or write secrets to the tree) is caught here — the
-#     whole batch is reverted, nothing is committed. (The prompt also frames file
-#     content as untrusted data, but this check is the enforcement that does not
-#     depend on the model obeying.)
+#     files from the planned batch (tracked + untracked). A prompt-injection in some
+#     .md that makes the agent touch other files IN THE TREE (or write secrets there)
+#     is caught here — the whole batch is reverted, nothing is committed. (The prompt
+#     also frames file content as untrusted data, but this check is the enforcement
+#     that does not depend on the model obeying.)
+#     LIMITATION: this is a working-tree check (`git status`), so it does NOT catch a
+#     write OUTSIDE the repo (an absolute path such as ~/.ssh or /tmp). The agent's
+#     Edit tool is not path-confined; closing this fully needs process-level FS
+#     sandboxing (bubblewrap/firejail, or a CLI --add-dir allowlist) — see FOLLOWUPS.
 #   Run it from a branch intended for DOCUMENTATION changes, never a tooling PR.
 #
-# One run = one batch: edit files via agent (parallel) -> validate (parallel,
-# isolated sandboxes) + write ledger (serial, single writer) -> commit the passed
-# ones (checkpoint). Resumable: remaining.py skips files already in the ledger, so
-# a re-run continues from the remainder and a retry is just the next run.
+# One run = one batch: edit files via agent (parallel) -> blast-radius check ->
+# validate + write ledger (serial) -> commit the passed ones (checkpoint). Resumable:
+# remaining.py skips files already in the ledger, so a re-run continues from the
+# remainder and a retry is just the next run.
 #
 # INTERRUPTS: Ctrl-C during the EDIT phase is harmless (nothing committed yet). A
 # Ctrl-C during the VALIDATE/RECORD phase can leave edits and/or ledger rows that
@@ -37,7 +41,7 @@
 #   RUN=1 .actualize/run-batch.sh [ROOT] [N] [PAR]   # actually run
 #     ROOT  walk directory             (default: api-reference/tasks)
 #     N     files per batch, 0 = all   (default: 20)  — checkpoint granularity
-#     PAR   parallelism (edits AND validation)        (default: 4)
+#     PAR   parallel agent edits       (default: 4)
 #
 # Env toggles:
 #   RUN=1             actually edit/validate/commit (omit => dry run)
@@ -46,7 +50,6 @@
 #   NO_COMMIT=1       validate + record into the ledger, but do not git-commit
 #   CLAUDE_MODEL=...  passed through to `claude --model`
 #   CLAUDE_BIN=...    agent binary to invoke (default `claude`; override for testing)
-#   VALIDATE_PAR=N    validation parallelism (default: PAR)
 #
 # Requires: GNU bash >= 4 (uses mapfile and `export -f`). macOS ships bash 3.2 by
 # default — install a newer bash (`brew install bash`) or run on Linux.
@@ -72,14 +75,11 @@ ROOT="${1:-api-reference/tasks}"
 N="${2:-20}"
 PAR="${3:-4}"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
-VALIDATE_PAR="${VALIDATE_PAR:-$PAR}"
 
 # --- validate numeric args (a stray path as N must not crash `[ -eq ]`) --------
-case "$N"            in ''|*[!0-9]*) echo "N must be a non-negative integer (got: '$N')" >&2;   exit 2 ;; esac
-case "$PAR"          in ''|*[!0-9]*) echo "PAR must be a non-negative integer (got: '$PAR')" >&2; exit 2 ;; esac
-case "$VALIDATE_PAR" in ''|*[!0-9]*) echo "VALIDATE_PAR must be a non-negative integer (got: '$VALIDATE_PAR')" >&2; exit 2 ;; esac
+case "$N"   in ''|*[!0-9]*) echo "N must be a non-negative integer (got: '$N')" >&2;   exit 2 ;; esac
+case "$PAR" in ''|*[!0-9]*) echo "PAR must be a non-negative integer (got: '$PAR')" >&2; exit 2 ;; esac
 [ "$PAR" -ge 1 ] || { echo "PAR must be >= 1 (got: '$PAR')" >&2; exit 2; }
-[ "$VALIDATE_PAR" -ge 1 ] || { echo "VALIDATE_PAR must be >= 1 (got: '$VALIDATE_PAR')" >&2; exit 2; }
 
 # --- 0. remainder list (remaining.py is already ledger-aware) ------------------
 # Run remaining.py first and CHECK its exit code, so a real failure (bad ROOT, etc.)
@@ -95,7 +95,7 @@ if [ "${#FILES[@]}" -eq 0 ]; then
   exit 0
 fi
 
-echo ">> batch plan: ${#FILES[@]} file(s) under $ROOT  (edit par=$PAR, validate par=$VALIDATE_PAR)"
+echo ">> batch plan: ${#FILES[@]} file(s) under $ROOT  (par=$PAR)"
 printf '   %s\n' "${FILES[@]}"
 
 # --- dry-run gate: do nothing unless explicitly told to run -------------------
@@ -110,6 +110,11 @@ if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
   echo "   RUN refuses to start so a batch never mixes in unrelated changes." >&2
   echo "   (Also make sure you are on a DOCS branch, not a tooling-PR branch.)" >&2
   exit 1
+fi
+
+# validate.py runs `npm ci` (lockfile-pinned toolchain) into .tscheck on first use.
+if [ ! -d .actualize/.tscheck/node_modules ]; then
+  echo ">> note: first validate.py runs 'npm ci' (lockfile-pinned toolchain) — needs network."
 fi
 
 LOGDIR="$(mktemp -d)"          # logs live outside the repo => never get committed
@@ -135,14 +140,6 @@ on_interrupt() {
   exit 130
 }
 trap on_interrupt INT TERM
-
-# --- prime ONE typecheck sandbox before parallel validation. validate.py runs
-#     `npm ci` on first use; doing it once here avoids N concurrent installs all
-#     racing on the same network/dir. Workers get cheap hardlink clones of it. ----
-PRIME=".actualize/.tscheck"
-if [ ! -d "$PRIME/node_modules" ]; then
-  echo ">> priming typecheck sandbox (npm ci, lockfile-pinned) — needs network ..."
-fi
 
 # --- 1. EDIT — parallel (slow step; files differ => no working-tree conflict) --
 edit_one() {
@@ -195,75 +192,54 @@ if [ "${#ESCAPED[@]}" -gt 0 ]; then
   echo "   Reverting the entire batch; nothing committed. Logs: $LOGDIR" >&2
   KEEP_LOGS=1
   git checkout -- . 2>/dev/null
-  # drop untracked escapees too (but never the gitignored .tscheck sandbox)
+  # drop untracked escapees (the .tscheck sandbox is gitignored, so `git clean -fd`
+  # without -x already skips it; -e .tscheck is just explicit belt-and-braces)
   git clean -fdq -e .tscheck 2>/dev/null
   exit 1
 fi
 
-# --- 2. VALIDATE (parallel, isolated sandboxes) --------------------------------
-# Each worker validates in its own --project dir so concurrent tsc runs don't
-# clobber a shared example.ts. The sandboxes are hardlink clones of the primed one
-# (near-zero cost, share node_modules inodes). RECORDING stays serial (step 3):
-# workers only WRITE a per-file verdict, they never touch the ledger.
-VERDICT="$LOGDIR/verdicts"; mkdir -p "$VERDICT"
-validate_one() {
-  f="$1"
-  safe="$(printf '%s' "$f" | tr -c 'A-Za-z0-9._-' '_')"
-  vlog="$LOGDIR/$safe.validate.log"
-  # skip files the agent did not change (e.g. SKIP: no JS tab) — no verdict written
-  if git diff --quiet -- "$f"; then
-    echo "SKIP  $f (unchanged by agent; stays in remaining)"
-    return 0
-  fi
-  proj=".actualize/.tscheck-w$$"          # per-worker sandbox (pid-unique)
-  if [ ! -d "$proj" ]; then
-    if [ -d "$PRIME/node_modules" ]; then
-      cp -al "$PRIME" "$proj" 2>/dev/null || cp -a "$PRIME" "$proj"
-    fi
-  fi
-  if python3 .actualize/validate.py "$f" --project "$proj" >"$vlog" 2>&1; then
-    : > "$VERDICT/$safe.pass"
-    echo "PASS  $f"
-  else
-    : > "$VERDICT/$safe.fail"
-    echo "FAIL  $f  ($vlog)"
-  fi
-}
-export -f validate_one
-export LOGDIR VERDICT PRIME
-# build the changed-only list (skips are handled inside, but pre-filtering keeps
-# the verdict set tight)
-printf '%s\0' "${FILES[@]}" | xargs -0 -P "$VALIDATE_PAR" -I{} bash -c 'validate_one "$1"' _ {}
-# clean up per-worker sandboxes (hardlink clones; node_modules inodes are shared)
-rm -rf .actualize/.tscheck-w* 2>/dev/null
-
-# --- 3. RECORD (serial, single writer) + revert failures -----------------------
+# --- 2. VALIDATE + RECORD — serial (one sandbox; single ledger writer) ---------
+# Kept serial on purpose: validate.py shares one .tscheck sandbox, and record.py
+# within one tree is a read-modify-write race on the ledger (the union merge driver
+# only helps across separate PRs, not in-process). Parallel validation would need a
+# TRULY isolated sandbox per worker — a `cp -al` clone shares inodes, so concurrent
+# tsc runs would clobber each other's example.ts and cross-contaminate verdicts (see
+# FOLLOWUPS). At the current scale the agent edit dominates, not tsc, so this is not
+# the long pole.
 declare -a PASSED=()
 SKIPPED=0
 for f in "${FILES[@]}"; do
-  safe="$(printf '%s' "$f" | tr -c 'A-Za-z0-9._-' '_')"
-  if [ -f "$VERDICT/$safe.pass" ]; then
+  if git diff --quiet -- "$f"; then
+    echo "SKIP  $f (unchanged by agent; stays in remaining)"
+    SKIPPED=$((SKIPPED + 1))
+    continue
+  fi
+  vlog="$LOGDIR/$(printf '%s' "$f" | tr -c 'A-Za-z0-9._-' '_').validate.log"
+  if python3 .actualize/validate.py "$f" >"$vlog" 2>&1; then
     if python3 .actualize/record.py "$f" done >/dev/null; then
+      echo "PASS  $f"
       PASSED+=("$f")
     else
+      # record.py failed: do NOT count as passed (it would commit without a ledger
+      # row and be re-processed forever). Revert so the file stays in remaining.
       echo "FAIL  $f  (record.py failed; reverting)" >&2
       FAILED=$((FAILED + 1))
+      [ "${KEEP_FAILED:-0}" = "1" ] && KEEP_LOGS=1   # keep the log to diagnose
       git checkout -- "$f"
     fi
-  elif [ -f "$VERDICT/$safe.fail" ]; then
+  else
+    echo "FAIL  $f  ($vlog)"
     FAILED=$((FAILED + 1))
     if [ "${KEEP_FAILED:-0}" = "1" ]; then
       KEEP_LOGS=1
-      echo "      KEEP_FAILED=1 -> $f left in place (clean the tree yourself)"
+      echo "      KEEP_FAILED=1 -> edit left in place (clean the tree yourself)"
     else
       git checkout -- "$f"   # revert => the file returns to remaining next pass
     fi
-  else
-    SKIPPED=$((SKIPPED + 1))   # no verdict => unchanged/skipped by the agent
   fi
 done
 
-# --- 4. CHECKPOINT — commit exactly the passed .md + ledger (logs are in /tmp) -
+# --- 3. CHECKPOINT — commit exactly the passed .md + ledger (logs are in /tmp) -
 if [ "${#PASSED[@]}" -gt 0 ] && [ "${NO_COMMIT:-0}" != "1" ]; then
   git add -- "${PASSED[@]}" .actualize/ledger.tsv
   if ! git commit -q -m "actualize($ROOT): ${#PASSED[@]} file(s)"; then

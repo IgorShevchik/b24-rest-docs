@@ -58,19 +58,6 @@ exit 0
 SH
   chmod +x "$REPO/bin/claude"
 
-  # stub validate.py that RECORDS the --project it was handed, so a test can assert
-  # the runner passes an isolated per-worker sandbox dir (parallel-validation seam).
-  cat > "$REPO/.actualize/validate_proj_probe.py" <<'PY'
-import sys
-proj = ""
-if "--project" in sys.argv:
-    proj = sys.argv[sys.argv.index("--project") + 1]
-with open(sys.argv[0] + ".seen", "a") as f:
-    f.write(proj + "\n")
-text = open(sys.argv[1], encoding="utf-8").read()
-sys.exit(1 if "FAILVALIDATE" in text else 0)
-PY
-
   # test docs: each must carry the legacy token so the real remaining.py lists it
   for n in pass1 pass2 skip1 fail1; do
     printf '# %s\n\n$b24.callMethod("x")\n' "$n" > "$REPO/api-reference/tasks/$n.md"
@@ -158,18 +145,20 @@ check "stray untracked file removed"   "[ ! -f \"\$REPO/api-reference/tasks/INJE
 check "nothing recorded in ledger"     "! grep -qE 'pass1|pass2' \"\$REPO/.actualize/ledger.tsv\""
 rm -rf "$REPO"
 
-# 7) PARALLEL VALIDATION: runner passes an isolated --project per validated file
+# 7) KNOWN LIMITATION (documentation test): blast-radius is a WORKING-TREE check, so
+#    a write OUTSIDE the repo (an absolute path like ~/.ssh or /tmp) is NOT caught.
+#    This pins that gap: the batch proceeds normally and the out-of-tree file IS
+#    created. If a future change adds process-level FS sandboxing that DOES catch it,
+#    this test will fail — that is the reminder to update the docs / FOLLOWUPS.
 make_repo
-# swap the real validate.py for the probe that logs the --project it received,
-# and COMMIT the swap so the clean-tree precondition is satisfied
-cp "$REPO/.actualize/validate_proj_probe.py" "$REPO/.actualize/validate.py"
-git -C "$REPO" commit -q -am "swap validate probe"
-( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
-    bash .actualize/run-batch.sh api-reference/tasks 10 2 ) >/dev/null 2>&1
-seen="$REPO/.actualize/validate.py.seen"
-check "validate.py invoked with --project" "[ -s \"\$seen\" ]"
-check "project dir is a per-worker sandbox" "grep -q '.tscheck-w' \"\$seen\""
-rm -rf "$REPO"
+ESC_DIR="$(mktemp -d)"; ESC="$ESC_DIR/escape.txt"     # a path OUTSIDE the fake repo
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        STUB_ESCAPE_FILE="$ESC" \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "out-of-tree write does NOT abort (exit 0)"     "[ $rc -eq 0 ]"
+check "out-of-tree write not flagged SECURITY ABORT"  "! printf '%s' \"\$out\" | grep -q 'SECURITY ABORT'"
+check "KNOWN LIMITATION: out-of-tree file created"    "[ -f \"\$ESC\" ]"
+rm -rf "$REPO" "$ESC_DIR"
 
 # ============================ result ==========================================
 echo "----"
