@@ -11,10 +11,11 @@
 |------|------------|
 | `PROMPT.md` | Главный промпт: по нему гоняем актуализацию одного файла (или папки — по файлу за раз). |
 | `PROMPT-REVIEW.md` | Второй промпт: ревью уже актуализированного файла. |
-| `validate.py` | Структура табов + запрещённые токены + `tsc --strict` (пиннинг SDK) + `node --check`. |
-| `record.py` | Идемпотентный журнал `ledger.tsv` (upsert по файлу); `--verify-all` — контроль дрейфа по sha256. |
+| `validate.py` | Структура табов + запрещённые токены + `tsc --strict` (lockfile-пиннинг) + `node --check`. |
+| `record.py` | Идемпотентный журнал `ledger.tsv` (upsert, атомарная запись); `--verify-all` — контроль дрейфа. |
 | `remaining.py` | Сколько файлов ещё не обработано (и список). |
-| `ledger.tsv` | Журнал: дата, файл, sha256, статус, метод. |
+| `ledger.tsv` | Журнал: дата, файл, sha256, статус, метод (в тулинг-PR — пустой). |
+| `typecheck/` | Зафиксированное окружение типопроверки (`package.json` + `package-lock.json`). |
 
 ## Как гонять
 
@@ -34,9 +35,15 @@ python3 .actualize/record.py   api-reference/tasks/tasks-task-get.md reviewed
 python3 .actualize/record.py --verify-all
 ```
 
-Первый запуск `validate.py` ставит пиннинг-версии `@bitrix24/b24jssdk` и `typescript`
-в `.actualize/.tscheck/` (папка в `.gitignore`). UMD-тег примеров использует мажор-тег `@1`,
-а `SDK_VERSION` в `validate.py` пиннит конкретную 1.x для воспроизводимой типопроверки.
+Первый запуск `validate.py` ставит зависимости из committed `.actualize/typecheck/package-lock.json`
+(через `npm ci --ignore-scripts`) в `.actualize/.tscheck/` (в `.gitignore`). UMD-тег примеров —
+мажор-тег `@1`; типопроверка пиннится lockfile'ом (конкретная 1.x). **Бамп версии SDK:** обновить
+`.actualize/typecheck/package.json` + `package-lock.json` и прогнать `validate.py` по `done`-файлам.
+
+**Журнал и порядок мёржа.** Тулинг и доковые правки — в разных PR; тулинг-PR мёржится **первым**.
+`ledger.tsv` в тулинг-PR пустой (только заголовок) — строки добавляются по мере обработки файлов
+(вместе с их контентом), иначе `--verify-all` на `main` покажет дрейф до влития доков. Конфликты
+`ledger.tsv` при параллельных PR гасит `merge=union` (`.gitattributes`) + идемпотентный upsert.
 
 ## Принятые решения (зафиксированы в PROMPT.md)
 

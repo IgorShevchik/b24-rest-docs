@@ -48,8 +48,8 @@
 
 - TS-пример — ES-модуль (есть `import` и top-level `await`); это отмечено в комментарии у
   `declare const $b24`. В обычный `<script>` без `type="module"` его вставлять нельзя.
-- UMD-тег использует мажор-тег `@1` (защита от мажорных breaking-changes); `SDK_VERSION` в
-  `.actualize/validate.py` пиннит конкретную 1.x для воспроизводимой типопроверки.
+- UMD-тег использует мажор-тег `@1` (защита от мажорных breaking-changes); типопроверка пиннится
+  committed lockfile'ом `.actualize/typecheck/package-lock.json` (конкретная 1.x).
 
 ## Если менять нечего
 

@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Keep GitHub Actions used by the example-validation workflow up to date.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

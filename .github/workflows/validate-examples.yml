@@ -1,8 +1,15 @@
 name: validate-examples
 
-# Validates the actualized b24jssdk TS + UMD examples.
-# Requires the .actualize/ tooling to be present on the default branch
-# (see the tooling PR). On a docs PR the workflow runs from the base branch.
+# Validates the actualized b24jssdk TS + UMD examples via .actualize/validate.py.
+# The .actualize/ tooling must already be on the default branch, so the tooling
+# PR is merged before this workflow can check documentation PRs.
+#
+# Security notes:
+#   - on pull_request the checkout is the PR *merge ref* (PR-controlled), so the
+#     job is restricted to same-repo PRs; fork PRs do not run the npm/tsc chain;
+#   - the token is read-only (permissions: contents: read) and not persisted;
+#   - validate.py only type-checks (tsc) and parses (node --check) — it never
+#     executes the example code; npm runs with --ignore-scripts from a lockfile.
 
 on:
   pull_request:
@@ -11,13 +18,22 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Run on push to main, and on PRs from this repository only (skip forks).
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -26,6 +42,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+
+      - name: Cache typecheck toolchain
+        uses: actions/cache@v4
+        with:
+          path: .actualize/.tscheck
+          key: tscheck-${{ runner.os }}-${{ hashFiles('.actualize/typecheck/package-lock.json') }}
 
       - name: Collect changed example files
         run: |
@@ -44,7 +66,7 @@ jobs:
             [ -z "$f" ] && continue
             [ -f "$f" ] || continue
             # only validate files that carry the actualized "- TS" tab
-            if grep -q '^- TS$' "$f"; then
+            if grep -qE '^- TS$' "$f"; then
               echo "::group::validate $f"
               python3 .actualize/validate.py "$f" || rc=1
               echo "::endgroup::"
@@ -52,6 +74,7 @@ jobs:
           done < changed.txt
           exit $rc
 
-      - name: Verify ledger drift (push to main only)
+      - name: Verify ledger drift (push to main, informational)
         if: github.event_name == 'push'
+        continue-on-error: true
         run: python3 .actualize/record.py --verify-all

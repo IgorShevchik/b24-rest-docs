@@ -9,8 +9,8 @@ Usage:
   python3 .actualize/record.py --verify <path-to-md>   # check one file
 
 Upsert keeps a single row per file (latest wins), so re-runs do not create
-duplicates and the ledger stays a clean source of truth. The sha256 is over the
-whole file, so post-processing edits can be detected as drift.
+duplicates. Every cell is sanitized (no tab/newline) and the file is written
+atomically (tmp + os.replace) to avoid a truncated ledger on interruption.
 """
 import datetime
 import hashlib
@@ -28,10 +28,9 @@ def sha256(path):
     return hashlib.sha256(open(path, "rb").read()).hexdigest()
 
 
-def clean(value, limit=120):
-    """Make a value safe for a TSV cell."""
-    value = re.sub(r"[\t\r\n]+", " ", str(value)).strip()
-    return value[:limit]
+def clean(value, limit=200):
+    """Make a value safe for a single TSV cell."""
+    return re.sub(r"[\t\r\n]+", " ", str(value)).strip()[:limit]
 
 
 def detect_method(path):
@@ -48,18 +47,19 @@ def load():
     rows = []
     if os.path.exists(LEDGER):
         with open(LEDGER, encoding="utf-8") as f:
-            lines = f.read().splitlines()
-        for line in lines[1:]:
-            if line.strip():
-                rows.append(line.split("\t"))
+            for line in f.read().splitlines()[1:]:
+                if line.strip():
+                    rows.append(line.split("\t"))
     return rows
 
 
 def save(rows):
-    with open(LEDGER, "w", encoding="utf-8") as f:
+    tmp = LEDGER + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         f.write("\t".join(HEADER) + "\n")
         for r in rows:
-            f.write("\t".join(r) + "\n")
+            f.write("\t".join(clean(c) for c in r) + "\n")
+    os.replace(tmp, LEDGER)
 
 
 def rel(path):
@@ -70,13 +70,13 @@ def upsert(path, status):
     r = rel(path)
     row = [
         datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        r, sha256(path), clean(status, 20), clean(detect_method(path)),
+        r, sha256(path), clean(status, 20), detect_method(path),
     ]
     rows = [x for x in load() if not (len(x) >= 2 and x[1] == r)]
     rows.append(row)
     rows.sort(key=lambda x: x[1])
     save(rows)
-    print(f"recorded: {r} [{row[3]}] {row[2][:12]} {row[4]}")
+    print(f"recorded: {clean(r)} [{clean(status, 20)}] {row[2][:12]} {clean(row[4])}")
 
 
 def verify(paths=None):
@@ -85,17 +85,15 @@ def verify(paths=None):
     for x in rows:
         if len(x) < 3:
             continue
-        date, r, recorded = x[0], x[1], x[2]
+        r, recorded = x[1], x[2]
         if paths and r not in paths:
             continue
         full = os.path.join(REPO, r)
         if not os.path.isfile(full):
             print(f"MISSING  {r}")
             drift += 1
-            continue
-        cur = sha256(full)
-        if cur != recorded:
-            print(f"DRIFT    {r}  recorded {recorded[:12]} != current {cur[:12]}")
+        elif sha256(full) != recorded:
+            print(f"DRIFT    {r}  recorded {recorded[:12]} != current {sha256(full)[:12]}")
             drift += 1
         else:
             print(f"OK       {r}")
@@ -110,7 +108,7 @@ def main():
         sys.exit(2)
     if args[0] == "--verify-all":
         verify()
-    elif args[0] == "--verify":
+    elif args[0] == "--verify" and len(args) >= 2:
         verify(paths={rel(args[1])})
     elif len(args) >= 2:
         upsert(args[0], args[1])

@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
 """Validate the b24jssdk TS + UMD examples inside a documentation .md file.
 
-Checks (in order, cheapest first):
+Checks (cheapest first):
   1. structural: legacy "- JS" tab is gone, "- TS" and "- UMD" tabs are present;
   2. extraction: take the single ```ts block and the single UMD <script> from
      INSIDE the {% list tabs %} ... {% endlist %} region (not anywhere in the file);
   3. forbidden tokens: no callMethod / callListMethod / fetchListMethod /
      processResult / processData; an actions.v{2,3} call is present;
-  4. types: `tsc --strict` against a PINNED @bitrix24/b24jssdk and PINNED typescript;
+  4. types: `tsc --strict` against a reproducible, lockfile-pinned toolchain
+     (.actualize/typecheck/package*.json installed with `npm ci --ignore-scripts`);
   5. syntax: `node --check` on the UMD inline script.
 
 Usage:
   python3 .actualize/validate.py <path-to-md> [--project DIR]
 
-Exit code 0 = PASS, non-zero = FAIL. The pinned versions below make validation
-reproducible; bump them deliberately when the documented SDK target changes.
+Exit code 0 = PASS, non-zero = FAIL. Versions are pinned by the committed
+.actualize/typecheck/package-lock.json — bump it deliberately (see README).
 """
 import argparse
+import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
+ENV_DIR = os.path.join(HERE, "typecheck")  # committed package.json + package-lock.json
 
-# Pinned for reproducible validation. Keep SDK_VERSION aligned with the version
-# referenced in the UMD <script> tag of the examples.
-SDK_VERSION = "1.2.0"
-TS_VERSION = "5.7.3"
+NPM_TIMEOUT = 600
+TSC_TIMEOUT = 300
+NODE_TIMEOUT = 120
 
 FORBIDDEN = ["callMethod", "callListMethod", "fetchListMethod",
              "processResult", "processData"]
@@ -45,7 +48,6 @@ def extract(md_path):
     """Return (ts_code, umd_inner_js) extracted from inside the tabs region."""
     s = open(md_path, encoding="utf-8").read()
 
-    # structural checks on the whole file
     if "- JS\n" in s:
         fail('legacy "- JS" tab still present')
     if "- TS\n" not in s:
@@ -73,7 +75,6 @@ def extract(md_path):
     if umd_inner is None:
         fail("UMD html block found but it has no non-empty <script> with logic")
 
-    # forbidden / required tokens
     for banned in FORBIDDEN:
         if banned in ts or banned in umd_inner:
             fail(f'forbidden token "{banned}" found in TS/UMD example')
@@ -85,25 +86,21 @@ def extract(md_path):
 
 def ensure_project(proj):
     os.makedirs(proj, exist_ok=True)
-    sdk_pkg = os.path.join(proj, "node_modules", "@bitrix24", "b24jssdk", "package.json")
-    tsc_bin = os.path.join(proj, "node_modules", ".bin", "tsc")
-    need = not (os.path.isfile(sdk_pkg) and os.path.isfile(tsc_bin))
-    if not need:
-        try:
-            if json.load(open(sdk_pkg))["version"] != SDK_VERSION:
-                need = True
-        except Exception:
-            need = True
-    if need:
-        with open(os.path.join(proj, "package.json"), "w") as f:
-            json.dump({"name": "b24-tscheck", "private": True, "type": "module"}, f)
-        print(f"[validate] installing @bitrix24/b24jssdk@{SDK_VERSION} + "
-              f"typescript@{TS_VERSION} ...", file=sys.stderr)
-        subprocess.run(
-            ["npm", "i", "--no-save", "--ignore-scripts",
-             f"@bitrix24/b24jssdk@{SDK_VERSION}", f"typescript@{TS_VERSION}"],
-            cwd=proj, check=True,
-        )
+    for fn in ("package.json", "package-lock.json"):
+        shutil.copyfile(os.path.join(ENV_DIR, fn), os.path.join(proj, fn))
+    lock = open(os.path.join(ENV_DIR, "package-lock.json"), "rb").read()
+    stamp = hashlib.sha256(lock).hexdigest()
+    stamp_file = os.path.join(proj, ".lockstamp")
+    fresh = (
+        os.path.isdir(os.path.join(proj, "node_modules"))
+        and os.path.isfile(stamp_file)
+        and open(stamp_file).read().strip() == stamp
+    )
+    if not fresh:
+        print("[validate] npm ci (lockfile-pinned toolchain) ...", file=sys.stderr)
+        subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=proj,
+                       check=True, timeout=NPM_TIMEOUT)
+        open(stamp_file, "w").write(stamp)
     with open(os.path.join(proj, "tsconfig.json"), "w") as f:
         json.dump({
             "compilerOptions": {
@@ -135,7 +132,7 @@ def main():
     ok = True
     tsc = os.path.join(a.project, "node_modules", ".bin", "tsc")
     r1 = subprocess.run([tsc, "-p", "tsconfig.json"], cwd=a.project,
-                        capture_output=True, text=True)
+                        capture_output=True, text=True, timeout=TSC_TIMEOUT)
     if r1.returncode != 0:
         ok = False
         print("TSC FAIL:\n" + r1.stdout + r1.stderr)
@@ -143,7 +140,7 @@ def main():
         print("TSC: OK")
 
     r2 = subprocess.run(["node", "--check", "umd_inner.js"], cwd=a.project,
-                        capture_output=True, text=True)
+                        capture_output=True, text=True, timeout=NODE_TIMEOUT)
     if r2.returncode != 0:
         ok = False
         print("NODE --check FAIL:\n" + r2.stdout + r2.stderr)
