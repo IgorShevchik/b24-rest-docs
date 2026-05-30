@@ -1,0 +1,3 @@
+# Append-friendly merge for the processing ledger: union keeps lines from both
+# sides on parallel PRs; record.py upsert de-duplicates on the next run.
+ledger.tsv merge=union
