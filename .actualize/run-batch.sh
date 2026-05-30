@@ -20,10 +20,12 @@
 #     is caught here — the whole batch is reverted, nothing is committed. (The prompt
 #     also frames file content as untrusted data, but this check is the enforcement
 #     that does not depend on the model obeying.)
-#     LIMITATION: this is a working-tree check (`git status`), so it does NOT catch a
-#     write OUTSIDE the repo (an absolute path such as ~/.ssh or /tmp). The agent's
-#     Edit tool is not path-confined; closing this fully needs process-level FS
-#     sandboxing (bubblewrap/firejail, or a CLI --add-dir allowlist) — see FOLLOWUPS.
+#     LIMITATION: this is a WORKING-TREE check (`git status`), so it does NOT catch
+#     writes git never reports: (a) OUTSIDE the repo (absolute paths like ~/.ssh,
+#     /tmp); (b) gitignored in-tree paths (e.g. .claude/, CLAUDE.md); (c) the .git/
+#     metadir (e.g. .git/config credential.helper). The agent's Edit tool is not
+#     path-confined; closing this fully needs process-level FS sandboxing
+#     (bubblewrap/firejail, or a CLI --add-dir allowlist) — see FOLLOWUPS.
 #   Run it from a branch intended for DOCUMENTATION changes, never a tooling PR.
 #
 # One run = one batch: edit files via agent (parallel) -> blast-radius check ->
@@ -50,6 +52,11 @@
 #   NO_COMMIT=1       validate + record into the ledger, but do not git-commit
 #   CLAUDE_MODEL=...  passed through to `claude --model`
 #   CLAUDE_BIN=...    agent binary to invoke (default `claude`; override for testing)
+#
+# Exit codes: 0 = ran ok (made progress, or nothing remained); 1 = abort (dirty tree,
+#   SECURITY ABORT, commit/add failed, remaining.py failed); 2 = bad args; 3 = ran but
+#   0 files passed (no progress — lets a `... || break` drain loop stop on stuck files);
+#   130 = interrupted.
 #
 # Requires: GNU bash >= 4 (uses mapfile and `export -f`). macOS ships bash 3.2 by
 # default — install a newer bash (`brew install bash`) or run on Linux.
@@ -112,6 +119,17 @@ if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
   exit 1
 fi
 
+# fail fast if the agent binary is missing (otherwise every edit silently no-ops)
+command -v "$CLAUDE_BIN" >/dev/null 2>&1 || {
+  echo ">> agent binary not found: '$CLAUDE_BIN' — set CLAUDE_BIN or install claude." >&2
+  exit 1
+}
+# soft warning: a mutating run auto-commits; on the default branch that is rarely intended
+_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+case "$_branch" in
+  main|master) echo ">> WARNING: on '$_branch' — run-batch commits here; prefer a docs branch." >&2 ;;
+esac
+
 # validate.py runs `npm ci` (lockfile-pinned toolchain) into .tscheck on first use.
 if [ ! -d .actualize/.tscheck/node_modules ]; then
   echo ">> note: first validate.py runs 'npm ci' (lockfile-pinned toolchain) — needs network."
@@ -172,14 +190,17 @@ export CLAUDE_BIN
 # NUL-delimited so paths with spaces/quotes/backslashes survive intact.
 printf '%s\0' "${FILES[@]}" | xargs -0 -P "$PAR" -I{} bash -c 'edit_one "$1"' _ {}
 
-# --- 1b. BLAST-RADIUS CHECK — the agent must have changed ONLY planned files ----
+# --- 2. BLAST-RADIUS CHECK — the agent must have changed ONLY planned files -----
 # Anything else (a sibling .md, a config, a new untracked file) means the agent
 # stepped outside its lane (prompt injection, over-eager edit, stray file). Abort
 # the whole batch and revert — nothing reaches a commit.
 declare -A PLANNED=()
 for f in "${FILES[@]}"; do PLANNED["$f"]=1; done
+# core.quotepath=false => non-ASCII paths come out as raw UTF-8 (matching remaining.py's
+# relpath); a quoted path would never match PLANNED and would cause a false abort.
 mapfile -t CHANGED < <(
-  { git diff --name-only; git ls-files --others --exclude-standard; } | sort -u
+  { git -c core.quotepath=false diff --name-only
+    git -c core.quotepath=false ls-files --others --exclude-standard; } | sort -u
 )
 ESCAPED=()
 for c in "${CHANGED[@]}"; do
@@ -198,7 +219,7 @@ if [ "${#ESCAPED[@]}" -gt 0 ]; then
   exit 1
 fi
 
-# --- 2. VALIDATE + RECORD — serial (one sandbox; single ledger writer) ---------
+# --- 3. VALIDATE + RECORD — serial (one sandbox; single ledger writer) ---------
 # Kept serial on purpose: validate.py shares one .tscheck sandbox, and record.py
 # within one tree is a read-modify-write race on the ledger (the union merge driver
 # only helps across separate PRs, not in-process). Parallel validation would need a
@@ -214,34 +235,44 @@ for f in "${FILES[@]}"; do
     SKIPPED=$((SKIPPED + 1))
     continue
   fi
-  vlog="$LOGDIR/$(printf '%s' "$f" | tr -c 'A-Za-z0-9._-' '_').validate.log"
+  safe="$(printf '%s' "$f" | tr -c 'A-Za-z0-9._-' '_')"
+  vlog="$LOGDIR/$safe.validate.log"
   if python3 .actualize/validate.py "$f" >"$vlog" 2>&1; then
-    if python3 .actualize/record.py "$f" done >/dev/null; then
+    rlog="$LOGDIR/$safe.record.log"
+    if python3 .actualize/record.py "$f" done >"$rlog" 2>&1; then
       echo "PASS  $f"
       PASSED+=("$f")
     else
-      # record.py failed: do NOT count as passed (it would commit without a ledger
-      # row and be re-processed forever). Revert so the file stays in remaining.
-      echo "FAIL  $f  (record.py failed; reverting)" >&2
+      # validate passed but record.py failed: do NOT count as passed (it would commit
+      # without a ledger row and be re-processed forever). Honour KEEP_FAILED like the
+      # validate-FAIL branch below, so the two failure modes behave the same.
+      echo "FAIL  $f  (record.py failed; see $rlog)" >&2
       FAILED=$((FAILED + 1))
-      [ "${KEEP_FAILED:-0}" = "1" ] && KEEP_LOGS=1   # keep the log to diagnose
-      git checkout -- "$f"
+      if [ "${KEEP_FAILED:-0}" = "1" ]; then
+        KEEP_LOGS=1
+        echo "      KEEP_FAILED=1 -> $f left in place (record failed; clean the tree yourself)"
+      else
+        git checkout -- "$f"   # revert => the file returns to remaining next pass
+      fi
     fi
   else
     echo "FAIL  $f  ($vlog)"
     FAILED=$((FAILED + 1))
     if [ "${KEEP_FAILED:-0}" = "1" ]; then
       KEEP_LOGS=1
-      echo "      KEEP_FAILED=1 -> edit left in place (clean the tree yourself)"
+      echo "      KEEP_FAILED=1 -> $f left in place (clean the tree yourself)"
     else
       git checkout -- "$f"   # revert => the file returns to remaining next pass
     fi
   fi
 done
 
-# --- 3. CHECKPOINT — commit exactly the passed .md + ledger (logs are in /tmp) -
+# --- 4. CHECKPOINT — commit exactly the passed .md + ledger (logs are in /tmp) -
 if [ "${#PASSED[@]}" -gt 0 ] && [ "${NO_COMMIT:-0}" != "1" ]; then
-  git add -- "${PASSED[@]}" .actualize/ledger.tsv
+  if ! git add -- "${PASSED[@]}" .actualize/ledger.tsv; then
+    echo ">> git add failed — ${#PASSED[@]} edit(s) recorded but NOT committed." >&2
+    exit 1
+  fi
   if ! git commit -q -m "actualize($ROOT): ${#PASSED[@]} file(s)"; then
     echo ">> COMMIT FAILED — ${#PASSED[@]} edit(s) recorded in the ledger but NOT committed." >&2
     echo "   Fix the cause (e.g. 'git config user.email'), then commit manually." >&2
@@ -255,3 +286,10 @@ if [ "${#PASSED[@]}" -gt 0 ] && [ "${NO_COMMIT:-0}" = "1" ]; then
   echo ">> NO_COMMIT=1 -> ${#PASSED[@]} change(s) left in the tree, uncommitted"
 fi
 python3 .actualize/remaining.py "$ROOT" 2>/dev/null | sed -n '2p'
+
+# No file passed => the remaining files are stuck (deterministic SKIP/FAIL). Exit
+# non-zero so a `... || break` drain loop stops instead of spinning on the same set.
+if [ "${#PASSED[@]}" -eq 0 ]; then
+  echo ">> no progress: 0 passed (${SKIPPED} skipped, ${FAILED} failed) — stopping." >&2
+  exit 3
+fi

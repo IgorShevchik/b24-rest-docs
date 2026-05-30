@@ -5,8 +5,9 @@
 # real remaining.py / record.py / _tabs.py (all stdlib, offline). Only validate.py
 # is replaced by a stub (the real one runs tsc/npm and needs network), and the LLM
 # agent is a stub `claude` injected via the CLAUDE_BIN seam. This exercises the real
-# bash orchestration: dry-run gate, numeric/clean-tree guards, and the
-# PASS / FAIL(+revert) / SKIP branches plus commit scoping.
+# bash orchestration: dry-run gate, numeric/clean-tree guards, the PASS / FAIL(+revert)
+# / SKIP branches, commit scoping, blast-radius abort, and the negative paths
+# (record-fail, KEEP_FAILED, commit-fail, no-progress exit, gitignored blind spot).
 #
 # Run: bash .actualize/tests/test_run_batch.sh   (exit 0 = all passed)
 set -uo pipefail
@@ -114,6 +115,8 @@ check "pass2 recorded in ledger"       "grep -q 'pass2.md' \"\$REPO/.actualize/l
 check "fail1 NOT recorded"             "! grep -q 'fail1.md' \"\$REPO/.actualize/ledger.tsv\""
 check "fail1 reverted (no marker)"     "! grep -q 'FAILVALIDATE' \"\$REPO/api-reference/tasks/fail1.md\""
 check "NO_COMMIT made no commit"       "[ \"\$(git -C \"\$REPO\" rev-list --count HEAD)\" -eq 1 ]"
+check "NO_COMMIT leaves tree dirty"    "[ -n \"\$(git -C \"\$REPO\" status --porcelain)\" ]"
+check "NO_COMMIT: pass1 left in tree"  "git -C \"\$REPO\" status --porcelain | grep -q 'pass1.md'"
 rm -rf "$REPO"
 
 # 5) RUN=1 with commit: exactly pass files + ledger committed (scope, not -A)
@@ -152,6 +155,7 @@ rm -rf "$REPO"
 #    this test will fail — that is the reminder to update the docs / FOLLOWUPS.
 make_repo
 ESC_DIR="$(mktemp -d)"; ESC="$ESC_DIR/escape.txt"     # a path OUTSIDE the fake repo
+check "test7 self-guard: ESC_DIR != REPO"             "[ \"\$ESC_DIR\" != \"\$REPO\" ]"
 out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
         STUB_ESCAPE_FILE="$ESC" \
         bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
@@ -159,6 +163,87 @@ check "out-of-tree write does NOT abort (exit 0)"     "[ $rc -eq 0 ]"
 check "out-of-tree write not flagged SECURITY ABORT"  "! printf '%s' \"\$out\" | grep -q 'SECURITY ABORT'"
 check "KNOWN LIMITATION: out-of-tree file created"    "[ -f \"\$ESC\" ]"
 rm -rf "$REPO" "$ESC_DIR"
+
+# 8) KNOWN LIMITATION (documentation test): a gitignored IN-TREE write is also a blind
+#    spot — `git ls-files --others --exclude-standard` hides it, so blast-radius does
+#    NOT catch it and the batch proceeds (mirrors test 7, in-tree variant).
+make_repo
+printf 'secret-drop/\n' > "$REPO/.gitignore"
+git -C "$REPO" add .gitignore && git -C "$REPO" commit -q -m "add gitignore" >/dev/null
+mkdir -p "$REPO/secret-drop"
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        STUB_ESCAPE_FILE="$REPO/secret-drop/loot.txt" \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "gitignored in-tree write does NOT abort (exit 0)" "[ $rc -eq 0 ]"
+check "gitignored write not flagged SECURITY ABORT"      "! printf '%s' \"\$out\" | grep -q 'SECURITY ABORT'"
+check "KNOWN LIMITATION: gitignored file created"        "[ -f \"\$REPO/secret-drop/loot.txt\" ]"
+rm -rf "$REPO"
+
+# 9) record.py failure -> validated file reverted, not recorded, tree stays clean
+make_repo
+printf 'import sys; sys.exit(1)\n' > "$REPO/.actualize/record.py"   # force record to fail
+git -C "$REPO" commit -q -am "stub record.py to fail" >/dev/null
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "record-fail: mentions record.py failed"  "printf '%s' \"\$out\" | grep -q 'record.py failed'"
+check "record-fail: tree clean (reverted)"      "[ -z \"\$(git -C \"\$REPO\" status --porcelain)\" ]"
+check "record-fail: nothing added to ledger"    "[ \"\$(wc -l < \"\$REPO/.actualize/ledger.tsv\")\" -eq 1 ]"
+rm -rf "$REPO"
+
+# 10) KEEP_FAILED=1 -> a validate-FAILED file is left in the tree (not reverted)
+make_repo
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 KEEP_FAILED=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "KEEP_FAILED: fail1 left dirty"        "git -C \"\$REPO\" status --porcelain | grep -q 'fail1.md'"
+check "KEEP_FAILED: FAILVALIDATE remains"    "grep -q 'FAILVALIDATE' \"\$REPO/api-reference/tasks/fail1.md\""
+check "KEEP_FAILED: summary FAILED=1"        "printf '%s' \"\$out\" | grep -q 'FAILED=1'"
+rm -rf "$REPO"
+
+# 11) git commit failure (pre-commit hook) -> exit 1 + recovery hint; ledger already written
+make_repo
+mkdir -p "$REPO/.git/hooks"
+printf '#!/bin/sh\nexit 1\n' > "$REPO/.git/hooks/pre-commit"; chmod +x "$REPO/.git/hooks/pre-commit"
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "commit-fail: exit 1"              "[ $rc -eq 1 ]"
+check "commit-fail: COMMIT FAILED hint"  "printf '%s' \"\$out\" | grep -q 'COMMIT FAILED'"
+check "commit-fail: ledger has pass1"    "grep -q 'pass1.md' \"\$REPO/.actualize/ledger.tsv\""
+check "commit-fail: no new commit"       "[ \"\$(git -C \"\$REPO\" rev-list --count HEAD)\" -eq 1 ]"
+rm -rf "$REPO"
+
+# 12) no progress (all remaining files SKIP) -> exit 3 so a `... || break` drain loop stops
+make_repo
+git -C "$REPO" rm -q api-reference/tasks/pass1.md api-reference/tasks/pass2.md api-reference/tasks/fail1.md >/dev/null
+git -C "$REPO" commit -q -m "leave only skip1" >/dev/null
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "all-skip: exit 3 (no progress)"   "[ $rc -eq 3 ]"
+check "all-skip: prints 'no progress'"   "printf '%s' \"\$out\" | grep -q 'no progress'"
+check "all-skip: summary PASSED=0"       "printf '%s' \"\$out\" | grep -q 'PASSED=0'"
+rm -rf "$REPO"
+
+# 13) missing agent binary under RUN=1 -> fail fast (exit 1) before any edit/commit
+make_repo
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 CLAUDE_BIN=definitely-not-a-real-binary-xyz \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "missing binary: exit 1"           "[ $rc -eq 1 ]"
+check "missing binary: clear message"    "printf '%s' \"\$out\" | grep -q 'agent binary not found'"
+check "missing binary: no commit"        "[ \"\$(git -C \"\$REPO\" rev-list --count HEAD)\" -eq 1 ]"
+rm -rf "$REPO"
+
+# 14) default-branch guard: warns on master/main, silent on a docs branch (soft, non-blocking)
+make_repo
+git -C "$REPO" checkout -q -B master
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"
+check "master: branch warning shown"     "printf '%s' \"\$out\" | grep -q 'WARNING: on'"
+rm -rf "$REPO"
+make_repo
+git -C "$REPO" checkout -q -B docs/feature
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 NO_COMMIT=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"
+check "docs branch: no branch warning"   "! printf '%s' \"\$out\" | grep -q 'WARNING: on'"
+rm -rf "$REPO"
 
 # ============================ result ==========================================
 echo "----"
