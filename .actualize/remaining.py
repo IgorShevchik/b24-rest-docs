@@ -51,8 +51,9 @@ def main():
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, REPO)
             try:
-                text = open(full, encoding="utf-8").read()
-            except Exception:
+                with open(full, encoding="utf-8") as fh:
+                    text = fh.read()
+            except (OSError, UnicodeDecodeError):
                 continue
             if LEGACY.search(text):
                 if rel in done:

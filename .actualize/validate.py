@@ -4,9 +4,9 @@
 Checks (cheapest first):
   1. structural: legacy "- JS" tab is gone, "- TS" and "- UMD" tabs are present;
   2. extraction: take the single ```ts block and the single UMD <script> from
-     INSIDE the {% list tabs %} ... {% endlist %} region (not anywhere in the file);
+     INSIDE the first {% list tabs %} … {% endlist %} region (not anywhere else);
   3. forbidden tokens: no callMethod / callListMethod / fetchListMethod /
-     processResult / processData; an actions.v{2,3} call is present;
+     processResult / processData; an actions.v{2,3} call is present in BOTH tabs;
   4. types: `tsc --strict` against a reproducible, lockfile-pinned toolchain
      (.actualize/typecheck/package*.json installed with `npm ci --ignore-scripts`);
   5. syntax: `node --check` on the UMD inline script.
@@ -14,8 +14,10 @@ Checks (cheapest first):
 Usage:
   python3 .actualize/validate.py <path-to-md> [--project DIR]
 
-Exit code 0 = PASS, non-zero = FAIL. Versions are pinned by the committed
-.actualize/typecheck/package-lock.json — bump it deliberately (see README).
+--project is a trusted local argument (the sandbox dir, default .actualize/.tscheck);
+in CI it is never overridden. Exit code 0 = PASS, non-zero = FAIL. Toolchain
+versions are pinned by .actualize/typecheck/package-lock.json (bump deliberately —
+see README).
 """
 import argparse
 import hashlib
@@ -26,6 +28,8 @@ import shutil
 import subprocess
 import sys
 import textwrap
+
+import _tabs
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -46,7 +50,8 @@ def fail(msg):
 
 def extract(md_path):
     """Return (ts_code, umd_inner_js) extracted from inside the tabs region."""
-    s = open(md_path, encoding="utf-8").read()
+    with open(md_path, encoding="utf-8") as f:
+        s = f.read()
 
     if "- JS\n" in s:
         fail('legacy "- JS" tab still present')
@@ -55,21 +60,21 @@ def extract(md_path):
     if "- UMD\n" not in s:
         fail('"- UMD" tab missing')
 
-    m = re.search(r"\{%\s*list tabs\s*%\}(.*?)\{%\s*endlist\s*%\}", s, re.DOTALL)
-    if not m:
+    region = _tabs.tabs_region(s)
+    if region is None:
         fail("no {% list tabs %} ... {% endlist %} region found")
-    region = m.group(1)
 
-    ts_blocks = re.findall(r"(?m)^[ \t]*```ts\n(.*?)\n[ \t]*```", region, re.DOTALL)
+    ts_blocks = _tabs.find_ts(region)
     if len(ts_blocks) != 1:
         fail(f"expected exactly one ```ts block in tabs, found {len(ts_blocks)}")
-    html_blocks = re.findall(r"(?m)^[ \t]*```html\n(.*?)\n[ \t]*```", region, re.DOTALL)
+    html_blocks = _tabs.find_html(region)
     if len(html_blocks) != 1:
         fail(f"expected exactly one ```html (UMD) block in tabs, found {len(html_blocks)}")
 
     ts = textwrap.dedent(ts_blocks[0])
     html = textwrap.dedent(html_blocks[0])
 
+    # first non-empty <script> (a library <script src=…> is empty and skipped)
     scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, re.DOTALL)
     umd_inner = next((sc for sc in scripts if sc.strip()), None)
     if umd_inner is None:
@@ -80,6 +85,8 @@ def extract(md_path):
             fail(f'forbidden token "{banned}" found in TS/UMD example')
     if "actions.v2." not in ts and "actions.v3." not in ts:
         fail("TS example does not use $b24.actions.v{2,3}.*")
+    if "actions.v2." not in umd_inner and "actions.v3." not in umd_inner:
+        fail("UMD example does not use $b24.actions.v{2,3}.*")
 
     return ts, umd_inner.strip("\n")
 
@@ -88,19 +95,28 @@ def ensure_project(proj):
     os.makedirs(proj, exist_ok=True)
     for fn in ("package.json", "package-lock.json"):
         shutil.copyfile(os.path.join(ENV_DIR, fn), os.path.join(proj, fn))
-    lock = open(os.path.join(ENV_DIR, "package-lock.json"), "rb").read()
-    stamp = hashlib.sha256(lock).hexdigest()
+    # cache stamp covers BOTH files: editing package.json without re-locking
+    # (or vice versa) must trigger a fresh install.
+    h = hashlib.sha256()
+    for fn in ("package-lock.json", "package.json"):
+        with open(os.path.join(ENV_DIR, fn), "rb") as f:
+            h.update(f.read())
+    stamp = h.hexdigest()
     stamp_file = os.path.join(proj, ".lockstamp")
-    fresh = (
-        os.path.isdir(os.path.join(proj, "node_modules"))
-        and os.path.isfile(stamp_file)
-        and open(stamp_file).read().strip() == stamp
-    )
+    fresh = False
+    if os.path.isdir(os.path.join(proj, "node_modules")) and os.path.isfile(stamp_file):
+        with open(stamp_file) as f:
+            fresh = f.read().strip() == stamp
     if not fresh:
         print("[validate] npm ci (lockfile-pinned toolchain) ...", file=sys.stderr)
         subprocess.run(["npm", "ci", "--ignore-scripts"], cwd=proj,
                        check=True, timeout=NPM_TIMEOUT)
-        open(stamp_file, "w").write(stamp)
+        with open(stamp_file, "w") as f:
+            f.write(stamp)
+    # tsconfig rationale: moduleResolution "bundler" matches the ESM browser-bundler
+    # target (top-level await, no package "type":"module" needed); "dom" provides
+    # `console`; skipLibCheck skips the SDK's own d.ts (it references node:stream).
+    # strict still fully type-checks the example body (proven by tests).
     with open(os.path.join(proj, "tsconfig.json"), "w") as f:
         json.dump({
             "compilerOptions": {
@@ -126,8 +142,10 @@ def main():
 
     ts, umd_js = extract(abspath)
     ensure_project(a.project)
-    open(os.path.join(a.project, "example.ts"), "w").write(ts)
-    open(os.path.join(a.project, "umd_inner.js"), "w").write(umd_js)
+    with open(os.path.join(a.project, "example.ts"), "w") as f:
+        f.write(ts)
+    with open(os.path.join(a.project, "umd_inner.js"), "w") as f:
+        f.write(umd_js)
 
     ok = True
     tsc = os.path.join(a.project, "node_modules", ".bin", "tsc")

@@ -9,7 +9,8 @@ Usage:
   python3 .actualize/record.py --verify <path-to-md>   # check one file
 
 Upsert keeps a single row per file (latest wins), so re-runs do not create
-duplicates. Every cell is sanitized (no tab/newline) and the file is written
+duplicates; load() also de-duplicates on read, so a `merge=union` of parallel
+PRs self-heals. Every cell is sanitized (no tab/newline) and the file is written
 atomically (tmp + os.replace) to avoid a truncated ledger on interruption.
 """
 import datetime
@@ -18,14 +19,18 @@ import os
 import re
 import sys
 
+import _tabs
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 LEDGER = os.path.join(HERE, "ledger.tsv")
 HEADER = ["date", "file", "sha256", "status", "method"]
+STATUS_LIMIT = 20
 
 
 def sha256(path):
-    return hashlib.sha256(open(path, "rb").read()).hexdigest()
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
 
 
 def clean(value, limit=200):
@@ -34,23 +39,26 @@ def clean(value, limit=200):
 
 
 def detect_method(path):
-    text = open(path, encoding="utf-8").read()
-    m = re.search(r"\{%\s*list tabs\s*%\}(.*?)\{%\s*endlist\s*%\}", text, re.DOTALL)
-    region = m.group(1) if m else text
-    tsm = re.search(r"```ts\n(.*?)\n[ \t]*```", region, re.DOTALL)
-    scope = tsm.group(1) if tsm else region
-    mm = re.search(r"method:\s*'([^']+)'", scope)
-    return mm.group(1) if mm else os.path.basename(path)
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    region = _tabs.tabs_region(text) or text
+    ts = _tabs.find_ts(region)
+    scope = ts[0] if ts else region
+    return _tabs.first_method(scope) or os.path.basename(path)
 
 
 def load():
-    rows = []
+    """Rows from the ledger, de-duplicated by file (last wins), sorted by file."""
+    dedup = {}
     if os.path.exists(LEDGER):
         with open(LEDGER, encoding="utf-8") as f:
             for line in f.read().splitlines()[1:]:
-                if line.strip():
-                    rows.append(line.split("\t"))
-    return rows
+                if not line.strip():
+                    continue
+                cells = line.split("\t")
+                if len(cells) >= 2:
+                    dedup[cells[1]] = cells
+    return [dedup[k] for k in sorted(dedup)]
 
 
 def save(rows):
@@ -67,16 +75,22 @@ def rel(path):
 
 
 def upsert(path, status):
+    abspath = os.path.abspath(path)
+    if os.path.commonpath([abspath, REPO]) != REPO:
+        print(f"ERROR: path is outside the repository: {abspath}")
+        sys.exit(1)
+    if clean(status) != clean(status, STATUS_LIMIT):
+        print(f"WARNING: status truncated to {STATUS_LIMIT} chars", file=sys.stderr)
     r = rel(path)
     row = [
         datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
-        r, sha256(path), clean(status, 20), detect_method(path),
+        r, sha256(path), clean(status, STATUS_LIMIT), detect_method(path),
     ]
     rows = [x for x in load() if not (len(x) >= 2 and x[1] == r)]
     rows.append(row)
     rows.sort(key=lambda x: x[1])
     save(rows)
-    print(f"recorded: {clean(r)} [{clean(status, 20)}] {row[2][:12]} {clean(row[4])}")
+    print(f"recorded: {clean(r)} [{row[3]}] {row[2][:12]} {clean(row[4])}")
 
 
 def verify(paths=None):

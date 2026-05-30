@@ -2,20 +2,22 @@
 
 Инструменты для замены устаревших jsSDK-примеров (`$b24.callMethod` / `callListMethod` /
 `fetchListMethod`) на актуальные табы **TS** и **UMD** через `@bitrix24/b24jssdk` (actions-API).
-В текущем `@latest` (1.2.0) actions-API уже доступен, а старые методы помечены deprecated
+В актуальном `@1` actions-API уже доступен, а старые методы помечены deprecated
 (удаляются в 2.0). Это служебная папка процесса — в PR с правками документации её можно не включать.
 
 ## Файлы
 
 | Файл | Назначение |
 |------|------------|
-| `PROMPT.md` | Главный промпт: по нему гоняем актуализацию одного файла (или папки — по файлу за раз). |
+| `PROMPT.md` | Главный промпт для актуализации **одного файла**. Папку обходим по одному файлу (`remaining.py --list`). |
 | `PROMPT-REVIEW.md` | Второй промпт: ревью уже актуализированного файла. |
-| `validate.py` | Структура табов + запрещённые токены + `tsc --strict` (lockfile-пиннинг) + `node --check`. |
-| `record.py` | Идемпотентный журнал `ledger.tsv` (upsert, атомарная запись); `--verify-all` — контроль дрейфа. |
+| `validate.py` | Структура табов + запрещённые токены + `tsc --strict` (lockfile-пиннинг) + `node --check`. Опц. `--project DIR` — каталог sandbox (для параллельных прогонов). |
+| `record.py` | Идемпотентный журнал `ledger.tsv` (upsert, атомарная запись); `--verify-all` / `--verify <path>` — контроль дрейфа по sha256. |
 | `remaining.py` | Сколько файлов ещё не обработано (и список). |
+| `_tabs.py` | Общие regex разбора табов (используют `validate.py` и `record.py`). |
 | `ledger.tsv` | Журнал: дата, файл, sha256, статус, метод (в тулинг-PR — пустой). |
 | `typecheck/` | Зафиксированное окружение типопроверки (`package.json` + `package-lock.json`). |
+| `tests/` | Офлайн unit-тесты тулинга (`python -m unittest discover -s .actualize/tests`). |
 
 ## Как гонять
 
@@ -32,7 +34,11 @@ python3 .actualize/record.py   api-reference/tasks/tasks-task-get.md done
 python3 .actualize/record.py   api-reference/tasks/tasks-task-get.md reviewed
 
 # контроль дрейфа после правок
-python3 .actualize/record.py --verify-all
+python3 .actualize/record.py --verify-all                                     # все
+python3 .actualize/record.py --verify api-reference/tasks/tasks-task-get.md   # один файл
+
+# офлайн-тесты тулинга (без сети)
+python -m unittest discover -s .actualize/tests -p 'test_*.py'
 ```
 
 Первый запуск `validate.py` ставит зависимости из committed `.actualize/typecheck/package-lock.json`
@@ -43,7 +49,8 @@ python3 .actualize/record.py --verify-all
 **Журнал и порядок мёржа.** Тулинг и доковые правки — в разных PR; тулинг-PR мёржится **первым**.
 `ledger.tsv` в тулинг-PR пустой (только заголовок) — строки добавляются по мере обработки файлов
 (вместе с их контентом), иначе `--verify-all` на `main` покажет дрейф до влития доков. Конфликты
-`ledger.tsv` при параллельных PR гасит `merge=union` (`.gitattributes`) + идемпотентный upsert.
+`ledger.tsv` при параллельных PR гасит `merge=union` (`.actualize/.gitattributes`) + идемпотентный
+upsert (`load()` дополнительно дедуплицирует строки по файлу при чтении).
 
 ## Принятые решения (зафиксированы в PROMPT.md)
 
