@@ -74,8 +74,8 @@
 - TS
 
     ```ts
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     import { Text } from '@bitrix24/b24jssdk'
     import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 

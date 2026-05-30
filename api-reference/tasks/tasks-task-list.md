@@ -172,8 +172,8 @@
 - TS
 
     ```ts
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     import { Text } from '@bitrix24/b24jssdk'
     import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 
@@ -189,6 +189,10 @@
     }
 
     try {
+      // tasks.task.list returns a single page (max 50 records). To pull the whole result
+      // set without manual paging, use a list helper instead (both auto-paginate by an
+      // id cursor, so they ignore order): $b24.actions.v2.callList.make() returns every
+      // record as one array, $b24.actions.v2.fetchList.make() yields them in chunks.
       const response = await $b24.actions.v2.call.make<{ tasks: TaskListItem[] }>({
         method: 'tasks.task.list',
         params: {
@@ -214,10 +218,7 @@
             WITH_PARSED_DESCRIPTION: true
           },
           // Page offset (not the page number): the page size is fixed at 50, so the
-          // Nth page is start = (N - 1) * 50. To fetch everything without manual paging,
-          // use a list helper instead (both auto-paginate by an id cursor, ignoring order):
-          // $b24.actions.v2.callList.make() returns all records as one array, while
-          // $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+          // Nth page is start = (N - 1) * 50.
           start: 0
         },
         requestId: Text.getUuidRfc4122()
@@ -251,6 +252,10 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
+          // tasks.task.list returns a single page (max 50 records). To pull the whole result
+          // set without manual paging, use a list helper instead (both auto-paginate by an
+          // id cursor, so they ignore order): $b24.actions.v2.callList.make() returns every
+          // record as one array, $b24.actions.v2.fetchList.make() yields them in chunks.
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.task.list',
             params: {
@@ -276,10 +281,7 @@
                 WITH_PARSED_DESCRIPTION: true
               },
               // Page offset (not the page number): the page size is fixed at 50, so the
-              // Nth page is start = (N - 1) * 50. To fetch everything without manual paging,
-              // use a list helper instead (both auto-paginate by an id cursor, ignoring order):
-              // $b24.actions.v2.callList.make() returns all records as one array, while
-              // $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+              // Nth page is start = (N - 1) * 50.
               start: 0
             },
             requestId: B24Js.Text.getUuidRfc4122()
