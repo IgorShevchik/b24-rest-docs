@@ -172,3 +172,6 @@ try {
 - [ ] `getData()!` в TS / `getData()` в UMD; для списков — `getTotal()`
 - [ ] `validate.py` → PASS
 - [ ] `record.py ... done` выполнен
+
+---
+_Last reviewed: 2026-05-30_
