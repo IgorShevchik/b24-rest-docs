@@ -48,10 +48,11 @@
 - TS
 
     ```ts
-    import { type B24Frame } from '@bitrix24/b24jssdk'
-
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
     declare const $b24: B24Frame
 
     // A single field descriptor and the map returned in result.fields
@@ -72,7 +73,7 @@
       const response = await $b24.actions.v2.call.make<TaskFieldsResult>({
         method: 'tasks.task.getFields',
         params: {},
-        requestId: 'tasks-task-get-fields'
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -103,7 +104,7 @@
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.task.getFields',
             params: {},
-            requestId: 'tasks-task-get-fields'
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

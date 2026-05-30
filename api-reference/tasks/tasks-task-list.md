@@ -172,10 +172,11 @@
 - TS
 
     ```ts
-    import { type B24Frame } from '@bitrix24/b24jssdk'
-
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
+
     declare const $b24: B24Frame
 
     // Shape of a single task in result.tasks (limited to the selected fields)
@@ -183,7 +184,7 @@
       id: string
       title: string
       status: string
-      deadline: string | null
+      deadline: ISODate | null
       responsibleId: string
     }
 
@@ -213,11 +214,13 @@
             WITH_PARSED_DESCRIPTION: true
           },
           // Page offset (not the page number): the page size is fixed at 50, so the
-          // Nth page is start = (N - 1) * 50. For full traversal prefer auto-pagination
-          // via $b24.actions.v2.fetchList.make({ method, params }).
+          // Nth page is start = (N - 1) * 50. To fetch everything without manual paging,
+          // use a list helper instead (both auto-paginate by an id cursor, ignoring order):
+          // $b24.actions.v2.callList.make() returns all records as one array, while
+          // $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
           start: 0
         },
-        requestId: 'tasks-task-list'
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -273,11 +276,13 @@
                 WITH_PARSED_DESCRIPTION: true
               },
               // Page offset (not the page number): the page size is fixed at 50, so the
-              // Nth page is start = (N - 1) * 50. For full traversal prefer auto-pagination
-              // via $b24.actions.v2.fetchList.make({ method, params }).
+              // Nth page is start = (N - 1) * 50. To fetch everything without manual paging,
+              // use a list helper instead (both auto-paginate by an id cursor, ignoring order):
+              // $b24.actions.v2.callList.make() returns all records as one array, while
+              // $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
               start: 0
             },
-            requestId: 'tasks-task-list'
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

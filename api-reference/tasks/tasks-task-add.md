@@ -84,10 +84,11 @@ SE_PARAMETER: [
 - TS
 
     ```ts
-    import { type B24Frame } from '@bitrix24/b24jssdk'
-
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
     declare const $b24: B24Frame
 
     // Minimal shape of result.task; the API returns the full task object
@@ -110,7 +111,7 @@ SE_PARAMETER: [
             UF_TASK_WEBDAV_FILES: ['n12345', 'n67890']
           }
         },
-        requestId: 'tasks-task-add'
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -151,7 +152,7 @@ SE_PARAMETER: [
                 UF_TASK_WEBDAV_FILES: ['n12345', 'n67890']
               }
             },
-            requestId: 'tasks-task-add'
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

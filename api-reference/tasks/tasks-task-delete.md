@@ -59,10 +59,11 @@
 - TS
 
     ```ts
-    import { type B24Frame } from '@bitrix24/b24jssdk'
-
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
     declare const $b24: B24Frame
 
     // The API wraps the deletion flag: result.task === true on success
@@ -76,7 +77,7 @@
         params: {
           taskId: 8131 // ID of the task to delete
         },
-        requestId: 'tasks-task-delete'
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -107,7 +108,7 @@
             params: {
               taskId: 8131 // ID of the task to delete
             },
-            requestId: 'tasks-task-delete'
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

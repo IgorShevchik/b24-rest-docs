@@ -74,10 +74,11 @@
 - TS
 
     ```ts
-    import { type B24Frame } from '@bitrix24/b24jssdk'
-
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
+
     declare const $b24: B24Frame
 
     // result.task limited to the requested (select) fields, in the SDK camelCase form
@@ -88,7 +89,7 @@
         description: string
         createdBy: string
         responsibleId: string
-        deadline: string | null
+        deadline: ISODate | null
         ufCrmTask: string[]
         ufTaskWebdavFiles: number[]
       }
@@ -111,7 +112,7 @@
             'UF_TASK_WEBDAV_FILES'
           ]
         },
-        requestId: 'tasks-task-get'
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -154,7 +155,7 @@
                 'UF_TASK_WEBDAV_FILES'
               ]
             },
-            requestId: 'tasks-task-get'
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response
