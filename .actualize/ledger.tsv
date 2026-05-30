@@ -1,0 +1,7 @@
+date	file	sha256	status	method
+2026-05-30T03:34:54+00:00	api-reference/tasks/tasks-task-add.md	5f4f2c8f8d55927b3359139f3a5ab11c0f5b41ab0a6edc4e3ee2ac2fb8774252	done	tasks.task.add
+2026-05-30T03:34:57+00:00	api-reference/tasks/tasks-task-delete.md	ed16a926bc9c770d7cf8e63c76974e899284ac00c5adece610080af13d17c365	done	tasks.task.delete
+2026-05-30T03:34:58+00:00	api-reference/tasks/tasks-task-get-fields.md	fc2a6b00fe486b403217a1f708ae689a77e102deb606785c38da184088b081dd	done	tasks.task.getFields
+2026-05-30T03:34:55+00:00	api-reference/tasks/tasks-task-get.md	e9b9bc1f8a9245ab8c3ccbca85d77bf25da65eab02f113dc7ff699a76304e352	done	tasks.task.get
+2026-05-30T03:34:56+00:00	api-reference/tasks/tasks-task-list.md	3c7566c98e6f4774567d8ee700a01847c204c92886e7e583f0b674f7f4c07000	done	tasks.task.list
+2026-05-30T03:34:55+00:00	api-reference/tasks/tasks-task-update.md	51fb42173750c06789bb5673e1c7da5e9e80bf51ccd3bc5ec54eb8d7fa4c0ccf	done	tasks.task.update
