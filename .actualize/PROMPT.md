@@ -34,17 +34,25 @@
 
 ## Списочные методы (`*.list`, старые `callListMethod` / `fetchListMethod`)
 
-Используем **ОДИН** вариант: **`actions.v2.call.make` c параметром `start`**.
+Используем **`actions.v2.call.make` c параметром `start`** (одностраничный вызов).
+Причина: list-хелперы `callList.make` / `fetchList.make` пагинируют по id-курсору и
+**не принимают `order`** (он исключён из типа их параметров — передача = ошибка `tsc`), а
+сортировка в примерах обычно важна.
 - читаем массив из `result.<key>` (например `result.tasks`, `result.items`);
-- у `start` оставляем комментарий-подсказку: для больших выборок есть
-  `$b24.actions.v2.fetchList.make` (авто-пагинация);
-- не плодим три варианта (callList/fetchList/call) — только этот.
+- НАД `const response` оставляем комментарий-подсказку, что для полной выборки есть **два**
+  хелпера: `$b24.actions.v2.callList.make()` (вернёт весь массив разом) и
+  `$b24.actions.v2.fetchList.make()` (async-генератор по чанкам) — с пометкой `NOTE:`, что
+  оба не принимают `order` (исключён из типа параметров);
+- `response.getTotal()` НЕ используем (deprecated, removed в SDK 2.0) — показываем размер
+  страницы через `result.<key>.length`.
 
-## Чтение ответа: `getData()!` vs `getData()` и `getTotal()`
+## Чтение ответа: `getData()!` vs `getData()`
 
 - TS (в ветке `else`, т.е. `isSuccess === true`): `response.getData()!.result` (с `!`).
 - UMD (после `if (!isSuccess) { …; return }`): `response.getData().result` (без `!`).
-- Для списков общее число записей — `response.getTotal()` (поле `total` намеренно не входит в `getData()`).
+- `response.getTotal()` НЕ используем — он `@deprecated` / `@removed 2.0.0` (привязан к v2-полю
+  `total`, в v3 его нет). Размер страницы — `result.<key>.length`; полное число — через
+  list-хелпер (`callList.make` → весь массив → `.length`) или `aggregate` (count) в v3.
 
 ## ES-модуль и версия SDK
 
@@ -52,6 +60,11 @@
   `declare const $b24`. В обычный `<script>` без `type="module"` его вставлять нельзя.
 - UMD-тег использует мажор-тег `@1` (защита от мажорных breaking-changes); типопроверка пиннится
   committed lockfile'ом `.actualize/typecheck/package-lock.json` (конкретная 1.x).
+- `requestId` задаём генератором SDK: `Text.getUuidRfc4122()` (TS, `import { Text }`) и
+  `B24Js.Text.getUuidRfc4122()` (UMD) — не хардкодим строку.
+- Пояснительные комментарии (про ES-модуль и готовый `$b24`) ставим **первыми** строками
+  TS-сниппета, до `import`. Тип импортируем как `import type { B24Frame[, ISODate] }`; поля-даты
+  в типе результата — `ISODate | null` (а не `string | null`).
 
 ## Если менять нечего
 
@@ -60,9 +73,11 @@
 ## Таб TS (предполагает уже инициализированный `$b24`)
 
 ```ts
-import { type B24Frame } from '@bitrix24/b24jssdk'
+// This snippet is an ES module: top-level await requires type="module" or a bundler.
+// $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+import { Text } from '@bitrix24/b24jssdk'
+import type { B24Frame } from '@bitrix24/b24jssdk' // add ISODate, etc. for typed date fields
 
-// $b24 is an already-initialized SDK instance (see the SDK "Get started" guide)
 declare const $b24: B24Frame
 
 // Shape of the payload returned in result (match the "response handling" section of the page)
@@ -76,7 +91,7 @@ try {
     params: {
       // parameters copied 1:1 from the original example, comments in English
     },
-    requestId: '<rest-method-kebab>'
+    requestId: Text.getUuidRfc4122()
   })
 
   // The payload is available only on a successful response
@@ -94,6 +109,8 @@ try {
 
 ## Таб UMD (полная инициализация)
 
+В UMD `call.make` вызывается **без** generic-параметра `<T>` (это plain JS, не TS).
+
 ```html
 <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
 <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
@@ -106,7 +123,7 @@ try {
       const response = await $b24.actions.v2.call.make({
         method: '<rest.method>',
         params: { /* same params as TS */ },
-        requestId: '<rest-method-kebab>'
+        requestId: B24Js.Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -168,8 +185,10 @@ try {
 - [ ] нет `callMethod` / `callListMethod` / `fetchListMethod` в jsSDK-примере
 - [ ] нет вызовов `processResult` / `processData`
 - [ ] комментарии и значения на английском
-- [ ] `requestId` задан (kebab-имя метода)
-- [ ] `getData()!` в TS / `getData()` в UMD; для списков — `getTotal()`
+- [ ] пояснит. комментарии (ES-модуль, `$b24`) — первыми строками; в TS `import type { B24Frame }` (+`ISODate` для дат), в UMD — `B24Js.*` без import
+- [ ] `requestId` через `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
+- [ ] `getData()!` в TS / `getData()` в UMD; для списков — `.length` (НЕ `getTotal()`, он deprecated)
+- [ ] для списков — подсказка про `callList.make` и `fetchList.make` (с `NOTE` про игнор `order`)
 - [ ] `validate.py` → PASS
 - [ ] `record.py ... done` выполнен
 

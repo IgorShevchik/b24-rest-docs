@@ -22,9 +22,12 @@ VALID = """# Page
 - TS
 
 ```ts
-import { type B24Frame } from '@bitrix24/b24jssdk'
+// This snippet is an ES module: top-level await requires type="module" or a bundler.
+// $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+import { Text } from '@bitrix24/b24jssdk'
+import type { B24Frame } from '@bitrix24/b24jssdk'
 declare const $b24: B24Frame
-const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} })
+const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, requestId: Text.getUuidRfc4122() })
 ```
 
 - UMD
@@ -33,7 +36,7 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} }
 <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
 <script>
 const $b24 = await B24Js.initializeB24Frame()
-const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} })
+const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, requestId: B24Js.Text.getUuidRfc4122() })
 </script>
 ```
 
@@ -42,6 +45,8 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {} }
 
 
 def replace_nth(s, old, new, n):
+    if n < 1:
+        return s
     i = -1
     for _ in range(n):
         i = s.find(old, i + 1)
@@ -58,8 +63,24 @@ def write_md(content):
 
 
 class ExtractTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = []
+        self.addCleanup(self._cleanup)
+
+    def _cleanup(self):
+        for p in self._tmp:
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+
+    def _write(self, content):
+        path = write_md(content)
+        self._tmp.append(path)
+        return path
+
     def test_valid_returns_ts_and_umd(self):
-        ts, umd = validate.extract(write_md(VALID))
+        ts, umd = validate.extract(self._write(VALID))
         self.assertIn("actions.v2.", ts)
         self.assertIn("actions.v2.", umd)
         self.assertNotIn("<script", umd)  # inner JS only
@@ -67,12 +88,12 @@ class ExtractTests(unittest.TestCase):
     def test_region_isolation_ignores_outside_blocks(self):
         # a ```ts block OUTSIDE the tabs region must not be counted
         md = "```ts\nconst ignored = true\n```\n\n" + VALID
-        ts, _ = validate.extract(write_md(md))
+        ts, _ = validate.extract(self._write(md))
         self.assertIn("crm.lead.add", ts)
 
     def _assert_fail(self, content):
         with self.assertRaises(SystemExit):
-            validate.extract(write_md(content))
+            validate.extract(self._write(content))
 
     def test_legacy_js_tab(self):
         self._assert_fail(VALID.replace("- TS\n", "- JS\n\n```js\nx\n```\n\n- TS\n", 1))
@@ -80,8 +101,28 @@ class ExtractTests(unittest.TestCase):
     def test_missing_ts_tab(self):
         self._assert_fail(VALID.replace("- TS\n", "", 1))
 
+    def test_missing_umd_tab(self):
+        self._assert_fail(VALID.replace("- UMD\n", "", 1))
+
     def test_two_ts_blocks(self):
         self._assert_fail(VALID.replace("{% endlist %}", "```ts\nconst x = 1\n```\n\n{% endlist %}"))
+
+    def test_two_html_blocks(self):
+        self._assert_fail(VALID.replace(
+            "{% endlist %}", "```html\n<script>const x = 1</script>\n```\n\n{% endlist %}"))
+
+    def test_no_tabs_region(self):
+        # tab names present but no {% list tabs %} … {% endlist %} wrapper
+        self._assert_fail("# Page\n\n- TS\n- UMD\n\n```ts\nconst r = 1\n```\n")
+
+    def test_umd_script_without_logic(self):
+        # an html block whose only <script> is the external src (no inline body) must fail
+        self._assert_fail(
+            "# Page\n\n{% list tabs %}\n\n- TS\n\n"
+            "```ts\nconst r = await $b24.actions.v2.call.make({ method: 'x', params: {} })\n```\n\n"
+            "- UMD\n\n```html\n"
+            '<script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>\n'
+            "```\n\n{% endlist %}\n")
 
     def test_forbidden_token(self):
         self._assert_fail(VALID.replace("actions.v2.call.make", "callMethod", 1))
@@ -91,6 +132,18 @@ class ExtractTests(unittest.TestCase):
 
     def test_umd_without_actions(self):
         self._assert_fail(replace_nth(VALID, "$b24.actions.v2.call.make", "$b24.callApi", 2))
+
+
+class HelperTests(unittest.TestCase):
+    def test_replace_nth_targets_only_the_nth(self):
+        self.assertEqual(replace_nth("a-a-a", "a", "X", 2), "a-X-a")
+
+    def test_replace_nth_out_of_range_is_noop(self):
+        # fewer than n occurrences -> original string returned unchanged
+        self.assertEqual(replace_nth("a-a", "a", "X", 5), "a-a")
+
+    def test_replace_nth_zero_is_noop(self):
+        self.assertEqual(replace_nth("a-a-a", "a", "X", 0), "a-a-a")
 
 
 class CleanTests(unittest.TestCase):
@@ -207,6 +260,11 @@ class LedgerTests(unittest.TestCase):
             f.write("plain text, no tabs, no method")
         self.assertEqual(record.detect_method(path), "no-method.md")
 
+    def test_detect_method_from_tabs(self):
+        self.assertEqual(
+            record.detect_method(self._md("m.md", method="tasks.task.list")),
+            "tasks.task.list")
+
 
 class RemainingTests(unittest.TestCase):
     def test_legacy_regex_matches_deprecated(self):
@@ -231,6 +289,51 @@ class RemainingTests(unittest.TestCase):
             done = remaining.done_set()
         self.assertIn("x/a.md", done)
         self.assertNotIn("x/b.md", done)
+
+
+class ValidateMainTests(unittest.TestCase):
+    def _run_main(self, path):
+        with mock.patch.object(sys, "argv", ["validate.py", path]):
+            with self.assertRaises(SystemExit) as e:
+                validate.main()
+        return e.exception.code
+
+    def test_main_rejects_path_outside_repo(self):
+        # the path-guard runs before any npm/tsc work, so this needs no toolchain
+        self.assertEqual(self._run_main("/etc/hostname"), 1)
+
+    def test_main_file_not_found(self):
+        missing = os.path.join(validate.REPO, "definitely-missing-xyz-123.md")
+        self.assertEqual(self._run_main(missing), 1)
+
+
+class FixtureAnchorTests(unittest.TestCase):
+    # guards the substring anchors the replace-based ExtractTests rely on, so a
+    # future VALID edit that drops one fails loudly instead of silently no-op'ing
+    def test_valid_fixture_has_expected_anchors(self):
+        for anchor in ("- TS\n", "- UMD\n", "{% endlist %}", "actions.v2.call.make"):
+            self.assertIn(anchor, VALID)
+        self.assertEqual(VALID.count("$b24.actions.v2.call.make"), 2)
+
+
+class DocsConsistencyTests(unittest.TestCase):
+    ACTUALIZE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    def _read(self, name):
+        with open(os.path.join(self.ACTUALIZE, name), encoding="utf-8") as f:
+            return f.read()
+
+    def test_prompt_encodes_current_conventions(self):
+        p = self._read("PROMPT.md")
+        for token in ("Text.getUuidRfc4122()", "import type { B24Frame }",
+                      "callList.make", "fetchList.make"):
+            self.assertIn(token, p)
+
+    def test_readme_in_sync_with_prompt(self):
+        readme = self._read("README.md")
+        self.assertIn("Text.getUuidRfc4122()", readme)
+        # the deprecated getTotal() must not be recommended as the list pattern
+        self.assertNotIn("для списков — `getTotal()`", readme)
 
 
 if __name__ == "__main__":
