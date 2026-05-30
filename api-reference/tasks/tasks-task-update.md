@@ -105,7 +105,7 @@ SE_PARAMETER: [
             RESPONSIBLE_ID: 123 // New responsible person ID
           }
         },
-        requestId: Text.getUuidRfc4122()
+        requestId: Text.getUuidRfc4122() // optional unique tracking id for this request
       })
 
       // The payload is available only on a successful response
@@ -144,7 +144,7 @@ SE_PARAMETER: [
                 RESPONSIBLE_ID: 123 // New responsible person ID
               }
             },
-            requestId: B24Js.Text.getUuidRfc4122()
+            requestId: B24Js.Text.getUuidRfc4122() // optional unique tracking id for this request
           })
 
           // The payload is available only on a successful response

@@ -111,7 +111,7 @@ SE_PARAMETER: [
             UF_TASK_WEBDAV_FILES: ['n12345', 'n67890']
           }
         },
-        requestId: Text.getUuidRfc4122()
+        requestId: Text.getUuidRfc4122() // optional unique tracking id for this request
       })
 
       // The payload is available only on a successful response
@@ -152,7 +152,7 @@ SE_PARAMETER: [
                 UF_TASK_WEBDAV_FILES: ['n12345', 'n67890']
               }
             },
-            requestId: B24Js.Text.getUuidRfc4122()
+            requestId: B24Js.Text.getUuidRfc4122() // optional unique tracking id for this request
           })
 
           // The payload is available only on a successful response

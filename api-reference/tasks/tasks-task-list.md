@@ -179,7 +179,8 @@
 
     declare const $b24: B24Frame
 
-    // Shape of a single task in result.tasks (limited to the selected fields)
+    // Shape of a single task in result.tasks. Only the fields read below are typed here;
+    // the request selects more — add them to this type as you start using them.
     type TaskListItem = {
       id: string
       title: string
@@ -189,10 +190,11 @@
     }
 
     try {
-      // tasks.task.list returns a single page (max 50 records). To pull the whole result
-      // set without manual paging, use a list helper instead (both auto-paginate by an
-      // id cursor, so they ignore order): $b24.actions.v2.callList.make() returns every
-      // record as one array, $b24.actions.v2.fetchList.make() yields them in chunks.
+      // tasks.task.list returns a single page (max 50 records). For the whole result set
+      // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+      // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+      // NOTE: both list helpers paginate by an id cursor and therefore IGNORE `order` —
+      // keep this call.make + `start` variant when the sort order matters.
       const response = await $b24.actions.v2.call.make<{ tasks: TaskListItem[] }>({
         method: 'tasks.task.list',
         params: {
@@ -200,7 +202,7 @@
           order: { DEADLINE: 'asc', PRIORITY: 'desc' },
           filter: {
             '!STATUS': 6, // exclude deferred tasks
-            '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue
+            '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue (UTC date; adjust to the portal time zone if needed)
             RESPONSIBLE_ID: 547, // tasks of a specific responsible person
             '::SUBFILTER-PARAMS': { FAVORITE: 'Y' } // favorites only
           },
@@ -221,7 +223,7 @@
           // Nth page is start = (N - 1) * 50.
           start: 0
         },
-        requestId: Text.getUuidRfc4122()
+        requestId: Text.getUuidRfc4122() // optional unique tracking id for this request
       })
 
       // The payload is available only on a successful response
@@ -229,8 +231,9 @@
         console.error(response.getErrorMessages().join('; '))
       } else {
         const tasks = response.getData()!.result.tasks
-        const total = response.getTotal() // total number of matched records (for paging)
-        console.info(`Loaded ${tasks.length} of ${total} tasks`)
+        // getTotal() is deprecated (removed in SDK 2.0); for the full match count fetch
+        // everything via a list helper (see above) and read its length.
+        console.info(`Loaded ${tasks.length} tasks (one page)`)
         for (const task of tasks) {
           console.info(`#${task.id}: ${task.title}`)
         }
@@ -252,10 +255,11 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // tasks.task.list returns a single page (max 50 records). To pull the whole result
-          // set without manual paging, use a list helper instead (both auto-paginate by an
-          // id cursor, so they ignore order): $b24.actions.v2.callList.make() returns every
-          // record as one array, $b24.actions.v2.fetchList.make() yields them in chunks.
+          // tasks.task.list returns a single page (max 50 records). For the whole result set
+          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+          // NOTE: both list helpers paginate by an id cursor and therefore IGNORE `order` —
+          // keep this call.make + `start` variant when the sort order matters.
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.task.list',
             params: {
@@ -263,7 +267,7 @@
               order: { DEADLINE: 'asc', PRIORITY: 'desc' },
               filter: {
                 '!STATUS': 6, // exclude deferred tasks
-                '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue
+                '>=DEADLINE': new Date().toISOString().split('T')[0], // not overdue (UTC date; adjust to the portal time zone if needed)
                 RESPONSIBLE_ID: 547, // tasks of a specific responsible person
                 '::SUBFILTER-PARAMS': { FAVORITE: 'Y' } // favorites only
               },
@@ -284,7 +288,7 @@
               // Nth page is start = (N - 1) * 50.
               start: 0
             },
-            requestId: B24Js.Text.getUuidRfc4122()
+            requestId: B24Js.Text.getUuidRfc4122() // optional unique tracking id for this request
           })
 
           // The payload is available only on a successful response
@@ -294,8 +298,9 @@
           }
 
           const tasks = response.getData().result.tasks
-          const total = response.getTotal() // total number of matched records (for paging)
-          console.info(`Loaded ${tasks.length} of ${total} tasks`)
+          // getTotal() is deprecated (removed in SDK 2.0); for the full match count fetch
+          // everything via a list helper (see above) and read its length.
+          console.info(`Loaded ${tasks.length} tasks (one page)`)
           for (const task of tasks) {
             console.info(`#${task.id}: ${task.title}`)
           }

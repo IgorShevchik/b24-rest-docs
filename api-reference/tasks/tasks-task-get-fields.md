@@ -73,7 +73,7 @@
       const response = await $b24.actions.v2.call.make<TaskFieldsResult>({
         method: 'tasks.task.getFields',
         params: {},
-        requestId: Text.getUuidRfc4122()
+        requestId: Text.getUuidRfc4122() // optional unique tracking id for this request
       })
 
       // The payload is available only on a successful response
@@ -104,7 +104,7 @@
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.task.getFields',
             params: {},
-            requestId: B24Js.Text.getUuidRfc4122()
+            requestId: B24Js.Text.getUuidRfc4122() // optional unique tracking id for this request
           })
 
           // The payload is available only on a successful response
