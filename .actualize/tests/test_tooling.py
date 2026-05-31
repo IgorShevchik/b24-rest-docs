@@ -474,7 +474,7 @@ class DocsConsistencyTests(unittest.TestCase):
         readme = self._read("README.md")
         self.assertIn("Text.getUuidRfc4122()", readme)
         # the deprecated getTotal() must not be recommended as the list pattern
-        self.assertNotIn("для списков — `getTotal()`", readme)
+        self.assertNotIn("for lists — `getTotal()`", readme)
 
 
 if __name__ == "__main__":
