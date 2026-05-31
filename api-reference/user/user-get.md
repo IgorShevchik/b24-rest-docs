@@ -139,49 +139,50 @@
     declare const $b24: B24Frame
 
     type UserData = {
-        ID: string
-        ACTIVE: boolean
-        NAME: string
-        LAST_NAME: string
-        SECOND_NAME: string
-        EMAIL: string
-        LAST_LOGIN: ISODate | null
-        DATE_REGISTER: ISODate | null
-        TIME_ZONE: string
-        IS_ONLINE: string
-        PERSONAL_GENDER: string
-        PERSONAL_BIRTHDAY: ISODate | null
-        PERSONAL_CITY: string
-        WORK_PHONE: string
-        WORK_POSITION: string
-        UF_EMPLOYMENT_DATE: string
-        UF_DEPARTMENT: number[]
-        USER_TYPE: string
+      ID: string
+      ACTIVE: boolean
+      NAME: string
+      LAST_NAME: string
+      SECOND_NAME: string
+      EMAIL: string
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
+      TIME_ZONE: string
+      IS_ONLINE: string
+      PERSONAL_GENDER: string
+      PERSONAL_BIRTHDAY: ISODate | ''
+      PERSONAL_CITY: string
+      WORK_PHONE: string
+      WORK_POSITION: string
+      UF_EMPLOYMENT_DATE: string
+      UF_DEPARTMENT: number[]
+      USER_TYPE: string
     }
 
     try {
-        // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-        // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-        const response = await $b24.actions.v2.call.make<UserData[]>({
-            method: 'user.get',
-            params: {
-                UF_DEPARTMENT: 1,
-                SORT: 'ID',
-                ORDER: 'asc',
-                start: 10,
-            },
-            requestId: Text.getUuidRfc4122(),
-        })
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<UserData[]>({
+        method: 'user.get',
+        params: {
+          UF_DEPARTMENT: 1,
+          SORT: 'ID',
+          ORDER: 'asc',
+          start: 10,
+        },
+        requestId: Text.getUuidRfc4122(),
+      })
 
-        if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-        } else {
-            const result = response.getData()!.result
-            console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-        }
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+      }
     } catch (error) {
-        // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-        console.error(error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
     ```
 
@@ -191,38 +192,39 @@
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
     <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
     <script>
-        async function getUsers() {
-            try {
-                // Initialize the SDK inside a Bitrix24 frame
-                const $b24 = await B24Js.initializeB24Frame()
+      async function getUsers() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-                // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-                // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-                const response = await $b24.actions.v2.call.make({
-                    method: 'user.get',
-                    params: {
-                        UF_DEPARTMENT: 1,
-                        SORT: 'ID',
-                        ORDER: 'asc',
-                        start: 10,
-                    },
-                    requestId: B24Js.Text.getUuidRfc4122(),
-                })
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'user.get',
+            params: {
+              UF_DEPARTMENT: 1,
+              SORT: 'ID',
+              ORDER: 'asc',
+              start: 10,
+            },
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
 
-                if (!response.isSuccess) {
-                    console.error(response.getErrorMessages().join('; '))
-                    return
-                }
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
 
-                const result = response.getData().result
-                console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-            } catch (error) {
-                // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-                console.error(error)
-            }
+          const result = response.getData().result
+          console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', getUsers)
+      document.addEventListener('DOMContentLoaded', getUsers)
     </script>
     ```
 
@@ -344,40 +346,41 @@
     declare const $b24: B24Frame
 
     type UserData = {
-        ID: string
-        ACTIVE: boolean
-        NAME: string
-        LAST_NAME: string
-        EMAIL: string
-        LAST_LOGIN: ISODate | null
-        DATE_REGISTER: ISODate | null
-        IS_ONLINE: string
-        UF_DEPARTMENT: number[]
-        USER_TYPE: string
+      ID: string
+      ACTIVE: boolean
+      NAME: string
+      LAST_NAME: string
+      EMAIL: string
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
+      IS_ONLINE: string
+      UF_DEPARTMENT: number[]
+      USER_TYPE: string
     }
 
     try {
-        // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-        // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-        const response = await $b24.actions.v2.call.make<UserData[]>({
-            method: 'user.get',
-            params: {
-                filter: {
-                    NAME: 'Iva%',
-                },
-            },
-            requestId: Text.getUuidRfc4122(),
-        })
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<UserData[]>({
+        method: 'user.get',
+        params: {
+          filter: {
+            NAME: 'Iva%',
+          },
+        },
+        requestId: Text.getUuidRfc4122(),
+      })
 
-        if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-        } else {
-            const result = response.getData()!.result
-            console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-        }
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+      }
     } catch (error) {
-        // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-        console.error(error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
     ```
 
@@ -387,37 +390,38 @@
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
     <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
     <script>
-        async function getUsersByName() {
-            try {
-                // Initialize the SDK inside a Bitrix24 frame
-                const $b24 = await B24Js.initializeB24Frame()
+      async function getUsersByName() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-                // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-                // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-                const response = await $b24.actions.v2.call.make({
-                    method: 'user.get',
-                    params: {
-                        filter: {
-                            NAME: 'Iva%',
-                        },
-                    },
-                    requestId: B24Js.Text.getUuidRfc4122(),
-                })
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'user.get',
+            params: {
+              filter: {
+                NAME: 'Iva%',
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
 
-                if (!response.isSuccess) {
-                    console.error(response.getErrorMessages().join('; '))
-                    return
-                }
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
 
-                const result = response.getData().result
-                console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-            } catch (error) {
-                // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-                console.error(error)
-            }
+          const result = response.getData().result
+          console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', getUsersByName)
+      document.addEventListener('DOMContentLoaded', getUsersByName)
     </script>
     ```
 
@@ -525,40 +529,41 @@
     declare const $b24: B24Frame
 
     type UserData = {
-        ID: string
-        ACTIVE: boolean
-        NAME: string
-        LAST_NAME: string
-        EMAIL: string
-        LAST_LOGIN: ISODate | null
-        DATE_REGISTER: ISODate | null
-        IS_ONLINE: string
-        UF_DEPARTMENT: number[]
-        USER_TYPE: string
+      ID: string
+      ACTIVE: boolean
+      NAME: string
+      LAST_NAME: string
+      EMAIL: string
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
+      IS_ONLINE: string
+      UF_DEPARTMENT: number[]
+      USER_TYPE: string
     }
 
     try {
-        // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-        // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-        const response = await $b24.actions.v2.call.make<UserData[]>({
-            method: 'user.get',
-            params: {
-                filter: {
-                    '!%LAST_NAME': 'ov',
-                },
-            },
-            requestId: Text.getUuidRfc4122(),
-        })
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<UserData[]>({
+        method: 'user.get',
+        params: {
+          filter: {
+            '!%LAST_NAME': 'ov',
+          },
+        },
+        requestId: Text.getUuidRfc4122(),
+      })
 
-        if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-        } else {
-            const result = response.getData()!.result
-            console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-        }
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+      }
     } catch (error) {
-        // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-        console.error(error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
     ```
 
@@ -568,37 +573,38 @@
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
     <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
     <script>
-        async function getUsersByLastName() {
-            try {
-                // Initialize the SDK inside a Bitrix24 frame
-                const $b24 = await B24Js.initializeB24Frame()
+      async function getUsersByLastName() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-                // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-                // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-                const response = await $b24.actions.v2.call.make({
-                    method: 'user.get',
-                    params: {
-                        filter: {
-                            '!%LAST_NAME': 'ov',
-                        },
-                    },
-                    requestId: B24Js.Text.getUuidRfc4122(),
-                })
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'user.get',
+            params: {
+              filter: {
+                '!%LAST_NAME': 'ov',
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
 
-                if (!response.isSuccess) {
-                    console.error(response.getErrorMessages().join('; '))
-                    return
-                }
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
 
-                const result = response.getData().result
-                console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
-            } catch (error) {
-                // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-                console.error(error)
-            }
+          const result = response.getData().result
+          console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME}`))
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', getUsersByLastName)
+      document.addEventListener('DOMContentLoaded', getUsersByLastName)
     </script>
     ```
 
@@ -706,41 +712,42 @@
     declare const $b24: B24Frame
 
     type UserData = {
-        ID: string
-        ACTIVE: boolean
-        NAME: string
-        LAST_NAME: string
-        EMAIL: string
-        LAST_LOGIN: ISODate | null
-        DATE_REGISTER: ISODate | null
-        IS_ONLINE: string
-        PERSONAL_CITY: string
-        UF_DEPARTMENT: number[]
-        USER_TYPE: string
+      ID: string
+      ACTIVE: boolean
+      NAME: string
+      LAST_NAME: string
+      EMAIL: string
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
+      IS_ONLINE: string
+      PERSONAL_CITY: string
+      UF_DEPARTMENT: number[]
+      USER_TYPE: string
     }
 
     try {
-        // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-        // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-        const response = await $b24.actions.v2.call.make<UserData[]>({
-            method: 'user.get',
-            params: {
-                filter: {
-                    '@PERSONAL_CITY': ['Moscow', 'Saint Petersburg'],
-                },
-            },
-            requestId: Text.getUuidRfc4122(),
-        })
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<UserData[]>({
+        method: 'user.get',
+        params: {
+          filter: {
+            '@PERSONAL_CITY': ['Moscow', 'Saint Petersburg'],
+          },
+        },
+        requestId: Text.getUuidRfc4122(),
+      })
 
-        if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-        } else {
-            const result = response.getData()!.result
-            console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME} (${u.PERSONAL_CITY})`))
-        }
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME} (${u.PERSONAL_CITY})`))
+      }
     } catch (error) {
-        // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-        console.error(error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
     ```
 
@@ -750,37 +757,38 @@
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
     <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
     <script>
-        async function getUsersByCity() {
-            try {
-                // Initialize the SDK inside a Bitrix24 frame
-                const $b24 = await B24Js.initializeB24Frame()
+      async function getUsersByCity() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-                // NOTE: to fetch all pages at once use $b24.actions.v2.callList.make()
-                // or the async-generator $b24.actions.v2.fetchList.make() — both exclude 'order' from their param type
-                const response = await $b24.actions.v2.call.make({
-                    method: 'user.get',
-                    params: {
-                        filter: {
-                            '@PERSONAL_CITY': ['Moscow', 'Saint Petersburg'],
-                        },
-                    },
-                    requestId: B24Js.Text.getUuidRfc4122(),
-                })
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'user.get',
+            params: {
+              filter: {
+                '@PERSONAL_CITY': ['Moscow', 'Saint Petersburg'],
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
 
-                if (!response.isSuccess) {
-                    console.error(response.getErrorMessages().join('; '))
-                    return
-                }
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
 
-                const result = response.getData().result
-                console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME} (${u.PERSONAL_CITY})`))
-            } catch (error) {
-                // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-                console.error(error)
-            }
+          const result = response.getData().result
+          console.info(`Fetched ${result.length} users:`, result.map(u => `${u.NAME} ${u.LAST_NAME} (${u.PERSONAL_CITY})`))
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', getUsersByCity)
+      document.addEventListener('DOMContentLoaded', getUsersByCity)
     </script>
     ```
 

@@ -407,7 +407,7 @@
             },
             LABEL: 'CRM deals binding',
             EDIT_FORM_LABEL: {
-              en: 'CRM deals binding',
+              ru: 'CRM deals binding',
             },
           },
         },
@@ -456,7 +456,7 @@
                 },
                 LABEL: 'CRM deals binding',
                 EDIT_FORM_LABEL: {
-                  en: 'CRM deals binding',
+                  ru: 'CRM deals binding',
                 },
               },
             },

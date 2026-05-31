@@ -117,46 +117,46 @@
 
     // Shape of each user object returned in result[]
     type UserItem = {
-        ID: string
-        ACTIVE: boolean
-        NAME: string
-        LAST_NAME: string
-        SECOND_NAME?: string
-        EMAIL: string
-        LAST_LOGIN: ISODate | null
-        DATE_REGISTER: ISODate | null
-        IS_ONLINE: string
-        PERSONAL_BIRTHDAY?: ISODate | null
-        WORK_POSITION?: string
-        UF_DEPARTMENT?: number[]
-        USER_TYPE: 'employee' | 'extranet' | 'email'
+      ID: string
+      ACTIVE: boolean
+      NAME: string
+      LAST_NAME: string
+      SECOND_NAME?: string
+      EMAIL: string
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
+      IS_ONLINE: string
+      PERSONAL_BIRTHDAY?: ISODate | ''
+      WORK_POSITION?: string
+      UF_DEPARTMENT?: number[]
+      USER_TYPE: 'employee' | 'extranet' | 'email'
     }
 
     try {
-        // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-        // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-        // Both helpers do NOT accept `order` (it is excluded from their parameter types).
-        const response = await $b24.actions.v2.call.make<UserItem[]>({
-            method: 'user.search',
-            params: {
-                UF_DEPARTMENT: 1,
-                SORT: 'ID',
-                ORDER: 'asc',
-                start: 10,
-            },
-            requestId: Text.getUuidRfc4122()
-        })
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<UserItem[]>({
+        method: 'user.search',
+        params: {
+          UF_DEPARTMENT: 1,
+          SORT: 'ID',
+          ORDER: 'asc',
+          start: 10,
+        },
+        requestId: Text.getUuidRfc4122()
+      })
 
-        // The payload is available only on a successful response
-        if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-        } else {
-            const result = response.getData()!.result
-            console.info('Users found on this page:', result.length, result)
-        }
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Users found on this page:', result.length, result)
+      }
     } catch (error) {
-        // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-        console.error(error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
     ```
 
@@ -166,40 +166,40 @@
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
     <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
     <script>
-        async function searchUsers() {
-            try {
-                // Initialize the SDK inside a Bitrix24 frame
-                const $b24 = await B24Js.initializeB24Frame()
+      async function searchUsers() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
 
-                // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-                // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-                // Both helpers do NOT accept `order` (it is excluded from their parameter types).
-                const response = await $b24.actions.v2.call.make({
-                    method: 'user.search',
-                    params: {
-                        UF_DEPARTMENT: 1,
-                        SORT: 'ID',
-                        ORDER: 'asc',
-                        start: 10,
-                    },
-                    requestId: B24Js.Text.getUuidRfc4122()
-                })
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'user.search',
+            params: {
+              UF_DEPARTMENT: 1,
+              SORT: 'ID',
+              ORDER: 'asc',
+              start: 10,
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
 
-                // The payload is available only on a successful response
-                if (!response.isSuccess) {
-                    console.error(response.getErrorMessages().join('; '))
-                    return
-                }
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
 
-                const result = response.getData().result
-                console.info('Users found on this page:', result.length, result)
-            } catch (error) {
-                // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-                console.error(error)
-            }
+          const result = response.getData().result
+          console.info('Users found on this page:', result.length, result)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', searchUsers)
+      document.addEventListener('DOMContentLoaded', searchUsers)
     </script>
     ```
 

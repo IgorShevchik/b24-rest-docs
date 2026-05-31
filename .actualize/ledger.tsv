@@ -1,11 +1,11 @@
 date	file	sha256	status	method
 2026-05-31T05:08:52+00:00	api-reference/user/user-add.md	a52690b8ec253ffdac3324f0c21923516bec951abe4d28353e006e593cdfb6d2	done	user.add
-2026-05-31T05:08:53+00:00	api-reference/user/user-current.md	f0044302780f1b7e91b46a1883ec0cd12d9e5068dd693bebbe98a168c9a68e1c	done	user.current
+2026-05-31T08:35:17+00:00	api-reference/user/user-current.md	2176ec3959b4d06146c9564838455524176642cc4a63284246e48ffdf9db1469	done	user.current
 2026-05-31T05:08:54+00:00	api-reference/user/user-fields.md	e077ee17d6ca4d70eabadcc0ee1e5a9b00f563d26b498c9e52821a1d5b0f7f1e	done	user.fields
-2026-05-31T05:31:28+00:00	api-reference/user/user-get.md	3b7fb7b18ce55c1bbab413d4deb96579d50b891ed4bf84cd0fc8790e366ea4ab	done	user.get
-2026-05-31T05:22:41+00:00	api-reference/user/user-search.md	d0da678beaa5a8dd28779e6ede48e1f5f907917d1c183cbc59f48ab0280d7f86	done	user.search
-2026-05-31T05:22:41+00:00	api-reference/user/user-update.md	96965537ff11c8122d6bb7bd4f69f7e5b662786bbaebeb84927fdec7dd4cf7ad	done	user.update
-2026-05-31T07:57:03+00:00	api-reference/user/userfields/user-userfield-add.md	f9d3b6495884d94d89160628523ab63f72f76d3b83a0d02dd3bbec471adfe5b6	done	user.userfield.add
+2026-05-31T08:35:17+00:00	api-reference/user/user-get.md	7df69f8e9d70df5a211ac2f9d4725b14bc9cb13b52316e9190c2844f7c3f9a97	done	user.get
+2026-05-31T08:35:17+00:00	api-reference/user/user-search.md	4d6aa239eeb255fb3cf095c3af3ef4209a82aa626e003ffee99fcb9407608aeb	done	user.search
+2026-05-31T08:35:17+00:00	api-reference/user/user-update.md	eacb0d5e125dcbb06c075d23450b474f4454a8a03d00f6708675cfc809ddce21	done	user.update
+2026-05-31T08:35:17+00:00	api-reference/user/userfields/user-userfield-add.md	6c398b3d471f28129ab1212e2d5084a287bbbd62620ec5ecdfe686ace029f42b	done	user.userfield.add
 2026-05-31T05:22:42+00:00	api-reference/user/userfields/user-userfield-delete.md	2c5daa7565e597f24cfc3ab6670bc1d39e76771e1ea3f55f70938117be80ce81	done	user.userfield.delete
 2026-05-31T05:22:43+00:00	api-reference/user/userfields/user-userfield-list.md	828eccbb93ff6552c220af13b911a5006dc1bee409a21401542cf72a3606d558	done	user.userfield.list
 2026-05-31T07:57:03+00:00	api-reference/user/userfields/user-userfield-update.md	c63ec233c162e46f80805d4ce5d8b2e421759fd9293b9904ea533b60eaaf8e81	done	user.userfield.update

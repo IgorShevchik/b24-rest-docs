@@ -66,8 +66,8 @@
       NAME: string
       LAST_NAME: string
       EMAIL: string
-      LAST_LOGIN: ISODate | null
-      DATE_REGISTER: ISODate | null
+      LAST_LOGIN: ISODate | ''
+      DATE_REGISTER: ISODate | ''
       IS_ONLINE: string
       LAST_ACTIVITY_DATE: string | null
       PERSONAL_GENDER: string
@@ -84,6 +84,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
