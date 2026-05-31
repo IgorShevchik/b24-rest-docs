@@ -120,11 +120,13 @@ calendar…), каждый раздел — отдельный PR поверх b
 - **[nit] Пин `actions/*` по commit-SHA.** Сейчас по тегам (`@v4`/`@v5`) + Dependabot. Для строгой
   supply-chain гигиены перейти на SHA-пиннинг (Dependabot это поддерживает).
 - **[minor][done] Multiple `{% list tabs %}` blocks per page.** A page can carry several
-  tabs blocks — e.g. a parameter-description block plus the code-examples block (confirmed
-  in `user/userfields/` during the first live run; the earlier "doesn't occur in the corpus"
-  assumption was wrong). `validate.py` and `record.py` now select the region holding the
-  ```ts example via `_tabs.code_region()` instead of blindly the first region, and fail
-  clearly when zero or more than one region carries a code example.
+  tabs blocks — parameter-description blocks plus one or more code-example blocks (confirmed
+  across the corpus during the first live run: 54 pages have ≥2 code examples, e.g.
+  `user/user-get.md` has 4; the earlier "doesn't occur in the corpus" assumption was wrong).
+  `_tabs.code_regions()` returns every tabs region that holds a TS code example; `validate.py`
+  type-checks each example independently and `record.py` reads the method from the first one.
+  Fails only when no region carries a code example. (Earlier this was a first-region-only
+  scan that silently skipped examples 2..N.)
 - **[nit] Forbidden-токены ищутся подстрокой.** Легитимный комментарий вида `// deprecated:
   callMethod` в TS/UMD вызовет FAIL. Крайне редкий кейс (цель — убрать следы deprecated API); при
   необходимости — запретить такие комментарии в PROMPT.md.

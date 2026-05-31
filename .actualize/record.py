@@ -40,12 +40,11 @@ def clean(value, limit=200):
 
 def detect_method(path):
     with open(path, encoding="utf-8") as f:
-        text = f.read()
-    # prefer the tabs region with the ```ts example (multi-region pages); fall back
-    # to the first region, then the whole text.
-    region, _ = _tabs.code_region(text)
-    if region is None:
-        region = _tabs.tabs_region(text) or text
+        text = f.read().replace("\r\n", "\n")
+    # prefer the first code-example region (a page may have several); fall back to the
+    # first tabs region, then the whole text (best-effort — the ledger method is advisory).
+    regions = _tabs.code_regions(text)
+    region = regions[0] if regions else (_tabs.tabs_region(text) or text)
     ts = _tabs.find_ts(region)
     scope = ts[0] if ts else region
     return _tabs.first_method(scope) or os.path.basename(path)
