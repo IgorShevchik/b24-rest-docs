@@ -5,5 +5,7 @@ date	file	sha256	status	method
 2026-05-31T05:31:28+00:00	api-reference/user/user-get.md	3b7fb7b18ce55c1bbab413d4deb96579d50b891ed4bf84cd0fc8790e366ea4ab	done	user.get
 2026-05-31T05:22:41+00:00	api-reference/user/user-search.md	d0da678beaa5a8dd28779e6ede48e1f5f907917d1c183cbc59f48ab0280d7f86	done	user.search
 2026-05-31T05:22:41+00:00	api-reference/user/user-update.md	96965537ff11c8122d6bb7bd4f69f7e5b662786bbaebeb84927fdec7dd4cf7ad	done	user.update
+2026-05-31T07:57:03+00:00	api-reference/user/userfields/user-userfield-add.md	f9d3b6495884d94d89160628523ab63f72f76d3b83a0d02dd3bbec471adfe5b6	done	user.userfield.add
 2026-05-31T05:22:42+00:00	api-reference/user/userfields/user-userfield-delete.md	2c5daa7565e597f24cfc3ab6670bc1d39e76771e1ea3f55f70938117be80ce81	done	user.userfield.delete
 2026-05-31T05:22:43+00:00	api-reference/user/userfields/user-userfield-list.md	828eccbb93ff6552c220af13b911a5006dc1bee409a21401542cf72a3606d558	done	user.userfield.list
+2026-05-31T07:57:03+00:00	api-reference/user/userfields/user-userfield-update.md	c63ec233c162e46f80805d4ce5d8b2e421759fd9293b9904ea533b60eaaf8e81	done	user.userfield.update
