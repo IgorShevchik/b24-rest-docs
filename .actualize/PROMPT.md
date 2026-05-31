@@ -168,6 +168,22 @@ Each tab: a `- Name` line, a blank line, then a code block indented by **4 space
     ```
 ```
 
+## Code style (mandatory)
+
+Keep examples uniform — across 400+ files small drifts compound and make reviews noisy:
+
+- **Body indentation:** inside the 4-space YFM tab indent, use **2-space** steps for the example
+  body (not 4). `tsc` / `node --check` accept either, but the corpus standard is 2-space.
+- **Trailing commas:** include them in multi-line object / array literals (the last property of
+  `params`, `fields`, …); none after the final call argument.
+- **List NOTE — one canonical wording.** Above `const response` for `*.list` methods:
+
+    ```ts
+    // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+    // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+    // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+    ```
+
 ## Validation (required)
 
 > **In batch mode (`run-batch.sh`)** the steps below are done by the ORCHESTRATOR, not you: the
