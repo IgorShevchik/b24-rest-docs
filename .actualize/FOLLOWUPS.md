@@ -1,129 +1,141 @@
-# Follow-ups (отложенные пункты ревью)
+# Follow-ups (deferred review items)
 
-GitHub Issues в репозитории отключены, поэтому пункты ревью, не блокирующие мёрж тулинга,
-фиксируются здесь. При включении Issues — перенести.
+GitHub Issues are disabled in the repository, so review items that do not block the tooling merge
+are recorded here. When Issues are enabled — migrate these.
 
-## 1. [major] Политика версий SDK: дрейф typecheck `@1.2.0` vs runtime `@1`
+## 1. [major] SDK version policy: typecheck `@1.2.0` vs runtime `@1` drift
 
-Примеры типопроверяются против lockfile-пиннинга `@bitrix24/b24jssdk` (`typecheck/package-lock.json`),
-а UMD-табы и пользователи используют плавающий мажор-тег `@1`. Зелёный `tsc` на запиненной версии
-не гарантирует валидность на будущих `1.x`, которые подтянет `@1` → документация может молча
-разойтись с SDK, и CI этого не заметит.
+Examples are typechecked against a lockfile-pinned `@bitrix24/b24jssdk`
+(`typecheck/package-lock.json`), while the UMD tabs and users use the floating major tag `@1`. A
+green `tsc` on the pinned version does not guarantee validity on future `1.x` releases that `@1`
+will pull in → the documentation may silently diverge from the SDK, and CI will not notice.
 
-Предложение:
-- периодический CI-job (`schedule` + `workflow_dispatch`): `validate.py` по всем `done`-файлам
-  ledger против `@1 latest` (не против пиннинга). По итогам мульти-ревью — делать его
-  **падающим** (а не информационным): зелёный `tsc` на пиннинге ≠ валидность на будущих `1.x`;
-  падение = сигнал к мандаторному бампу lockfile + ревалидации ledger;
-- план бампа/отката: при breaking-change SDK — обновить `typecheck/package.json` +
-  `package-lock.json`, прогнать `validate.py` по ledger, при провале — точечная ре-актуализация;
-- Dependabot (npm, direct-only) уже открывает PR на бамп SDK как сигнал к ревалидации;
-- (опц.) обсудить пиннинг UMD до минора `@1.2` для консистентности.
+Proposal:
+- a periodic CI job (`schedule` + `workflow_dispatch`): `validate.py` over all `done` files in the
+  ledger against `@1 latest` (not against the pin). Per the multi-review outcome — make it
+  **failing** (not informational): a green `tsc` on the pin ≠ validity on future `1.x`; a failure =
+  a signal for a mandatory lockfile bump + ledger revalidation;
+- bump/rollback plan: on an SDK breaking change — update `typecheck/package.json` +
+  `package-lock.json`, run `validate.py` over the ledger, and on failure — targeted
+  re-actualization;
+- Dependabot (npm, direct-only) already opens an SDK-bump PR as a revalidation signal;
+- (optional) discuss pinning UMD to the minor `@1.2` for consistency.
 
-## 2. [v1 реализован] Batch-runner для массовой актуализации
+## 2. [v1 implemented] Batch-runner for bulk actualization
 
-**`.actualize/run-batch.sh`** — оркестратор поверх существующих скриптов (контракты
-`validate.py`/`record.py` не менялись). ⚠️ EXPERIMENTAL: боевым `RUN=1`-прогоном пока не обкатан.
-Что делает:
-- правит файлы агентом (`claude -p` по `PROMPT.md`) **параллельно** (`xargs -0 -P`); список берёт из
-  `remaining.py` (ledger-aware → возобновляемо, ретрай = просто следующий запуск);
-- **blast-radius check** — сверяет фактически изменённые файлы с планом батча; выход за план → откат
-  всего батча (`SECURITY ABORT`), коммита нет;
-- **валидирует и пишет ledger серийно** — один sandbox `.tscheck`, один писатель (без гонки);
-- чекпоинт: коммитит прошедшие `.md` + ledger батчами; упавшие откатываются и остаются в `remaining`;
-- безопасность: dry-run по умолчанию (нужен `RUN=1`), отказ старта на грязном дереве, **blast-radius
-  check** (правки вне плана батча → весь батч откатывается, `SECURITY ABORT`) + prompt-hardening,
-  bash≥4-гейт, таймаут на правку (`EDIT_TIMEOUT`), тумблеры
+**`.actualize/run-batch.sh`** — an orchestrator over the existing scripts (the
+`validate.py`/`record.py` contracts were not changed). ⚠️ EXPERIMENTAL: not yet exercised by a real
+`RUN=1` run. What it does:
+- edits files with the agent (`claude -p` per `PROMPT.md`) **in parallel** (`xargs -0 -P`); the list
+  comes from `remaining.py` (ledger-aware → resumable, a retry is just the next run);
+- **blast-radius check** — compares the actually-changed files against the batch plan; anything
+  outside the plan → revert the whole batch (`SECURITY ABORT`), no commit;
+- **validates and writes the ledger serially** — one `.tscheck` sandbox, one writer (no race);
+- checkpoint: commits the passing `.md` files + ledger in batches; failing ones are reverted and
+  stay in `remaining`;
+- safety: dry-run by default (needs `RUN=1`), refuses to start on a dirty tree, the **blast-radius
+  check** (edits outside the batch plan → the whole batch is reverted, `SECURITY ABORT`) +
+  prompt-hardening, a bash≥4 gate, an edit timeout (`EDIT_TIMEOUT`), the toggles
   `KEEP_FAILED` / `NO_COMMIT` / `CLAUDE_MODEL` / `CLAUDE_BIN`.
 
-Покрытие тестами: `tests/test_run_batch.sh` (стаб-агент, без сети) — dry-run-гейт, numeric/clean-tree
-гарды, PASS/FAIL+revert/SKIP, скоуп коммита, **blast-radius abort**, и тест-документация известного
-ограничения blast-radius (запись вне рабочего дерева).
+Test coverage: `tests/test_run_batch.sh` (stub agent, no network) — the dry-run gate, numeric/clean-tree
+guards, PASS/FAIL+revert/SKIP, commit scope, the **blast-radius abort**, and test-documentation of the
+known blast-radius limitation (writes outside the working tree).
 
-**Сделано в этой итерации (было отложено):**
-- ✅ **prompt-injection** — добавлена enforcement-защита (blast-radius check), не зависящая от
-  послушания модели: пост-проверка сверяет изменённые файлы (tracked + untracked) с планом батча,
-  любой выход за план → откат всего батча, ничего не коммитится.
+**Done in this iteration (was deferred):**
+- ✅ **prompt-injection** — an enforcement guard was added (the blast-radius check) that does not
+  depend on the model's obedience: a post-check compares the changed files (tracked + untracked)
+  against the batch plan, and any escape from the plan → revert the whole batch, nothing is
+  committed.
 
-Ещё отложено:
-- **параллельная валидация.** Пробовали `--project`-sandbox на воркер через `cp -al`-клон прогретого
-  `.tscheck` — **откатили**. Hardlink-клон делит inode'ы, а `validate.py` пишет mutable-файлы
-  (`example.ts`/`umd_inner.js`) Python-ом `open("w")` → запись идёт в общий inode, параллельные
-  воркеры затирают код друг друга и выдают перекрёстно-ложные verdict'ы (воспроизведено). Корректная
-  изоляция требует либо разрыва hardlink'ов для mutable-файлов после клона, либо реального отдельного
-  `node_modules` на воркер (дорого). На текущем масштабе боттлнек — правка агентом, не `tsc`, поэтому
-  серийная валидация не на критическом пути;
-- **батч-режим `record.py`** (N путей из stdin) — пока запись идёт серийным циклом (single writer);
-  нужен, только если запись станет боттлнеком (сейчас доминирует правка агентом);
-- **слепые зоны blast-radius (известное ограничение).** Проверка работает через `git status` и видит
-  только то, что git репортит в рабочем дереве. НЕ ловятся: (a) запись **вне репозитория** (абсолютный
-  путь — `~/.ssh`, `/tmp`); (b) **gitignored-пути в дереве** (`.claude/`, `CLAUDE.md`); (c) **`.git/`**
-  (напр. `.git/config` → `credential.helper`). Инструмент `Edit` у агента не ограничен по пути файла
-  (и `git clean -fd` при откате тоже не трогает gitignored — без `-x`). Полное закрытие — процессный
-  ФС-сэндбоксинг агента (bubblewrap/firejail), либо CLI-allowlist (`--add-dir`/`--allowedDirectories`)
-  при его появлении. В тест-харнесе зафиксировано тест-документацией: out-of-tree (тест 7) и
-  gitignored-путь в дереве (тест 8); `.git/config`-вектор пока без теста.
+Still deferred:
+- **parallel validation.** We tried a per-worker `--project` sandbox via a `cp -al` clone of the
+  warmed `.tscheck` — **reverted**. A hardlink clone shares inodes, but `validate.py` writes mutable
+  files (`example.ts`/`umd_inner.js`) via Python `open("w")` → the write goes to the shared inode,
+  parallel workers overwrite each other's code and produce cross-false verdicts (reproduced). Proper
+  isolation needs either breaking the hardlinks for mutable files after the clone, or a real separate
+  `node_modules` per worker (expensive). At the current scale the bottleneck is the agent edit, not
+  `tsc`, so serial validation is not on the critical path;
+- **`record.py` batch mode** (N paths from stdin) — for now the write runs in a serial loop (single
+  writer); needed only if the write becomes the bottleneck (today the agent edit dominates);
+- **blast-radius blind spots (known limitation).** The check works via `git status` and sees only
+  what git reports in the working tree. NOT caught: (a) writes **outside the repository** (an absolute
+  path — `~/.ssh`, `/tmp`); (b) **gitignored paths in the tree** (`.claude/`, `CLAUDE.md`); (c)
+  **`.git/`** (e.g. `.git/config` → `credential.helper`). The agent's `Edit` tool is not path-limited
+  (and `git clean -fd` on revert also leaves gitignored files — without `-x`). Closing this fully —
+  process-level FS sandboxing of the agent (bubblewrap/firejail), or a CLI allowlist
+  (`--add-dir`/`--allowedDirectories`) once it exists. Recorded in the test harness as
+  test-documentation: out-of-tree (test 7) and a gitignored path in the tree (test 8); the
+  `.git/config` vector has no test yet.
 
-**Условия к первому боевому `RUN=1`** (не блокируют мёрж тулинга, но обязательны перед прогоном по
-корпусу):
-- запускать на throwaway-ветке малым батчем (`N=3 PAR=1`) под наблюдением (уже в шапке скрипта; на
-  `main`/`master` скрипт предупреждает);
-- **не на машине с продакшн-секретами** в `~` (`~/.ssh` и т.п.) — пока нет ФС-сэндбоксинга агента
-  (см. слепые зоны выше);
-- следить за §1 (дрейф версий SDK) и §5 (CI-фильтр `grep '- TS'`) — оба дают тихий регресс на
-  массовом прогоне;
-- убедиться, что бинарь `claude` поддерживает `--permission-mode acceptEdits --allowed-tools` (скрипт
-  проверяет лишь наличие бинаря, не флаги).
+**Conditions before the first real `RUN=1`** (do not block the tooling merge, but are mandatory
+before a corpus run):
+- run on a throwaway branch with a small batch (`N=3 PAR=1`) under supervision (already in the
+  script header; on `main`/`master` the script warns);
+- **not on a machine with production secrets** in `~` (`~/.ssh`, etc.) — while there is no FS
+  sandboxing of the agent (see the blind spots above);
+- watch §1 (SDK version drift) and §5 (the CI filter `grep '- TS'`) — both cause a silent regression
+  on a bulk run;
+- make sure the `claude` binary supports `--permission-mode acceptEdits --allowed-tools` (the script
+  only checks the binary is present, not the flags).
 
-**Мелкие nit'ы (после мульти-ревью, низкий приоритет):**
-- commit-message батча не содержит списка файлов (видно только через `git show`); при желании —
-  первые N имён в тело коммита;
-- `git clean -fdq -e .tscheck` при `SECURITY ABORT` не трогает gitignored-беглецов (без `-x`); сейчас
-  приемлемо (вреда нет, `.tscheck` — кэш), при ужесточении — `git clean -fdxq --exclude=.tscheck`.
+**Small nits (after the multi-review, low priority):**
+- the batch commit message does not include a file list (visible only via `git show`); if wanted —
+  the first N names in the commit body;
+- `git clean -fdq -e .tscheck` on `SECURITY ABORT` does not touch gitignored escapees (without `-x`);
+  acceptable for now (no harm, `.tscheck` is a cache); to tighten — `git clean -fdxq --exclude=.tscheck`.
 
-## 3. [minor] Полный bash-тест-харнес для run-batch.sh
+## 3. [minor] Full bash test harness for run-batch.sh
 
-Ключевые ветки покрыты (см. §2), включая негативные пути: провал `record.py` (revert), `KEEP_FAILED=1`
-(файл остаётся грязным), провал `git commit`, нулевой прогресс (`exit 3`), gitignored-слепая-зона.
-Отложено: миграция на `bats` и кейс **прерывания в фазе валидации** (ledger-строка записана, но не
-закоммичена; SIGINT в shell-харнесе flaky) — труднее воспроизвести в shell-харнесе.
+The key branches are covered (see §2), including the negative paths: `record.py` failure (revert),
+`KEEP_FAILED=1` (the file stays dirty), `git commit` failure, zero progress (`exit 3`), the
+gitignored blind spot. Deferred: migration to `bats` and the case of an **interruption during the
+validation phase** (a ledger row written but not committed; SIGINT in the shell harness is flaky) —
+harder to reproduce in a shell harness.
 
-## 4. [major] Стратегия батчинга: «1 PR = 1 раздел»
+## 4. [major] Batching strategy: "1 PR = 1 section"
 
-~1542 файла нельзя валидировать одним PR (CI-job ~20 мин; нечитаемый diff; нет изоляции
-регрессий). Декомпозиция по `api-reference/<section>/` (tasks — пилот готов, далее crm, disk,
-calendar…), каждый раздел — отдельный PR поверх batch-runner (см. п. 2). Зафиксировать как
-мандаторную политику.
+~1542 files cannot be validated in one PR (a ~20-min CI job; an unreadable diff; no regression
+isolation). Decompose by `api-reference/<section>/` (tasks — pilot ready, then crm, disk,
+calendar…), each section a separate PR on top of the batch-runner (see §2). Record this as a
+mandatory policy.
 
-## 5. [major] CI-фильтр `grep '- TS'` молча пропускает файлы
+## 5. [major] The CI filter `grep '- TS'` silently skips files
 
-`validate-examples.yml` запускает `validate.py` только на изменённых `*.md`, где есть строка
-`- TS`. Если файл по ошибке лишился `- TS` (опечатка `- Ts`, случайное удаление таба), CI
-пройдёт мимо без ошибки. Варианты: дополнительно валидировать затронутые в PR файлы из ledger;
-или предупреждать, когда у изменённого `api-reference/**` нет ни одного из ожидаемых табов.
+`validate-examples.yml` runs `validate.py` only on changed `*.md` files that contain a `- TS` line.
+If a file mistakenly loses `- TS` (a typo `- Ts`, an accidental tab deletion), CI passes it without
+error. Options: additionally validate the PR-affected files from the ledger; or warn when a changed
+`api-reference/**` file has none of the expected tabs.
 
-## Мелкие (minor/nit, по мере необходимости)
+## Minor (minor/nit, as needed)
 
-- **[minor] Ручная типизация result-типов не верифицируется против live API.** Типы
-  `type <Name>Result` пишутся вручную по JSON-ответу на странице; `tsc` проверяет лишь синтаксис
-  типа, не соответствие реальному ответу. Осознанный компромисс (иначе нужен live API-stub).
-  Принято как есть.
-- **[nit][done] `getTotal()` исключён.** Помечен `@deprecated` / `@removed 2.0.0`; в пилоте tasks и в
-  `PROMPT.md` / `PROMPT-REVIEW.md` / `README.md` заменён на `.length` + list-хелперы. Учитывать в остальных разделах.
-- **[minor] Покрытие тестов тулинга.** Добавлены негативные кейсы `extract`, тесты `validate.main`
-  (path-guards), `detect_method` (happy-path) и смоук-тест синхрона промптов. Ещё не покрыто:
-  `remaining.main` (`os.walk`/`--limit`), `_tabs` с CRLF/отступами, `ensure_project` (требует npm),
-  атомарность `record.save`. Добавлять по мере необходимости.
-- **[minor] Операционный runbook декомпозиции по разделам.** Кто назначает раздел, как не
-  пересекаться параллельным PR, как откатывать частично влитый крупный раздел (crm — 200+ файлов).
+- **[minor] Manual typing of result types is not verified against the live API.** The
+  `type <Name>Result` types are written by hand from the JSON response on the page; `tsc` only checks
+  the type's syntax, not that it matches the real response. A conscious trade-off (otherwise a live
+  API stub is needed). Accepted as is.
+- **[nit][done] `getTotal()` removed.** Marked `@deprecated` / `@removed 2.0.0`; in the tasks pilot
+  and in `PROMPT.md` / `PROMPT-REVIEW.md` / `README.md` replaced with `.length` + list helpers.
+  Apply this in the remaining sections.
+- **[minor] Tooling test coverage.** Added negative `extract` cases, `validate.main` tests
+  (path-guards), `detect_method` (happy path), and a prompt-sync smoke test. Not yet covered:
+  `remaining.main` (`os.walk`/`--limit`), `_tabs` with CRLF/indentation, `ensure_project` (needs npm),
+  `record.save` atomicity. Add as needed.
+- **[minor] Operational runbook for the per-section decomposition.** Who assigns a section, how to
+  avoid overlap with a parallel PR, how to roll back a partially-merged large section (crm — 200+
+  files).
 
-- **[nit] Пин `actions/*` по commit-SHA.** Сейчас по тегам (`@v4`/`@v5`) + Dependabot. Для строгой
-  supply-chain гигиены перейти на SHA-пиннинг (Dependabot это поддерживает).
-- **[minor] Несколько `{% list tabs %}` в одном файле.** `extract()` берёт только первый регион;
-  страница с двумя блоками примеров провалидирует только первый. В текущем корпусе method-страниц
-  не встречается; при появлении — валидировать каждый регион (`re.finditer`).
-- **[nit] Forbidden-токены ищутся подстрокой.** Легитимный комментарий вида `// deprecated:
-  callMethod` в TS/UMD вызовет FAIL. Крайне редкий кейс (цель — убрать следы deprecated API); при
-  необходимости — запретить такие комментарии в PROMPT.md.
-- **[nit] Кэш CI без `restore-keys`.** Намеренно all-or-nothing; при частых бампах SDK — холодный
-  `npm ci`. Допустимо на текущем масштабе.
+- **[nit] Pin `actions/*` by commit SHA.** Currently by tag (`@v4`/`@v5`) + Dependabot. For strict
+  supply-chain hygiene, move to SHA pinning (Dependabot supports it).
+- **[minor][done] Multiple `{% list tabs %}` blocks per page.** A page can carry several
+  tabs blocks — parameter-description blocks plus one or more code-example blocks (confirmed
+  across the corpus during the first live run: 54 pages have ≥2 code examples, e.g.
+  `user/user-get.md` has 4; the earlier "doesn't occur in the corpus" assumption was wrong).
+  `_tabs.code_regions()` returns every tabs region that holds a TS code example; `validate.py`
+  type-checks each example independently and `record.py` reads the method from the first one.
+  Fails only when no region carries a code example. (Earlier this was a first-region-only
+  scan that silently skipped examples 2..N.)
+- **[nit] Forbidden tokens are matched by substring.** A legitimate comment like `// deprecated:
+  callMethod` in TS/UMD will cause a FAIL. An extremely rare case (the goal is to remove traces of
+  the deprecated API); if needed — forbid such comments in PROMPT.md.
+- **[nit] CI cache without `restore-keys`.** Deliberately all-or-nothing; on frequent SDK bumps — a
+  cold `npm ci`. Acceptable at the current scale.

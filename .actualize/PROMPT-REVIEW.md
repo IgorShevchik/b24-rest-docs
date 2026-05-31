@@ -1,42 +1,45 @@
-# Промпт: ревью актуализированного файла
+# Prompt: review of an actualized file
 
-Тебе дан **путь к `.md`-файлу**, который уже прошёл актуализацию по `.actualize/PROMPT.md`.
-Проверь его и при необходимости исправь. Меняй только пример (табы `- TS` / `- UMD`).
+You are given a **path to a `.md` file** that has already been actualized per
+`.actualize/PROMPT.md`. Review it and fix it if needed. Change only the example (the `- TS` /
+`- UMD` tabs).
 
-Вход: `<PATH>`.
+Input: `<PATH>`.
 
-## Что проверить
+## What to check
 
-1. **Структура табов**: есть `- TS` и `- UMD`, таба `- JS` (старого jsSDK) нет.
-   Табы `cURL`, `PHP`, `BX24.js`, `PHP CRest` на месте и не изменены.
-2. **Никаких устаревших вызовов**: в примере нет `callMethod`, `callListMethod`, `fetchListMethod`.
-   Вызов идёт через `actions.v2.call.make` (или `actions.v3.call.make` для rest-v3 / ответа
-   `result.item`) — одинаковую версию в **обоих** табах (TS и UMD).
-3. **Обработка ответа**: `try/catch` + проверка `if (!response.isSuccess)` с
-   `getErrorMessages()`, затем чтение `getData()!.result` (TS) / `getData().result` (UMD).
-4. **Параметры 1:1** со старым примером и с табами cURL/PHP (метод, поля, фильтры совпадают).
-5. **Английский**: комментарии и строковые значения переведены; нет вызовов
-   `processResult` / `processData`.
-6. **Списочные методы**: один вариант — `call.make` со `start` (сохраняет `order`). Над
-   `const response` — комментарий про **оба** хелпера `callList.make` / `fetchList.make` с
-   `NOTE`, что они НЕ принимают `order` (исключён из их типа — `tsc`-ошибка при передаче).
-   `response.getTotal()` НЕ используется (deprecated/removed 2.0.0) — размер страницы через `.length`.
-7. **Тип `<T>`** в TS соответствует разделу «Обработка ответа» страницы; поля-даты — `ISODate | null`.
-8. **Текст страницы вне табов не изменён** (если изменения уже закоммичены:
-   `git show HEAD -- <PATH>` должен затрагивать только блок `{% list tabs %}`). Табы
-   PHP/BX24.js/cURL не трогаем — их русские комментарии и пред-существующие `processData()`
-   остаются как есть.
-9. **`requestId`** генерируется через `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()`
-   (UMD), не хардкод-строка. В TS есть `import { Text }` и `import type { B24Frame }` (+`ISODate`,
-   если в типе есть поля-даты).
-10. **Порядок шапки TS**: пояснительные комментарии (ES-модуль, `$b24`) — первыми строками, до `import`.
+1. **Tab structure**: `- TS` and `- UMD` are present, the `- JS` tab (old jsSDK) is gone. The
+   `cURL`, `PHP`, `BX24.js`, `PHP CRest` tabs are in place and unchanged. A page may have several
+   `{% list tabs %}` code-example blocks — check that **every** one was converted.
+2. **No deprecated calls**: the example has no `callMethod`, `callListMethod`, `fetchListMethod`.
+   The call goes through `actions.v2.call.make` (or `actions.v3.call.make` for rest-v3 / a
+   `result.item` response) — the same version in **both** tabs (TS and UMD).
+3. **Response handling**: `try/catch` + an `if (!response.isSuccess)` check with
+   `getErrorMessages()`, then reading `getData()!.result` (TS) / `getData().result` (UMD).
+4. **Parameters 1:1** with the old example and with the cURL/PHP tabs (method, fields, filters
+   match).
+5. **English**: comments and string values are translated; no `processResult` / `processData`
+   calls.
+6. **List methods**: a single variant — `call.make` with `start` (preserves `order`). Above
+   `const response` — a comment about **both** helpers `callList.make` / `fetchList.make` with a
+   `NOTE` that they do NOT accept `order` (excluded from their type — a `tsc` error if passed).
+   `response.getTotal()` is NOT used (deprecated/removed 2.0.0) — page size via `.length`.
+7. **The `<T>` type** in TS matches the page's "response handling" section; date fields are
+   `ISODate | null`.
+8. **The page text outside the tabs is unchanged** (if the changes are already committed:
+   `git show HEAD -- <PATH>` should touch only the `{% list tabs %}` code blocks). Do not touch the
+   PHP/BX24.js/cURL tabs — their Russian comments and pre-existing `processData()` stay as they are.
+9. **`requestId`** is generated via `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()`
+   (UMD), not a hardcoded string. In TS there is `import { Text }` and `import type { B24Frame }`
+   (+`ISODate` if the type has date fields).
+10. **TS header order**: the explanatory comments (ES module, `$b24`) come first, before `import`.
 
-## Валидация
+## Validation
 
 - `python3 .actualize/validate.py <PATH>` → `PASS`.
-- Если правил что-то — повтори валидацию и обнови отметку:
+- If you fixed something — re-run validation and update the mark:
   `python3 .actualize/record.py <PATH> reviewed`.
-  `reviewed` перезаписывает `done` (одна строка на файл — это намеренно).
+  `reviewed` overwrites `done` (one row per file — this is intentional).
 
 ---
-_Last reviewed: 2026-05-30_
+_Last reviewed: 2026-05-31_

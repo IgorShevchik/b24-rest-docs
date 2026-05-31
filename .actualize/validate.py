@@ -3,8 +3,10 @@
 
 Checks (cheapest first):
   1. structural: legacy "- JS" tab is gone, "- TS" and "- UMD" tabs are present;
-  2. extraction: take the single ```ts block and the single UMD <script> from
-     INSIDE the first {% list tabs %} … {% endlist %} region (not anywhere else);
+  2. extraction: from EVERY {% list tabs %} … {% endlist %} region that holds a
+     ```ts example (a page may have several code-example blocks), take the single
+     ```ts block and the single UMD <script> — each example is validated, not
+     blocks found anywhere else on the page;
   3. forbidden tokens: no callMethod / callListMethod / fetchListMethod /
      processResult / processData; an actions.v{2,3} call is present in BOTH tabs;
   4. types: `tsc --strict` against a reproducible, lockfile-pinned toolchain
@@ -42,6 +44,8 @@ NODE_TIMEOUT = 120
 FORBIDDEN = ["callMethod", "callListMethod", "fetchListMethod",
              "processResult", "processData"]
 
+MAX_MD_BYTES = 2_000_000  # guard: a method page is never this big; refuse pathological input
+
 
 def fail(msg):
     print(f"FAIL: {msg}")
@@ -49,9 +53,17 @@ def fail(msg):
 
 
 def extract(md_path):
-    """Return (ts_code, umd_inner_js) extracted from inside the tabs region."""
+    """Return [(ts_code, umd_inner_js), …] — one pair per code-example tabs region.
+
+    A page may have several {% list tabs %} blocks (parameter-description blocks
+    plus one or more code-example blocks); every region holding a ```ts example is
+    validated and returned, so the caller can type-check each one independently.
+    """
+    size = os.path.getsize(md_path)
+    if size > MAX_MD_BYTES:
+        fail(f"file too large: {size} bytes (limit {MAX_MD_BYTES})")
     with open(md_path, encoding="utf-8") as f:
-        s = f.read()
+        s = f.read().replace("\r\n", "\n")  # normalise CRLF so the fence regexes match
 
     if "- JS\n" in s:
         fail('legacy "- JS" tab still present')
@@ -60,16 +72,22 @@ def extract(md_path):
     if "- UMD\n" not in s:
         fail('"- UMD" tab missing')
 
-    region = _tabs.tabs_region(s)
-    if region is None:
-        fail("no {% list tabs %} ... {% endlist %} region found")
+    regions = _tabs.code_regions(s)
+    if not regions:
+        fail("no {% list tabs %} region with a ```ts example found")
 
+    return [_extract_region(r, i, len(regions)) for i, r in enumerate(regions, 1)]
+
+
+def _extract_region(region, idx, total):
+    """Validate one code-example region and return its (ts_code, umd_inner_js)."""
+    where = f"code region {idx}/{total}"
     ts_blocks = _tabs.find_ts(region)
     if len(ts_blocks) != 1:
-        fail(f"expected exactly one ```ts block in tabs, found {len(ts_blocks)}")
+        fail(f"expected exactly one ```ts block in {where}, found {len(ts_blocks)}")
     html_blocks = _tabs.find_html(region)
     if len(html_blocks) != 1:
-        fail(f"expected exactly one ```html (UMD) block in tabs, found {len(html_blocks)}")
+        fail(f"expected exactly one ```html (UMD) block in {where}, found {len(html_blocks)}")
 
     ts = textwrap.dedent(ts_blocks[0])
     html = textwrap.dedent(html_blocks[0])
@@ -78,15 +96,15 @@ def extract(md_path):
     scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, re.DOTALL)
     umd_inner = next((sc for sc in scripts if sc.strip()), None)
     if umd_inner is None:
-        fail("UMD html block found but it has no non-empty <script> with logic")
+        fail(f"UMD html block in {where} has no non-empty <script> with logic")
 
     for banned in FORBIDDEN:
         if banned in ts or banned in umd_inner:
-            fail(f'forbidden token "{banned}" found in TS/UMD example')
+            fail(f'forbidden token "{banned}" found in {where}')
     if "actions.v2." not in ts and "actions.v3." not in ts:
-        fail("TS example does not use $b24.actions.v{2,3}.*")
+        fail(f"TS example in {where} does not use $b24.actions.v{{2,3}}.*")
     if "actions.v2." not in umd_inner and "actions.v3." not in umd_inner:
-        fail("UMD example does not use $b24.actions.v{2,3}.*")
+        fail(f"UMD example in {where} does not use $b24.actions.v{{2,3}}.*")
 
     return ts, umd_inner.strip("\n")
 
@@ -140,30 +158,36 @@ def main():
     if not os.path.isfile(abspath):
         fail(f"file not found: {abspath}")
 
-    ts, umd_js = extract(abspath)
+    examples = extract(abspath)
     ensure_project(a.project)
-    with open(os.path.join(a.project, "example.ts"), "w") as f:
-        f.write(ts)
-    with open(os.path.join(a.project, "umd_inner.js"), "w") as f:
-        f.write(umd_js)
-
-    ok = True
     tsc = os.path.join(a.project, "node_modules", ".bin", "tsc")
-    r1 = subprocess.run([tsc, "-p", "tsconfig.json"], cwd=a.project,
-                        capture_output=True, text=True, timeout=TSC_TIMEOUT)
-    if r1.returncode != 0:
-        ok = False
-        print("TSC FAIL:\n" + r1.stdout + r1.stderr)
-    else:
-        print("TSC: OK")
+    total = len(examples)
 
-    r2 = subprocess.run(["node", "--check", "umd_inner.js"], cwd=a.project,
-                        capture_output=True, text=True, timeout=NODE_TIMEOUT)
-    if r2.returncode != 0:
-        ok = False
-        print("NODE --check FAIL:\n" + r2.stdout + r2.stderr)
-    else:
-        print("NODE --check: OK")
+    # Compile each code example separately (overwriting example.ts / umd_inner.js):
+    # examples are independent ES modules, so isolating them keeps errors attributable.
+    ok = True
+    for i, (ts, umd_js) in enumerate(examples, 1):
+        tag = f"[example {i}/{total}]"
+        with open(os.path.join(a.project, "example.ts"), "w") as f:
+            f.write(ts)
+        with open(os.path.join(a.project, "umd_inner.js"), "w") as f:
+            f.write(umd_js)
+
+        r1 = subprocess.run([tsc, "-p", "tsconfig.json"], cwd=a.project,
+                            capture_output=True, text=True, timeout=TSC_TIMEOUT)
+        if r1.returncode != 0:
+            ok = False
+            print(f"TSC FAIL {tag}:\n" + r1.stdout + r1.stderr)
+        else:
+            print(f"TSC OK {tag}")
+
+        r2 = subprocess.run(["node", "--check", "umd_inner.js"], cwd=a.project,
+                            capture_output=True, text=True, timeout=NODE_TIMEOUT)
+        if r2.returncode != 0:
+            ok = False
+            print(f"NODE --check FAIL {tag}:\n" + r2.stdout + r2.stderr)
+        else:
+            print(f"NODE --check OK {tag}")
 
     print("PASS" if ok else "FAIL")
     sys.exit(0 if ok else 1)

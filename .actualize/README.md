@@ -1,143 +1,151 @@
-# .actualize — процесс актуализации JS-примеров b24jssdk
+# .actualize — b24jssdk JS-example actualization process
 
-Инструменты для замены устаревших jsSDK-примеров (`$b24.callMethod` / `callListMethod` /
-`fetchListMethod`) на актуальные табы **TS** и **UMD** через `@bitrix24/b24jssdk` (actions-API).
-В актуальном `@1` actions-API уже доступен, а старые методы помечены deprecated
-(удаляются в 2.0). Это служебная папка процесса — в PR с правками документации её можно не включать.
+Tooling for replacing deprecated jsSDK examples (`$b24.callMethod` / `callListMethod` /
+`fetchListMethod`) with current **TS** and **UMD** tabs built on `@bitrix24/b24jssdk` (the
+actions API). The actions API already ships in the current `@1`, and the old methods are
+deprecated (removed in 2.0). This is an internal process folder — it can be left out of
+documentation PRs.
 
-## Файлы
+## Files
 
-| Файл | Назначение |
-|------|------------|
-| `PROMPT.md` | Промпт для актуализации **одного файла**. Оркестрация — через `run-batch.sh` или вручную (`remaining.py --list`). |
-| `PROMPT-REVIEW.md` | Второй промпт: ревью уже актуализированного файла. |
-| `validate.py` | Структура табов + запрещённые токены + `tsc --strict` (lockfile-пиннинг) + `node --check`. Опц. `--project DIR` — каталог sandbox typecheck (по умолчанию `.actualize/.tscheck`). |
-| `record.py` | Идемпотентный журнал `ledger.tsv` (upsert, атомарная запись); `--verify-all` / `--verify <path>` — контроль дрейфа по sha256. |
-| `remaining.py` | Сколько файлов ещё не обработано (и список). |
-| `run-batch.sh` | Оркестратор батча поверх трёх скриптов: правит файлы агентом (параллельно), валидирует и пишет ledger (серийно), коммитит прошедшие. **Dry-run по умолчанию** (нужен `RUN=1`); ⚠️ EXPERIMENTAL — боевым прогоном пока не обкатан. Требует GNU bash ≥ 4. |
-| `_tabs.py` | Общие regex разбора табов (используют `validate.py` и `record.py`). |
-| `ledger.tsv` | Журнал: дата, файл, sha256, статус, метод (в тулинг-PR — пустой). |
-| `typecheck/` | Зафиксированное окружение типопроверки (`package.json` + `package-lock.json`). |
-| `tests/` | Офлайн unit-тесты тулинга (`python -m unittest discover -s .actualize/tests`). |
+| File | Purpose |
+|------|---------|
+| `PROMPT.md` | Prompt for actualizing **one file**. Orchestration via `run-batch.sh` or by hand (`remaining.py --list`). |
+| `PROMPT-REVIEW.md` | Second prompt: review of an already-actualized file. |
+| `validate.py` | Tab structure + forbidden tokens + `tsc --strict` (lockfile-pinned) + `node --check`. Optional `--project DIR` — the typecheck sandbox dir (default `.actualize/.tscheck`). |
+| `record.py` | Idempotent `ledger.tsv` journal (upsert, atomic write); `--verify-all` / `--verify <path>` — sha256 drift control. |
+| `remaining.py` | How many files are still unprocessed (and the list). |
+| `run-batch.sh` | Batch orchestrator over the three scripts: edits files with the agent (in parallel), validates and writes the ledger (serially), commits the ones that pass. **Dry-run by default** (needs `RUN=1`); ⚠️ EXPERIMENTAL — not yet exercised by a real run. Requires GNU bash ≥ 4. |
+| `_tabs.py` | Shared tab-parsing regexes (used by `validate.py` and `record.py`). A page may have several `{% list tabs %}` blocks; `code_regions()` returns every region holding a TS example, so each one is validated. |
+| `ledger.tsv` | Journal: date, file, sha256, status, method (empty in the tooling PR). |
+| `typecheck/` | Pinned typecheck environment (`package.json` + `package-lock.json`). |
+| `tests/` | Offline tooling unit tests (`python -m unittest discover -s .actualize/tests`). |
 
-## Как гонять
+## How to run
 
 ```bash
-# что осталось
-python3 .actualize/remaining.py api-reference                 # счётчик
-python3 .actualize/remaining.py api-reference/tasks --list    # список
+# what's left
+python3 .actualize/remaining.py api-reference                 # counter
+python3 .actualize/remaining.py api-reference/tasks --list    # list
 
-# актуализировать файл по PROMPT.md (LLM-агент), затем проверить и отметить:
+# actualize a file per PROMPT.md (LLM agent), then validate and record:
 python3 .actualize/validate.py api-reference/tasks/tasks-task-get.md   # -> PASS
 python3 .actualize/record.py   api-reference/tasks/tasks-task-get.md done
 
-# (опц.) ревью по PROMPT-REVIEW.md:
+# (optional) review per PROMPT-REVIEW.md:
 python3 .actualize/record.py   api-reference/tasks/tasks-task-get.md reviewed
 
-# контроль дрейфа после правок
-python3 .actualize/record.py --verify-all                                     # все
-python3 .actualize/record.py --verify api-reference/tasks/tasks-task-get.md   # один файл
+# drift control after edits
+python3 .actualize/record.py --verify-all                                     # all
+python3 .actualize/record.py --verify api-reference/tasks/tasks-task-get.md   # one file
 
-# офлайн-тесты тулинга (без сети)
+# offline tooling tests (no network)
 python -m unittest discover -s .actualize/tests -p 'test_*.py'
 ```
 
-Первый запуск `validate.py` ставит зависимости из committed `.actualize/typecheck/package-lock.json`
-(через `npm ci --ignore-scripts`) в `.actualize/.tscheck/` (в `.gitignore`). UMD-тег примеров —
-мажор-тег `@1`; типопроверка пиннится lockfile'ом (конкретная 1.x). **Бамп версии SDK:** обновить
-`.actualize/typecheck/package.json` + `package-lock.json` и прогнать `validate.py` по `done`-файлам.
+The first `validate.py` run installs the dependencies from the committed
+`.actualize/typecheck/package-lock.json` (via `npm ci --ignore-scripts`) into
+`.actualize/.tscheck/` (which is `.gitignore`d). The example UMD tag is the major tag `@1`;
+the typecheck is pinned by the lockfile (a specific 1.x). **Bumping the SDK version:** update
+`.actualize/typecheck/package.json` + `package-lock.json` and re-run `validate.py` over the
+`done` files.
 
-### Массовый прогон (batch-runner)
+### Bulk run (batch-runner)
 
-> ⚠️ **EXPERIMENTAL.** Скрипт проверен синтаксически, в dry-run и офлайн-харнесом
-> (`tests/test_run_batch.sh`), но боевым `RUN=1`-прогоном по корпусу ещё не обкатывался. Первый
-> реальный запуск делай малым (`N=3 PAR=1`) на throwaway-ветке
-> под наблюдением. Требует **GNU bash ≥ 4** (macOS по умолчанию bash 3.2 — поставь новее или Linux).
+> ⚠️ **EXPERIMENTAL.** The script is checked syntactically, in dry-run, and by the offline
+> harness (`tests/test_run_batch.sh`), but has not yet been exercised by a real `RUN=1` run
+> over the corpus. Do the first real run small (`N=3 PAR=1`) on a throwaway branch under
+> supervision. Requires **GNU bash ≥ 4** (macOS ships bash 3.2 by default — install a newer
+> one or use Linux).
 
-`run-batch.sh` гоняет связку «агент → blast-radius check → `validate.py` → `record.py`» батчами:
-шаг правки — параллельно (`xargs -0 -P`, файлы разные), затем blast-radius check, затем валидация и
-запись ledger — серийно (один писатель, без гонки). Прошедшие коммитятся; упавшие откатываются и
-остаются в `remaining` на следующий проход.
+`run-batch.sh` runs the "agent → blast-radius check → `validate.py` → `record.py`" chain in
+batches: the edit step runs in parallel (`xargs -0 -P`, files are distinct), then the
+blast-radius check, then validation and ledger writes run serially (a single writer, no race).
+Passing files are committed; failing ones are reverted and stay in `remaining` for the next
+pass.
 
-**Dry-run по умолчанию.** Без `RUN=1` скрипт только печатает план (какие файлы тронул бы) и
-выходит — ничего не правит и не коммитит. Это защита: скрипт сам переходит в корень репозитория,
-поэтому случайный запуск не должен молча менять файлы. Дополнительно, с `RUN=1` скрипт **не
-стартует на грязном рабочем дереве** — так батч может закоммитить только свои правки и никогда не
-смешает посторонние изменения. Запускай из ветки для **доковых** правок, не из тулинг-PR (на
-`main`/`master` скрипт предупредит). Перед стартом проверяется наличие бинаря агента (`CLAUDE_BIN`).
+**Dry-run by default.** Without `RUN=1` the script only prints the plan (which files it would
+touch) and exits — it changes nothing and commits nothing. This is a guard: the script `cd`s to
+the repo root itself, so an accidental run must not silently change files. Additionally, with
+`RUN=1` the script **refuses to start on a dirty working tree** — so a batch can commit only its
+own edits and never mixes in unrelated changes. Run it from a branch for **documentation** edits,
+not from the tooling PR (on `main`/`master` the script warns). Before starting it checks the agent
+binary is present (`CLAUDE_BIN`).
 
-**Защита от prompt-injection (blast-radius check).** Контент `.md` для агента — недоверенные
-данные: системный префикс запрещает трогать что-либо кроме `<PATH>`. Но главная защита —
-**не на доверии к модели**: после фазы правки скрипт сверяет фактически изменённые файлы (tracked +
-untracked) с планом батча. Любой выход за план (соседний файл, новый untracked, запись секрета) →
-**весь батч откатывается, ничего не коммитится** (`SECURITY ABORT`). Так инъекция, заставившая
-агента писать вне `<PATH>`, не сможет ничего протащить в коммит. **Ограничение:** это проверка
-рабочего дерева (`git status`), поэтому она не ловит то, что git не показывает: запись **вне
-репозитория** (абсолютный путь — `~/.ssh`, `/tmp`), **gitignored-пути в дереве** (`.claude/`,
-`CLAUDE.md`) и **`.git/`** (напр. `.git/config`). Полное закрытие требует ФС-сэндбоксинга агента на
-уровне процесса (bubblewrap/firejail или `--add-dir`-allowlist) — см. `FOLLOWUPS.md`.
+**Prompt-injection guard (blast-radius check).** The `.md` content fed to the agent is untrusted
+data: a system preamble forbids touching anything but `<PATH>`. But the main protection is **not
+trust in the model**: after the edit phase the script compares the actually-changed files (tracked
++ untracked) against the batch plan. Anything outside the plan (a neighbouring file, a new
+untracked file, a secret written out) → **the whole batch is reverted, nothing is committed**
+(`SECURITY ABORT`). So an injection that made the agent write outside `<PATH>` cannot smuggle
+anything into a commit. **Limitation:** this is a working-tree check (`git status`), so it does not
+catch what git does not show: writes **outside the repository** (an absolute path — `~/.ssh`,
+`/tmp`), **gitignored paths in the tree** (`.claude/`, `CLAUDE.md`), and **`.git/`** (e.g.
+`.git/config`). Closing this fully needs process-level FS sandboxing of the agent
+(bubblewrap/firejail or an `--add-dir` allowlist) — see `FOLLOWUPS.md`.
 
 ```bash
-# план без изменений (dry-run): ROOT, N (файлов в батче, 0 = все), PAR (параллельных правок)
+# plan with no changes (dry-run): ROOT, N (files per batch, 0 = all), PAR (parallel edits)
 .actualize/run-batch.sh api-reference/tasks 20 4
 
-# реальный прогон одного батча (требует чистого дерева):
+# real run of one batch (requires a clean tree):
 RUN=1 .actualize/run-batch.sh api-reference/tasks 20 4
 
-# крутить раздел до нуля (возобновляемо через ledger; `|| break` ловит и ошибку, и
-# «нет прогресса»: exit 3, когда все оставшиеся файлы стабильно SKIP/FAIL):
+# grind a section to zero (resumable via the ledger; `|| break` catches both an error and
+# "no progress": exit 3 when all remaining files keep SKIP/FAIL):
 while python3 .actualize/remaining.py api-reference/tasks --limit 1 \
         | grep -q 'not done): [1-9]'; do
   RUN=1 .actualize/run-batch.sh api-reference/tasks 30 4 || break
 done
 ```
 
-Тумблеры: `RUN=1` (реальный прогон), `EDIT_TIMEOUT` (сек на файл, дефолт 600, требует `timeout` в
-PATH), `KEEP_FAILED=1` (не откатывать упавшие + сохранить логи), `NO_COMMIT=1` (не коммитить),
-`CLAUDE_MODEL`, `CLAUDE_BIN` (бинарь агента, для тестов). Итог батча печатается строкой
-`batch summary: PASSED=… FAILED=… SKIPPED=…`. Логи правок/валидации — во временном каталоге
-(`mktemp -d`, печатается при старте; удаляется в конце — кроме `KEEP_FAILED=1`, `SECURITY ABORT` и
-прерывания Ctrl-C, когда папка сохраняется для диагностики), в коммит не попадают.
+Toggles: `RUN=1` (real run), `EDIT_TIMEOUT` (seconds per file, default 600, needs `timeout` on
+PATH), `KEEP_FAILED=1` (do not revert failures + keep logs), `NO_COMMIT=1` (do not commit),
+`CLAUDE_MODEL`, `CLAUDE_BIN` (agent binary, for tests). The batch result prints as
+`batch summary: PASSED=… FAILED=… SKIPPED=…`. Edit/validation logs go to a temp dir (`mktemp -d`,
+printed at start; removed at the end — except with `KEEP_FAILED=1`, on `SECURITY ABORT`, and on
+Ctrl-C, when the dir is kept for diagnostics) and never land in a commit.
 
-**SKIP — это норма.** Если агент не изменил файл (нет таба `- JS`, либо ответ `SKIP`), файл не
-пишется в ledger и остаётся в `remaining` — повторные SKIP в логах ожидаемы.
+**SKIP is normal.** If the agent did not change a file (no `- JS` tab, or a `SKIP` reply), the
+file is not written to the ledger and stays in `remaining` — repeated SKIPs in the logs are
+expected.
 
-**Прерывание (Ctrl-C).** В фазе правки — безопасно (ещё ничего не закоммичено). В фазе
-валидации/записи — в дереве могут остаться правки и/или строки ledger, записанные но не
-закоммиченные; скрипт печатает подсказку — проверь `git status` и либо закоммить, либо откати.
+**Interruption (Ctrl-C).** During the edit phase — safe (nothing is committed yet). During the
+validation/write phase — the tree may keep edits and/or ledger rows that were written but not
+committed; the script prints a hint — check `git status` and either commit or revert.
 
-**Внимание:** `validate.py` — структурный гейт (табы, токены, `tsc`, `node --check`); семантику
-(выбор `v2`/`v3`, маппинг полей `result`) он **не** проверяет — прогоняй выборку через
-`PROMPT-REVIEW.md` и ставь `reviewed`.
+**Note:** `validate.py` is a structural gate (tabs, tokens, `tsc`, `node --check`); it does **not**
+check semantics (choosing `v2`/`v3`, mapping `result` fields) — run a sample through
+`PROMPT-REVIEW.md` and mark it `reviewed`.
 
-**Журнал и порядок мёржа.** Тулинг и доковые правки — в разных PR; тулинг-PR мёржится **первым**.
-`ledger.tsv` в тулинг-PR пустой (только заголовок) — строки добавляются по мере обработки файлов
-(вместе с их контентом), иначе `--verify-all` на `main` покажет дрейф до влития доков. Конфликты
-`ledger.tsv` при параллельных PR гасит `merge=union` (`.actualize/.gitattributes`) + идемпотентный
-upsert (`load()` дополнительно дедуплицирует строки по файлу при чтении).
+**Ledger and merge order.** Tooling and documentation edits go in separate PRs; the tooling PR is
+merged **first**. `ledger.tsv` is empty in the tooling PR (header only) — rows are added as files
+are processed (together with their content), otherwise `--verify-all` on `main` would show drift
+before the docs land. `ledger.tsv` conflicts across parallel PRs are absorbed by `merge=union`
+(`.actualize/.gitattributes`) + the idempotent upsert (`load()` also dedups rows per file on read).
 
-## Принятые решения (зафиксированы в PROMPT.md)
+## Decisions (recorded in PROMPT.md)
 
-- Вместо одного таба `JS` → два таба: **TS** (предполагает готовый `$b24`) и **UMD**
-  (полная инициализация через `B24Js.initializeB24Frame()`).
-- Обработка ответа: `try/catch` + проверка `response.isSuccess`; в TS — `getData()!`,
-  в UMD — `getData()`; для списков — `result.<key>.length` (`getTotal()` deprecated/removed 2.0).
-- `requestId` генерируется SDK: `Text.getUuidRfc4122()` (TS, `import { Text }`) /
+- Instead of a single `JS` tab → two tabs: **TS** (assumes a ready `$b24`) and **UMD** (full
+  initialization via `B24Js.initializeB24Frame()`).
+- Response handling: `try/catch` + an `response.isSuccess` check; in TS — `getData()!`, in UMD —
+  `getData()`; for lists — `result.<key>.length` (`getTotal()` is deprecated / removed in 2.0).
+- `requestId` is generated by the SDK: `Text.getUuidRfc4122()` (TS, `import { Text }`) /
   `B24Js.Text.getUuidRfc4122()` (UMD).
-- Шапка TS: пояснительные комментарии (ES-модуль, `$b24`) — первыми строками; тип импортируется
-  как `import type { B24Frame[, ISODate] }`; поля-даты в типе результата — `ISODate | null`.
-- Комментарии и строковые значения — на английском (SDK ориентирован на международных
-  разработчиков). Табы PHP/BX24.js/cURL остаются как есть, включая русские комментарии и
-  пред-существующие `processData()` — это вне области правок.
-- Версия: по умолчанию `actions.v2`; `actions.v3` — для `rest-v3/**` и ответов `result.item`.
-- Списочные методы: один вариант — `call.make` со `start` (сохраняет `order`). Над `const response`
-  — подсказка про оба хелпера `callList.make` / `fetchList.make` с `NOTE`, что они НЕ принимают
-  `order` (исключён из их типа — `tsc`-ошибка при передаче).
+- TS header: explanatory comments (ES module, `$b24`) come first; the type is imported as
+  `import type { B24Frame[, ISODate] }`; date fields in the result type are `ISODate | null`.
+- Comments and string values are in English (the SDK targets international developers). The
+  PHP/BX24.js/cURL tabs stay as they are, including Russian comments and pre-existing
+  `processData()` — that is out of scope.
+- Version: `actions.v2` by default; `actions.v3` for `rest-v3/**` and `result.item` responses.
+- List methods: a single variant — `call.make` with `start` (preserves `order`). Above
+  `const response`, a hint about both helpers `callList.make` / `fetchList.make` with a `NOTE` that
+  they do NOT accept `order` (excluded from their type — a `tsc` error if passed).
 
-## Отложенные пункты
+## Deferred items
 
-Стратегические задачи (политика версий SDK, доработки batch-runner) — в
-[`FOLLOWUPS.md`](FOLLOWUPS.md) (GitHub Issues в репозитории отключены).
+Strategic tasks (SDK version policy, batch-runner improvements) are in
+[`FOLLOWUPS.md`](FOLLOWUPS.md) (GitHub Issues are disabled in the repository).
 
 ---
-_Last reviewed: 2026-05-30_
+_Last reviewed: 2026-05-31_

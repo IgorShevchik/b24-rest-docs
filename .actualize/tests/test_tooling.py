@@ -43,6 +43,15 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, 
 {% endlist %}
 """
 
+# A page with TWO {% list tabs %} blocks: a parameter-description block (no code)
+# then the code-examples block. validate/record must target the code one.
+PARAM_TABS = (
+    "{% list tabs %}\n\n- crm\n\nPlain prose describing a parameter, no code fence.\n\n"
+    "- iblock\n\nMore prose.\n\n{% endlist %}\n"
+)
+MULTIREGION = ("# Page\n\n## Parameter SETTINGS\n\n" + PARAM_TABS
+               + "\n## Code examples\n\n" + VALID.split("# Page\n\n", 1)[1])
+
 
 def replace_nth(s, old, new, n):
     if n < 1:
@@ -79,8 +88,10 @@ class ExtractTests(unittest.TestCase):
         self._tmp.append(path)
         return path
 
-    def test_valid_returns_ts_and_umd(self):
-        ts, umd = validate.extract(self._write(VALID))
+    def test_valid_returns_one_example(self):
+        examples = validate.extract(self._write(VALID))
+        self.assertEqual(len(examples), 1)
+        ts, umd = examples[0]
         self.assertIn("actions.v2.", ts)
         self.assertIn("actions.v2.", umd)
         self.assertNotIn("<script", umd)  # inner JS only
@@ -88,12 +99,55 @@ class ExtractTests(unittest.TestCase):
     def test_region_isolation_ignores_outside_blocks(self):
         # a ```ts block OUTSIDE the tabs region must not be counted
         md = "```ts\nconst ignored = true\n```\n\n" + VALID
-        ts, _ = validate.extract(self._write(md))
+        examples = validate.extract(self._write(md))
+        self.assertEqual(len(examples), 1)
+        self.assertIn("crm.lead.add", examples[0][0])
+
+    def test_multiregion_skips_param_block(self):
+        # first tabs block is a parameter description (no ```ts); only the code-example
+        # block is validated — extract returns exactly one example, the code one.
+        examples = validate.extract(self._write(MULTIREGION))
+        self.assertEqual(len(examples), 1)
+        ts, umd = examples[0]
         self.assertIn("crm.lead.add", ts)
+        self.assertIn("actions.v2.", umd)
+
+    def test_two_code_regions_both_validated(self):
+        # a page with two separate code-example blocks -> BOTH are validated and returned
+        body = VALID.split("# Page\n\n", 1)[1]
+        examples = validate.extract(
+            self._write("# Page\n\n## One\n\n" + body + "\n## Two\n\n" + body))
+        self.assertEqual(len(examples), 2)
+        for ts, umd in examples:
+            self.assertIn("actions.v2.", ts)
+            self.assertIn("actions.v2.", umd)
 
     def _assert_fail(self, content):
         with self.assertRaises(SystemExit):
             validate.extract(self._write(content))
+
+    def _assert_fail_msg(self, content, substr):
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with self.assertRaises(SystemExit), redirect_stdout(buf):
+            validate.extract(self._write(content))
+        self.assertIn(substr, buf.getvalue())
+
+    def test_tabs_wrapper_without_ts_fence_fails_clearly(self):
+        # {% list tabs %} with - TS/- UMD labels but only prose (no ```ts) -> no code
+        # region -> clear, specific failure message
+        md = ("# Page\n\n{% list tabs %}\n\n- TS\n\nprose, not code\n\n"
+              "- UMD\n\nstill prose\n\n{% endlist %}\n")
+        self._assert_fail_msg(md, "no {% list tabs %} region with a")
+
+    def test_per_region_error_names_the_failing_region(self):
+        # valid first code region + a second one with a stray extra ```ts ->
+        # the failure is attributed to "code region 2/2"
+        body = VALID.split("# Page\n\n", 1)[1]
+        bad = body.replace("{% endlist %}", "```ts\nconst x = 1\n```\n\n{% endlist %}", 1)
+        self._assert_fail_msg("# Page\n\n## One\n\n" + body + "\n## Two\n\n" + bad,
+                              "code region 2/2")
 
     def test_legacy_js_tab(self):
         self._assert_fail(VALID.replace("- TS\n", "- JS\n\n```js\nx\n```\n\n- TS\n", 1))
@@ -138,7 +192,7 @@ class ExtractTests(unittest.TestCase):
 
     def test_v3_accepted(self):
         # actions.v3 must be accepted just like v2
-        ts, umd = validate.extract(self._write(VALID.replace("actions.v2.", "actions.v3.")))
+        ts, umd = validate.extract(self._write(VALID.replace("actions.v2.", "actions.v3.")))[0]
         self.assertIn("actions.v3.", ts)
         self.assertIn("actions.v3.", umd)
 
@@ -188,6 +242,20 @@ class TabsTests(unittest.TestCase):
 
     def test_first_method_double_quote(self):
         self.assertEqual(_tabs.first_method('method: "tasks.task.get"'), "tasks.task.get")
+
+    def test_code_regions_picks_only_ts_bearing(self):
+        text = ("{% list tabs %}\n- a\n\nprose only\n{% endlist %}\n"
+                "{% list tabs %}\n- TS\n\n```ts\nmethod: 'crm.lead.add'\n```\n{% endlist %}")
+        regions = _tabs.code_regions(text)
+        self.assertEqual(len(regions), 1)
+        self.assertIn("crm.lead.add", regions[0])
+
+    def test_code_regions_empty_when_no_ts(self):
+        self.assertEqual(_tabs.code_regions("{% list tabs %}\n- a\n\nprose\n{% endlist %}"), [])
+
+    def test_code_regions_returns_every_code_block(self):
+        block = "{% list tabs %}\n- TS\n\n```ts\nx\n```\n{% endlist %}"
+        self.assertEqual(len(_tabs.code_regions(block + "\n" + block)), 2)
 
 
 class LedgerTests(unittest.TestCase):
@@ -280,6 +348,21 @@ class LedgerTests(unittest.TestCase):
             record.detect_method(self._md("m.md", method="tasks.task.list")),
             "tasks.task.list")
 
+    def test_detect_method_multiregion_uses_code_region(self):
+        # decoy method in the first (parameter) block; real method in the code block
+        path = os.path.join(self.tmp, "multi.md")
+        with open(path, "w") as f:
+            f.write("{% list tabs %}\n- a\n\nsee method: 'WRONG.decoy'\n{% endlist %}\n"
+                    "{% list tabs %}\n- TS\n\n```ts\nmethod: 'tasks.task.list'\n```\n{% endlist %}\n")
+        self.assertEqual(record.detect_method(path), "tasks.task.list")
+
+    def test_detect_method_from_bare_text_fallback(self):
+        # no {% list tabs %} at all, but a bare method: '…' in the prose -> fallback finds it
+        path = os.path.join(self.tmp, "bare.md")
+        with open(path, "w") as f:
+            f.write("Some prose. method: 'foo.bar' somewhere in the body.\n")
+        self.assertEqual(record.detect_method(path), "foo.bar")
+
 
 class RemainingTests(unittest.TestCase):
     def test_legacy_regex_matches_deprecated(self):
@@ -339,14 +422,39 @@ class ValidateMainTests(unittest.TestCase):
         missing = os.path.join(validate.REPO, "definitely-missing-xyz-123.md")
         self.assertEqual(self._run_main(missing), 1)
 
+    def test_main_multiregion_compiles_each_example(self):
+        # a 2-code-region page must invoke the toolchain for BOTH examples
+        # (tsc + node per example = 4 subprocess calls), with tsc/node mocked green.
+        import shutil
+        body = VALID.split("# Page\n\n", 1)[1]
+        two = "# Page\n\n## One\n\n" + body + "\n## Two\n\n" + body
+        path = os.path.join(validate.REPO, "._tmp_multiregion_main_test.md")
+        with open(path, "w") as f:
+            f.write(two)
+        self.addCleanup(lambda: os.path.exists(path) and os.remove(path))
+        proj = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(proj, ignore_errors=True))
+        green = mock.Mock(returncode=0, stdout="", stderr="")
+        with mock.patch.object(sys, "argv", ["validate.py", path, "--project", proj]), \
+                mock.patch.object(validate, "ensure_project"), \
+                mock.patch.object(validate.subprocess, "run", return_value=green) as run:
+            with self.assertRaises(SystemExit) as e:
+                validate.main()
+        self.assertEqual(e.exception.code, 0)
+        self.assertEqual(run.call_count, 4)  # 2 examples x (tsc + node)
+
 
 class FixtureAnchorTests(unittest.TestCase):
     # guards the substring anchors the replace-based ExtractTests rely on, so a
     # future VALID edit that drops one fails loudly instead of silently no-op'ing
     def test_valid_fixture_has_expected_anchors(self):
-        for anchor in ("- TS\n", "- UMD\n", "{% endlist %}", "actions.v2.call.make"):
+        for anchor in ("# Page\n\n", "- TS\n", "- UMD\n", "{% endlist %}", "actions.v2.call.make"):
             self.assertIn(anchor, VALID)
         self.assertEqual(VALID.count("$b24.actions.v2.call.make"), 2)
+
+    def test_multiregion_fixture_shape(self):
+        self.assertEqual(MULTIREGION.count("{% list tabs %}"), 2)
+        self.assertEqual(len(_tabs.code_regions(MULTIREGION)), 1)  # only the code block has ```ts
 
 
 class DocsConsistencyTests(unittest.TestCase):
@@ -366,7 +474,7 @@ class DocsConsistencyTests(unittest.TestCase):
         readme = self._read("README.md")
         self.assertIn("Text.getUuidRfc4122()", readme)
         # the deprecated getTotal() must not be recommended as the list pattern
-        self.assertNotIn("для списков — `getTotal()`", readme)
+        self.assertNotIn("for lists — `getTotal()`", readme)
 
 
 if __name__ == "__main__":

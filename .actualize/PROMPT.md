@@ -1,76 +1,82 @@
-# Промпт: актуализация JS-примеров b24jssdk (TS + UMD)
+# Prompt: actualizing b24jssdk JS examples (TS + UMD)
 
-Тебе дан **путь к одному `.md`-файлу** документации Bitrix24 REST API (обычно из `api-reference/**`).
-Задача — заменить устаревший пример в табе **`- JS`** (использует `$b24.callMethod` /
-`$b24.callListMethod` / `$b24.fetchListMethod`, удалённые в b24jssdk 2.0) на **два таба** —
-**`- TS`** и **`- UMD`** — на актуальном API SDK. Содержание страницы не меняем, только пример.
+You are given a **path to a single documentation `.md` file** of the Bitrix24 REST API (usually
+under `api-reference/**`). The task is to replace the deprecated example in the **`- JS`** tab
+(which uses `$b24.callMethod` / `$b24.callListMethod` / `$b24.fetchListMethod`, removed in
+b24jssdk 2.0) with **two tabs** — **`- TS`** and **`- UMD`** — on the current SDK API. Do not
+change the page content, only the example.
 
-Вход: `<PATH>` — путь к файлу.
+Input: `<PATH>` — the path to the file.
 
-## Жёсткие правила
+## Hard rules
 
-1. **Меняем только пример** внутри блока `{% list tabs %}`. НЕ трогаем остальной текст:
-   заголовки, описание параметров, раздел «Обработка ответа», коды ошибок, «Продолжить изучение».
-2. **Удаляем таб `- JS`** (старый jsSDK) и ставим на его место по очереди: **`- TS`**, затем **`- UMD`**.
-3. **НЕ трогаем** табы `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest` — ни код, ни порядок.
-4. Параметры запроса переносим из старого JS-примера **1:1** (`taskId`, `fields`, `select`,
-   `filter`, `order`, `params`, `start`, `id`, `entityTypeId` и т.д.).
-5. **Комментарии и строковые значения-примеры — на английском.**
-6. **В TS/UMD-примере удаляем вызовы несуществующих функций** (`processResult(...)`,
-   `processData(...)` и т.п.) — заменяем осмысленным `console.info(...)` по реальным полям ответа.
-   В табах PHP/BX24.js/cURL такие вызовы НЕ трогаем — они вне области правок.
+1. **Change only the example** inside the `{% list tabs %}` block. Do NOT touch the rest of the
+   text: headings, parameter descriptions, the "response handling" section, error codes,
+   "continue learning".
+2. **Remove the `- JS` tab** (old jsSDK) and put in its place, in order: **`- TS`**, then
+   **`- UMD`**. A page may have **several** `{% list tabs %}` code-example blocks (each with its
+   own `- JS` tab) — convert **every** one of them.
+3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest` tabs —
+   neither the code nor the order.
+4. Carry the request parameters over from the old JS example **1:1** (`taskId`, `fields`,
+   `select`, `filter`, `order`, `params`, `start`, `id`, `entityTypeId`, etc.).
+5. **Comments and example string values are in English.**
+6. **In the TS/UMD example, remove calls to non-existent functions** (`processResult(...)`,
+   `processData(...)`, etc.) — replace them with a meaningful `console.info(...)` over the real
+   response fields. Do NOT touch such calls in the PHP/BX24.js/cURL tabs — they are out of scope.
 
-## Версия API (v2 / v3)
+## API version (v2 / v3)
 
-- По умолчанию — **`actions.v2`**.
-- Используй **`actions.v3`**, если файл лежит в `api-reference/rest-v3/**` ИЛИ раздел
-  «Обработка ответа» возвращает `result.item` (а не `result.<entity>`).
-- Если версию определить нельзя (на странице нет JSON-ответа) — бери `actions.v2` и оставь
-  комментарий `// TODO: verify API version`.
-- Тип результата `<T>` бери из формы ответа на странице: `{ task: {...} }`, `{ item: {...} }`,
-  `{ tasks: [...] }`, `{ fields: {...} }`, `{ order: {...} }`, `boolean`-поля и т.д.
-- Выбранную версию (`v2`/`v3`) применяй к **обоим** табам — и TS, и UMD. В шаблонах ниже
-  `actions.v2` показан как пример по умолчанию.
+- Default — **`actions.v2`**.
+- Use **`actions.v3`** if the file lives under `api-reference/rest-v3/**` OR the "response
+  handling" section returns `result.item` (not `result.<entity>`).
+- If the version cannot be determined (the page has no JSON response) — use `actions.v2` and leave
+  a `// TODO: verify API version` comment.
+- Take the result type `<T>` from the response shape on the page: `{ task: {...} }`,
+  `{ item: {...} }`, `{ tasks: [...] }`, `{ fields: {...} }`, `{ order: {...} }`, `boolean` fields,
+  etc.
+- Apply the chosen version (`v2`/`v3`) to **both** tabs — TS and UMD. In the templates below
+  `actions.v2` is shown as the default example.
 
-## Списочные методы (`*.list`, старые `callListMethod` / `fetchListMethod`)
+## List methods (`*.list`, the old `callListMethod` / `fetchListMethod`)
 
-Используем **`actions.v2.call.make` c параметром `start`** (одностраничный вызов).
-Причина: list-хелперы `callList.make` / `fetchList.make` пагинируют по id-курсору и
-**не принимают `order`** (он исключён из типа их параметров — передача = ошибка `tsc`), а
-сортировка в примерах обычно важна.
-- читаем массив из `result.<key>` (например `result.tasks`, `result.items`);
-- НАД `const response` оставляем комментарий-подсказку, что для полной выборки есть **два**
-  хелпера: `$b24.actions.v2.callList.make()` (вернёт весь массив разом) и
-  `$b24.actions.v2.fetchList.make()` (async-генератор по чанкам) — с пометкой `NOTE:`, что
-  оба не принимают `order` (исключён из типа параметров);
-- `response.getTotal()` НЕ используем (deprecated, removed в SDK 2.0) — показываем размер
-  страницы через `result.<key>.length`.
+Use **`actions.v2.call.make` with the `start` parameter** (a single-page call). Reason: the list
+helpers `callList.make` / `fetchList.make` paginate by an id cursor and **do not accept `order`**
+(it is excluded from their parameter type — passing it is a `tsc` error), and sorting in examples
+usually matters.
+- read the array from `result.<key>` (e.g. `result.tasks`, `result.items`);
+- ABOVE `const response` leave a hint comment that for a full fetch there are **two** helpers:
+  `$b24.actions.v2.callList.make()` (returns the whole array at once) and
+  `$b24.actions.v2.fetchList.make()` (an async generator over chunks) — with a `NOTE:` that both
+  do not accept `order` (excluded from the parameter type);
+- do NOT use `response.getTotal()` (deprecated, removed in SDK 2.0) — show the page size via
+  `result.<key>.length`.
 
-## Чтение ответа: `getData()!` vs `getData()`
+## Reading the response: `getData()!` vs `getData()`
 
-- TS (в ветке `else`, т.е. `isSuccess === true`): `response.getData()!.result` (с `!`).
-- UMD (после `if (!isSuccess) { …; return }`): `response.getData().result` (без `!`).
-- `response.getTotal()` НЕ используем — он `@deprecated` / `@removed 2.0.0` (привязан к v2-полю
-  `total`, в v3 его нет). Размер страницы — `result.<key>.length`; полное число — через
-  list-хелпер (`callList.make` → весь массив → `.length`) или `aggregate` (count) в v3.
+- TS (in the `else` branch, i.e. `isSuccess === true`): `response.getData()!.result` (with `!`).
+- UMD (after `if (!isSuccess) { …; return }`): `response.getData().result` (without `!`).
+- Do NOT use `response.getTotal()` — it is `@deprecated` / `@removed 2.0.0` (tied to the v2 `total`
+  field, absent in v3). Page size — `result.<key>.length`; the full count — via a list helper
+  (`callList.make` → whole array → `.length`) or `aggregate` (count) in v3.
 
-## ES-модуль и версия SDK
+## ES module and SDK version
 
-- TS-пример — ES-модуль (есть `import` и top-level `await`); это отмечено в комментарии у
-  `declare const $b24`. В обычный `<script>` без `type="module"` его вставлять нельзя.
-- UMD-тег использует мажор-тег `@1` (защита от мажорных breaking-changes); типопроверка пиннится
-  committed lockfile'ом `.actualize/typecheck/package-lock.json` (конкретная 1.x).
-- `requestId` задаём генератором SDK: `Text.getUuidRfc4122()` (TS, `import { Text }`) и
-  `B24Js.Text.getUuidRfc4122()` (UMD) — не хардкодим строку.
-- Пояснительные комментарии (про ES-модуль и готовый `$b24`) ставим **первыми** строками
-  TS-сниппета, до `import`. Тип импортируем как `import type { B24Frame[, ISODate] }`; поля-даты
-  в типе результата — `ISODate | null` (а не `string | null`).
+- The TS example is an ES module (it has `import` and top-level `await`); this is noted in a comment
+  at `declare const $b24`. It must not be pasted into a plain `<script>` without `type="module"`.
+- The UMD tag uses the major tag `@1` (protection against major breaking changes); the typecheck is
+  pinned by the committed lockfile `.actualize/typecheck/package-lock.json` (a specific 1.x).
+- Set `requestId` via the SDK generator: `Text.getUuidRfc4122()` (TS, `import { Text }`) and
+  `B24Js.Text.getUuidRfc4122()` (UMD) — do not hardcode a string.
+- Put the explanatory comments (about the ES module and the ready `$b24`) **first** in the TS
+  snippet, before `import`. Import the type as `import type { B24Frame[, ISODate] }`; date fields in
+  the result type are `ISODate | null` (not `string | null`).
 
-## Если менять нечего
+## If there is nothing to change
 
-Нет блока `{% list tabs %}` или таба `- JS` → выведи `SKIP: no JS tab` и не меняй файл.
+No `{% list tabs %}` block or no `- JS` tab → print `SKIP: no JS tab` and do not change the file.
 
-## Таб TS (предполагает уже инициализированный `$b24`)
+## TS tab (assumes an already-initialized `$b24`)
 
 ```ts
 // This snippet is an ES module: top-level await requires type="module" or a bundler.
@@ -107,9 +113,9 @@ try {
 }
 ```
 
-## Таб UMD (полная инициализация)
+## UMD tab (full initialization)
 
-В UMD `call.make` вызывается **без** generic-параметра `<T>` (это plain JS, не TS).
+In UMD, `call.make` is called **without** the generic `<T>` parameter (this is plain JS, not TS).
 
 ```html
 <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
@@ -144,60 +150,61 @@ try {
 </script>
 ```
 
-## Формат табов (YFM)
+## Tab format (YFM)
 
-Каждый таб: строка `- Имя`, пустая строка, затем блок кода с отступом **4 пробела**:
+Each tab: a `- Name` line, a blank line, then a code block indented by **4 spaces**:
 
 ```
 - TS
 
     ```ts
-    ...код...
+    ...code...
     ```
 
 - UMD
 
     ```html
-    ...код...
+    ...code...
     ```
 ```
 
-## Валидация (обязательно)
+## Validation (required)
 
-> **В batch-режиме (`run-batch.sh`)** шаги ниже выполняет ОРКЕСТРАТОР, а не ты: у агента нет
-> инструмента Bash (`--allowed-tools Read Edit Grep`). Просто внеси правку и остановись —
-> валидацию и запись в ledger сделает раннер. Команды ниже — для **ручного** прогона.
+> **In batch mode (`run-batch.sh`)** the steps below are done by the ORCHESTRATOR, not you: the
+> agent has no Bash tool (`--allowed-tools Read Edit Grep`). Just make the edit and stop — the
+> runner does validation and the ledger write. The commands below are for a **manual** run.
 
-1. `python3 .actualize/validate.py <PATH>` → должно быть `PASS`. Проверяет: структуру табов
-   (нет `- JS`, есть `- TS`/`- UMD`); извлекает блоки ТОЛЬКО внутри `{% list tabs %}`;
-   запрещённые токены (`callMethod`/`callListMethod`/`fetchListMethod`/`processResult`/`processData`);
-   наличие `$b24.actions.v{2,3}.*` в **обоих** табах; `tsc --strict` против ПИННИНГ-версии
-   `@bitrix24/b24jssdk` (= 0 ошибок); `node --check` UMD.
-2. Если `FAIL` — исправь код и повтори, пока не `PASS`.
+1. `python3 .actualize/validate.py <PATH>` → must be `PASS`. It checks: tab structure (no `- JS`,
+   `- TS`/`- UMD` present); extracts blocks ONLY from inside `{% list tabs %}` (every code-example
+   block — a page may have several, and each is validated); forbidden tokens
+   (`callMethod`/`callListMethod`/`fetchListMethod`/`processResult`/`processData`); the presence of
+   `$b24.actions.v{2,3}.*` in **both** tabs; `tsc --strict` against the PINNED `@bitrix24/b24jssdk`
+   version (= 0 errors); `node --check` on the UMD.
+2. If `FAIL` — fix the code and repeat until `PASS`.
 
-## Отметка о выполнении
+## Recording completion
 
-> В batch-режиме это тоже делает оркестратор — ручной шаг ниже не нужен.
+> In batch mode the orchestrator does this too — the manual step below is not needed.
 
-После `PASS`: `python3 .actualize/record.py <PATH> done` — идемпотентный upsert (одна строка на
-файл: дата, sha256, статус, метод) в `.actualize/ledger.tsv`. Контроль дрейфа:
-`python3 .actualize/record.py --verify-all`. Список оставшихся: `python3 .actualize/remaining.py`.
+After `PASS`: `python3 .actualize/record.py <PATH> done` — an idempotent upsert (one row per file:
+date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
+`python3 .actualize/record.py --verify-all`. List of remaining: `python3 .actualize/remaining.py`.
 
-## Чек-лист перед завершением
+## Checklist before finishing
 
-> Не заполняется при `SKIP` (файл не менялся).
+> Not filled in on `SKIP` (the file was not changed).
 
-- [ ] таб `- JS` удалён, добавлены `- TS` и `- UMD`
-- [ ] остальные табы и текст страницы не изменены
-- [ ] нет `callMethod` / `callListMethod` / `fetchListMethod` в jsSDK-примере
-- [ ] нет вызовов `processResult` / `processData`
-- [ ] комментарии и значения на английском
-- [ ] пояснит. комментарии (ES-модуль, `$b24`) — первыми строками; в TS `import type { B24Frame }` (+`ISODate` для дат), в UMD — `B24Js.*` без import
-- [ ] `requestId` через `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
-- [ ] `getData()!` в TS / `getData()` в UMD; для списков — `.length` (НЕ `getTotal()`, он deprecated)
-- [ ] для списков — подсказка про `callList.make` и `fetchList.make` (с `NOTE` про игнор `order`)
+- [ ] the `- JS` tab is removed, `- TS` and `- UMD` added (in every code-example block)
+- [ ] the other tabs and the page text are unchanged
+- [ ] no `callMethod` / `callListMethod` / `fetchListMethod` in the jsSDK example
+- [ ] no `processResult` / `processData` calls
+- [ ] comments and values in English
+- [ ] explanatory comments (ES module, `$b24`) first; in TS `import type { B24Frame }` (+`ISODate` for dates), in UMD — `B24Js.*` without import
+- [ ] `requestId` via `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
+- [ ] `getData()!` in TS / `getData()` in UMD; for lists — `.length` (NOT `getTotal()`, it is deprecated)
+- [ ] for lists — a hint about `callList.make` and `fetchList.make` (with a `NOTE` about ignoring `order`)
 - [ ] `validate.py` → PASS
-- [ ] `record.py ... done` выполнен
+- [ ] `record.py ... done` done
 
 ---
-_Last reviewed: 2026-05-30_
+_Last reviewed: 2026-05-31_
