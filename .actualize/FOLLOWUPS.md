@@ -113,6 +113,13 @@ error. Options: additionally validate the PR-affected files from the ledger; or 
   `type <Name>Result` types are written by hand from the JSON response on the page; `tsc` only checks
   the type's syntax, not that it matches the real response. A conscious trade-off (otherwise a live
   API stub is needed). Accepted as is.
+- **[minor] `node --check` on the UMD is syntax-only.** It parses the inline script but does not
+  execute it, so a wrong global or method name (`B24Js.TextX…`, `user.userfield.deletes`) passes.
+  A green `node --check` proves the UMD parses, not that it runs — do not read PASS as "it works".
+- **[minor] Request `params` are not type-checked.** `call.make`'s params type uses an index
+  signature (`[key: string]: any`), so `tsc` validates only the result generic, not the param
+  shape — a misspelled or wrong-cased param key (`SORT` vs `sort`) compiles cleanly. Option: a
+  per-method JSON-schema lint (e.g. `ajv`) over `params`, hand-maintained or generated, no live API.
 - **[nit][done] `getTotal()` removed.** Marked `@deprecated` / `@removed 2.0.0`; in the tasks pilot
   and in `PROMPT.md` / `PROMPT-REVIEW.md` / `README.md` replaced with `.length` + list helpers.
   Apply this in the remaining sections.
