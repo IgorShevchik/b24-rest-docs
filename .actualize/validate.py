@@ -60,16 +60,20 @@ def extract(md_path):
     if "- UMD\n" not in s:
         fail('"- UMD" tab missing')
 
-    region = _tabs.tabs_region(s)
+    # A page may have several {% list tabs %} blocks (e.g. a parameter-description
+    # block plus the code-examples block); validate the one with the ```ts example.
+    region, n_code = _tabs.code_region(s)
     if region is None:
-        fail("no {% list tabs %} ... {% endlist %} region found")
+        if n_code == 0:
+            fail("no {% list tabs %} region with a ```ts example found")
+        fail(f"expected exactly one tabs region with a ```ts example, found {n_code}")
 
     ts_blocks = _tabs.find_ts(region)
     if len(ts_blocks) != 1:
-        fail(f"expected exactly one ```ts block in tabs, found {len(ts_blocks)}")
+        fail(f"expected exactly one ```ts block in the code tabs region, found {len(ts_blocks)}")
     html_blocks = _tabs.find_html(region)
     if len(html_blocks) != 1:
-        fail(f"expected exactly one ```html (UMD) block in tabs, found {len(html_blocks)}")
+        fail(f"expected exactly one ```html (UMD) block in the code tabs region, found {len(html_blocks)}")
 
     ts = textwrap.dedent(ts_blocks[0])
     html = textwrap.dedent(html_blocks[0])

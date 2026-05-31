@@ -41,7 +41,11 @@ def clean(value, limit=200):
 def detect_method(path):
     with open(path, encoding="utf-8") as f:
         text = f.read()
-    region = _tabs.tabs_region(text) or text
+    # prefer the tabs region with the ```ts example (multi-region pages); fall back
+    # to the first region, then the whole text.
+    region, _ = _tabs.code_region(text)
+    if region is None:
+        region = _tabs.tabs_region(text) or text
     ts = _tabs.find_ts(region)
     scope = ts[0] if ts else region
     return _tabs.first_method(scope) or os.path.basename(path)

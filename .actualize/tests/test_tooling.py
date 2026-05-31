@@ -43,6 +43,15 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, 
 {% endlist %}
 """
 
+# A page with TWO {% list tabs %} blocks: a parameter-description block (no code)
+# then the code-examples block. validate/record must target the code one.
+PARAM_TABS = (
+    "{% list tabs %}\n\n- crm\n\nPlain prose describing a parameter, no code fence.\n\n"
+    "- iblock\n\nMore prose.\n\n{% endlist %}\n"
+)
+MULTIREGION = ("# Page\n\n## Parameter SETTINGS\n\n" + PARAM_TABS
+               + "\n## Code examples\n\n" + VALID.split("# Page\n\n", 1)[1])
+
 
 def replace_nth(s, old, new, n):
     if n < 1:
@@ -90,6 +99,18 @@ class ExtractTests(unittest.TestCase):
         md = "```ts\nconst ignored = true\n```\n\n" + VALID
         ts, _ = validate.extract(self._write(md))
         self.assertIn("crm.lead.add", ts)
+
+    def test_multiregion_picks_code_region(self):
+        # first tabs block is a parameter description (no ```ts); the code example is
+        # in the second block — extract must validate that one, not the first.
+        ts, umd = validate.extract(self._write(MULTIREGION))
+        self.assertIn("crm.lead.add", ts)
+        self.assertIn("actions.v2.", umd)
+
+    def test_two_code_regions_fail_as_ambiguous(self):
+        # the code-examples block twice -> two regions carry ```ts -> must fail
+        body = VALID.split("# Page\n\n", 1)[1]
+        self._assert_fail("# Page\n\n## One\n\n" + body + "\n## Two\n\n" + body)
 
     def _assert_fail(self, content):
         with self.assertRaises(SystemExit):
@@ -189,6 +210,28 @@ class TabsTests(unittest.TestCase):
     def test_first_method_double_quote(self):
         self.assertEqual(_tabs.first_method('method: "tasks.task.get"'), "tasks.task.get")
 
+    def test_tabs_regions_returns_all_in_order(self):
+        text = "{% list tabs %}A{% endlist %}\n{% list tabs %}B{% endlist %}"
+        self.assertEqual(_tabs.tabs_regions(text), ["A", "B"])
+
+    def test_code_region_picks_the_ts_block(self):
+        text = ("{% list tabs %}\n- a\n\nprose only\n{% endlist %}\n"
+                "{% list tabs %}\n- TS\n\n```ts\nmethod: 'crm.lead.add'\n```\n{% endlist %}")
+        region, n = _tabs.code_region(text)
+        self.assertEqual(n, 1)
+        self.assertIn("crm.lead.add", region)
+
+    def test_code_region_none_when_no_ts(self):
+        region, n = _tabs.code_region("{% list tabs %}\n- a\n\nprose\n{% endlist %}")
+        self.assertIsNone(region)
+        self.assertEqual(n, 0)
+
+    def test_code_region_none_when_ambiguous(self):
+        block = "{% list tabs %}\n- TS\n\n```ts\nx\n```\n{% endlist %}"
+        region, n = _tabs.code_region(block + "\n" + block)
+        self.assertIsNone(region)
+        self.assertEqual(n, 2)
+
 
 class LedgerTests(unittest.TestCase):
     def setUp(self):
@@ -280,6 +323,14 @@ class LedgerTests(unittest.TestCase):
             record.detect_method(self._md("m.md", method="tasks.task.list")),
             "tasks.task.list")
 
+    def test_detect_method_multiregion_uses_code_region(self):
+        # decoy method in the first (parameter) block; real method in the code block
+        path = os.path.join(self.tmp, "multi.md")
+        with open(path, "w") as f:
+            f.write("{% list tabs %}\n- a\n\nsee method: 'WRONG.decoy'\n{% endlist %}\n"
+                    "{% list tabs %}\n- TS\n\n```ts\nmethod: 'tasks.task.list'\n```\n{% endlist %}\n")
+        self.assertEqual(record.detect_method(path), "tasks.task.list")
+
 
 class RemainingTests(unittest.TestCase):
     def test_legacy_regex_matches_deprecated(self):
@@ -347,6 +398,10 @@ class FixtureAnchorTests(unittest.TestCase):
         for anchor in ("- TS\n", "- UMD\n", "{% endlist %}", "actions.v2.call.make"):
             self.assertIn(anchor, VALID)
         self.assertEqual(VALID.count("$b24.actions.v2.call.make"), 2)
+
+    def test_multiregion_fixture_has_two_regions_one_with_code(self):
+        self.assertEqual(MULTIREGION.count("{% list tabs %}"), 2)
+        self.assertEqual(_tabs.code_region(MULTIREGION)[1], 1)  # exactly one code region
 
 
 class DocsConsistencyTests(unittest.TestCase):
