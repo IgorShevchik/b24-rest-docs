@@ -185,7 +185,7 @@ array(
 
     declare const $b24: B24Frame
 
-    // event.bind returns true on success
+    // Shape of the payload returned in result (event.bind returns true on success)
     type EventBindResult = boolean
 
     try {
@@ -198,6 +198,7 @@ array(
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {

@@ -77,6 +77,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -84,6 +85,7 @@
         console.info('Task delegated:', result)
       }
     } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
       console.error(error)
     }
     ```

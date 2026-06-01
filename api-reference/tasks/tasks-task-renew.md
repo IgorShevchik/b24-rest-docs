@@ -66,8 +66,13 @@
 
     declare const $b24: B24Frame
 
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskRenewResult = {
-      task: Record<string, unknown>
+      task: {
+        id: string
+        title: string
+        status: string
+      }
     }
 
     try {
@@ -79,6 +84,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {

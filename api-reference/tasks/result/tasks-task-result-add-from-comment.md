@@ -94,6 +94,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -101,6 +102,7 @@
         console.info(result.id, result.taskId, result.text)
       }
     } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
       console.error(error)
     }
     ```
@@ -113,6 +115,7 @@
     <script>
       async function addTaskResultFromComment() {
         try {
+          // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
           const response = await $b24.actions.v2.call.make({
@@ -123,6 +126,7 @@
             requestId: B24Js.Text.getUuidRfc4122()
           })
 
+          // The payload is available only on a successful response
           if (!response.isSuccess) {
             console.error(response.getErrorMessages().join('; '))
             return
@@ -131,6 +135,7 @@
           const result = response.getData().result
           console.info(result.id, result.taskId, result.text)
         } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
           console.error(error)
         }
       }

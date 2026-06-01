@@ -210,6 +210,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -230,6 +231,7 @@
     <script>
       async function updateUserField() {
         try {
+          // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
           const response = await $b24.actions.v2.call.make({
@@ -247,6 +249,7 @@
             requestId: B24Js.Text.getUuidRfc4122()
           })
 
+          // The payload is available only on a successful response
           if (!response.isSuccess) {
             console.error(response.getErrorMessages().join('; '))
             return

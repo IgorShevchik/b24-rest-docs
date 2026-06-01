@@ -152,9 +152,10 @@
       const response = await $b24.actions.v2.call.make<TaskItem[]>({
         method: 'task.items.getlist',
         params: {},
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -184,7 +185,7 @@
           const response = await $b24.actions.v2.call.make({
             method: 'task.items.getlist',
             params: {},
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response
@@ -311,9 +312,10 @@
           select: ['ID', 'TITLE'],              // return only these fields
           NAV_PARAMS: { iNumPage: 2 },          // page 2
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -348,7 +350,7 @@
               select: ['ID', 'TITLE'],              // return only these fields
               NAV_PARAMS: { iNumPage: 2 },          // page 2
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

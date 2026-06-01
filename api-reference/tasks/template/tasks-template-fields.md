@@ -74,7 +74,7 @@
       const response = await $b24.actions.v2.call.make<TemplateFieldsResult>({
         method: 'tasks.template.fields',
         params: {},
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -104,7 +104,7 @@
           const response = await $b24.actions.v2.call.make({
             method: 'tasks.template.fields',
             params: {},
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

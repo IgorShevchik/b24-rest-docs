@@ -162,7 +162,7 @@ array(
 
     declare const $b24: B24Frame
 
-    // Shape of the payload returned in result
+    // Shape of the payload returned in result (event.bind returns true on success)
     type BindEventResult = boolean
 
     try {

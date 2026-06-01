@@ -110,7 +110,6 @@
     type StageAddResult = number
 
     try {
-      // The payload is available only on a successful response
       const response = await $b24.actions.v2.call.make<StageAddResult>({
         method: 'task.stages.add',
         params: {
@@ -125,6 +124,7 @@
         requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {

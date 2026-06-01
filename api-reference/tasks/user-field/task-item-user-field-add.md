@@ -227,7 +227,7 @@
             FIELD_NAME: 'UF_TASK_CLIENT_REQUEST',
             XML_ID: 'UF_TASK_CLIENT_REQUEST',
             EDIT_FORM_LABEL: {
-              ru: 'Client request',
+              ru: 'Запрос клиента',
               en: 'Client request',
             },
             LABEL: 'Client request',
@@ -240,9 +240,10 @@
             },
           },
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -274,7 +275,7 @@
                 FIELD_NAME: 'UF_TASK_CLIENT_REQUEST',
                 XML_ID: 'UF_TASK_CLIENT_REQUEST',
                 EDIT_FORM_LABEL: {
-                  ru: 'Client request',
+                  ru: 'Запрос клиента',
                   en: 'Client request',
                 },
                 LABEL: 'Client request',
@@ -287,7 +288,7 @@
                 },
               },
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

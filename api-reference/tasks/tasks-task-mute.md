@@ -66,7 +66,10 @@
 
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskMuteResult = {
-      task: Record<string, unknown>
+      task: {
+        id: string
+        isMuted: string
+      }
     }
 
     try {

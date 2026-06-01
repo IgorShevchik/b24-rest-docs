@@ -171,7 +171,7 @@
             },
           },
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
       // The payload is available only on a successful response
@@ -215,7 +215,7 @@
                 },
               },
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response

@@ -121,9 +121,10 @@
           checkListItemId: 37,
           attachmentsIds: [1119, 1121],
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -131,6 +132,7 @@
         console.info('Updated checklist item:', result.checkListItem)
       }
     } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
       console.error(error)
     }
     ```
@@ -143,6 +145,7 @@
     <script>
       async function removeAttachments() {
         try {
+          // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
           const response = await $b24.actions.v2.call.make({
@@ -152,9 +155,10 @@
               checkListItemId: 37,
               attachmentsIds: [1119, 1121],
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
+          // The payload is available only on a successful response
           if (!response.isSuccess) {
             console.error(response.getErrorMessages().join('; '))
             return
@@ -163,6 +167,7 @@
           const result = response.getData().result
           console.info('Updated checklist item:', result.checkListItem)
         } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
           console.error(error)
         }
       }

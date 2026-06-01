@@ -80,9 +80,10 @@
             POST_MESSAGE: 'comment text',
           },
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -114,7 +115,7 @@
                 POST_MESSAGE: 'comment text',
               },
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
           // The payload is available only on a successful response
