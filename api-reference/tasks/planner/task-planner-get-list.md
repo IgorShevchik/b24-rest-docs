@@ -45,51 +45,82 @@
     https://**put_your_bitrix24_address**/rest/task.planner.getlist
     ```
 
-- JS
+- TS
 
-    ```javascript
-    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    try {
-        const response = await $b24.callListMethod(
-        "task.planner.getlist",
-        {},
-        (progress) => {
-            console.log("Progress:", progress);
-        }
-        );
-        const items = response.getData() || [];
-        for (const entity of items) {
-        console.log("Entity:", entity);
-        }
-    } catch (error) {
-        console.error("Request failed", error);
-    }
+    declare const $b24: B24Frame
 
-    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
+    // Shape of the payload returned in result (match the "response handling" section of the page)
+    type PlannerGetListResult = number[]
 
     try {
-        const generator = $b24.fetchListMethod("task.planner.getlist", {}, "ID");
-        for await (const page of generator) {
-        for (const entity of page) {
-            console.log("Entity:", entity);
-        }
-        }
-    } catch (error) {
-        console.error("Request failed", error);
-    }
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<PlannerGetListResult>({
+        method: 'task.planner.getlist',
+        params: {
+          start: 0,
+        },
+        requestId: Text.getUuidRfc4122()
+      })
 
-    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
-
-    try {
-        const response = await $b24.callMethod("task.planner.getlist", {}, 0);
-        const result = response.getData().result || [];
-        for (const entity of result) {
-        console.log("Entity:", entity);
-        }
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Task IDs in the day plan:', result, 'Total on this page:', result.length)
+      }
     } catch (error) {
-        console.error("Request failed", error);
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
+    ```
+
+- UMD
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function getPlannerTaskList() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'task.planner.getlist',
+            params: {
+              start: 0,
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Task IDs in the day plan:', result, 'Total on this page:', result.length)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', getPlannerTaskList)
+    </script>
     ```
 
 - PHP
