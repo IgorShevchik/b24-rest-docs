@@ -132,44 +132,77 @@
     https://**put_your_bitrix24_address**/rest/task.items.getlist?auth=**put_access_token_here**
     ```
 
-- JS
+- TS
 
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    ```js
-    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
-    
+    declare const $b24: B24Frame
+
+    // TODO: verify API version — no response shape defined on this page
+    type TaskItem = Record<string, unknown>
+
     try {
-      const response = await $b24.callListMethod(
-        'task.items.getlist',
-        {},
-        (progress) => { console.log('Progress:', progress) }
-      )
-      const items = response.getData() || []
-      for (const entity of items) { console.log('Entity:', entity) }
-    } catch (error) {
-      console.error('Request failed', error)
-    }
-    
-    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
-    
-    try {
-      const generator = $b24.fetchListMethod('task.items.getlist', {}, 'ID')
-      for await (const page of generator) {
-        for (const entity of page) { console.log('Entity:', entity) }
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<TaskItem[]>({
+        method: 'task.items.getlist',
+        params: {},
+        requestId: Text.getUuidRfc4122(),
+      })
+
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Tasks retrieved:', result.length)
       }
     } catch (error) {
-      console.error('Request failed', error)
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
-    
-    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
-    
-    try {
-      const response = await $b24.callMethod('task.items.getlist', {}, 0)
-      const result = response.getData().result || []
-      for (const entity of result) { console.log('Entity:', entity) }
-    } catch (error) {
-      console.error('Request failed', error)
-    }
+    ```
+
+- UMD
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function getTaskItemsList() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'task.items.getlist',
+            params: {},
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Tasks retrieved:', result.length)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', getTaskItemsList)
+    </script>
     ```
 
 - PHP
@@ -253,71 +286,87 @@
     https://**put_your_bitrix24_address**/rest/task.items.getlist
     ```
 
-- JS
+- TS
 
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    ```js
-    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
-    
+    declare const $b24: B24Frame
+
+    // TODO: verify API version — no response shape defined on this page
+    type TaskItem = Record<string, unknown>
+
     try {
-      const response = await $b24.callListMethod(
-        'task.items.getlist',
-        [
-          {ID: 'desc'},        // Сортировка по ID — по убыванию.
-          {ID: [1, 2, 3, 4, 5, 6]},    // Фильтр
-          ['ID', 'TITLE'],    // Выбираемые поля
-          {
-            NAV_PARAMS: {        // постраничка
-              iNumPage: 2        // страница номер 2
-            }
-          }
-        ],
-        (progress) => { console.log('Progress:', progress) }
-      );
-      const items = response.getData() || [];
-      for (const entity of items) { console.log('Entity:', entity); }
-    } catch (error) {
-      console.error('Request failed', error);
-    }
-    
-    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
-    
-    try {
-      const generator = $b24.fetchListMethod('task.items.getlist', [
-        {ID: 'desc'},        // Сортировка по ID — по убыванию.
-        {ID: [1, 2, 3, 4, 5, 6]},    // Фильтр
-        ['ID', 'TITLE'],    // Выбираемые поля
-        {
-          NAV_PARAMS: {        // постраничка
-            iNumPage: 2        // страница номер 2
-          }
-        }
-      ], 'ID');
-      for await (const page of generator) {
-        for (const entity of page) { console.log('Entity:', entity); }
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<TaskItem[]>({
+        method: 'task.items.getlist',
+        params: {
+          order: { ID: 'desc' },               // sort by ID descending
+          filter: { ID: [1, 2, 3, 4, 5, 6] },  // filter by IDs
+          select: ['ID', 'TITLE'],              // return only these fields
+          NAV_PARAMS: { iNumPage: 2 },          // page 2
+        },
+        requestId: Text.getUuidRfc4122(),
+      })
+
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Tasks on page:', result.length)
       }
     } catch (error) {
-      console.error('Request failed', error);
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
-    
-    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
-    
-    try {
-      const response = await $b24.callMethod('task.items.getlist', [
-        {ID: 'desc'},        // Сортировка по ID — по убыванию.
-        {ID: [1, 2, 3, 4, 5, 6]},    // Фильтр
-        ['ID', 'TITLE'],    // Выбираемые поля
-        {
-          NAV_PARAMS: {        // постраничка
-            iNumPage: 2        // страница номер 2
+    ```
+
+- UMD
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function getTaskItemsListFiltered() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'task.items.getlist',
+            params: {
+              order: { ID: 'desc' },               // sort by ID descending
+              filter: { ID: [1, 2, 3, 4, 5, 6] },  // filter by IDs
+              select: ['ID', 'TITLE'],              // return only these fields
+              NAV_PARAMS: { iNumPage: 2 },          // page 2
+            },
+            requestId: B24Js.Text.getUuidRfc4122(),
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
           }
+
+          const result = response.getData().result
+          console.info('Tasks on page:', result.length)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
         }
-      ], 0);
-      const result = response.getData().result || [];
-      for (const entity of result) { console.log('Entity:', entity); }
-    } catch (error) {
-      console.error('Request failed', error);
-    }
+      }
+
+      document.addEventListener('DOMContentLoaded', getTaskItemsListFiltered)
+    </script>
     ```
 
 - PHP

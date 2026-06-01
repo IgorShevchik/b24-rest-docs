@@ -56,44 +56,83 @@
     https://**put_your_bitrix24_address**/rest/task.logitem.list
     ```
 
-- JS
+- TS
 
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 
-    ```js
-    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
-    
+    declare const $b24: B24Frame
+
+    type TaskLogItemListResult = Array<{
+      CREATED_DATE: ISODate | null
+      USER_ID: string
+      TASK_ID: string
+      FIELD: string
+      FROM_VALUE: string
+      TO_VALUE: string
+    }>
+
     try {
-      const response = await $b24.callListMethod(
-        'task.logitem.list',
-        [1205],
-        (progress) => { console.log('Progress:', progress) }
-      )
-      const items = response.getData() || []
-      for (const entity of items) { console.log('Entity:', entity) }
-    } catch (error) {
-      console.error('Request failed', error)
-    }
-    
-    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
-    
-    try {
-      const generator = $b24.fetchListMethod('task.logitem.list', [1205], 'ID')
-      for await (const page of generator) {
-        for (const entity of page) { console.log('Entity:', entity) }
+      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      const response = await $b24.actions.v2.call.make<TaskLogItemListResult>({
+        method: 'task.logitem.list',
+        params: {
+          taskId: 1205,
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Log items count:', result.length, 'First item:', result[0])
       }
     } catch (error) {
-      console.error('Request failed', error)
+      console.error(error)
     }
-    
-    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
-    
-    try {
-      const response = await $b24.callMethod('task.logitem.list', [1205], 0)
-      const result = response.getData().result || []
-      for (const entity of result) { console.log('Entity:', entity) }
-    } catch (error) {
-      console.error('Request failed', error)
-    }
+    ```
+
+- UMD
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function fetchTaskLogItems() {
+        try {
+          const $b24 = await B24Js.initializeB24Frame()
+
+          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
+          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
+          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          const response = await $b24.actions.v2.call.make({
+            method: 'task.logitem.list',
+            params: {
+              taskId: 1205,
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Log items count:', result.length, 'First item:', result[0])
+        } catch (error) {
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', fetchTaskLogItems)
+    </script>
     ```
 
 - PHP
