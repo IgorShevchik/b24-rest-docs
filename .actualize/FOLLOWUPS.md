@@ -144,7 +144,14 @@ Verified on the tasks corpus — **0** false positives for the four comment/comm
 Shape-comment rule flags **36** files (= the §7 scope, to backfill before the tasks content lands on
 a hardened `main`).
 
-## 7. [minor] Backfill `// Shape of the payload` comment on scalar result types (tasks)
+## 7. [done] Backfill `// Shape of the payload` comment on result types (tasks)
+
+**Done in PR #10** (commit `81f95f9`): 37 comments across 36 files — every main result type (the
+`.make<X>` generic) now carries the Shape comment; the default parenthetical
+`(match the "response handling" section of the page)` was used (no event methods were among the gap);
+helper types untouched. Includes the 5 core `tasks-task-*` pages from #1 so the whole section is
+uniform before the §6 enforcement lands. Post-check: **0** main types without the comment; all 36
+re-validated (tsc + node) PASS. Original analysis below.
 
 The review found ~46 type aliases across ~40 tasks files where the **main** result type has no
 preceding `// Shape of the payload returned in result (…)`, while object types (`= {`) do. These are
