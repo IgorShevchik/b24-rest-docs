@@ -67,6 +67,7 @@
     declare const $b24: B24Frame
 
     // The API wraps the deletion flag: result.task === true on success
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskDeleteResult = {
       task: boolean
     }

@@ -88,6 +88,7 @@ SE_PARAMETER: [
     declare const $b24: B24Frame
 
     // Minimal shape of result.task; the API returns the full task object
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskUpdateResult = {
       task: { id: string }
     }
