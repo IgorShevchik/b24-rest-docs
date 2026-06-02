@@ -126,10 +126,11 @@
       LIST?: Array<{ ID: string; SORT: string; VALUE: string; DEF: 'Y' | 'N'; XML_ID: string }>
     }
 
-    // NOTE: for a full result set without pagination use:
-    //   $b24.actions.v2.callList.make()  – resolves with the full array at once
-    //   $b24.actions.v2.fetchList.make() – async generator, yields chunks
-    // Both helpers ignore `order` (excluded from their parameter types).
+    // user.userfield.list returns a single page (max 50 records). For the whole result set
+    // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+    // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+    // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+    // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
 
     try {
       const response = await $b24.actions.v2.call.make<UserUserfieldItem[]>({
@@ -139,9 +140,10 @@
           filter: { id: 13 },
           start: 0,
         },
-        requestId: Text.getUuidRfc4122(),
+        requestId: Text.getUuidRfc4122()
       })
 
+      // The payload is available only on a successful response
       if (!response.isSuccess) {
         console.error(response.getErrorMessages().join('; '))
       } else {
@@ -165,10 +167,11 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // NOTE: for a full result set without pagination use:
-          //   $b24.actions.v2.callList.make()  – resolves with the full array at once
-          //   $b24.actions.v2.fetchList.make() – async generator, yields chunks
-          // Both helpers ignore `order` (excluded from their parameter types).
+          // user.userfield.list returns a single page (max 50 records). For the whole result set
+          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
 
           const response = await $b24.actions.v2.call.make({
             method: 'user.userfield.list',
@@ -177,9 +180,10 @@
               filter: { id: 13 },
               start: 0,
             },
-            requestId: B24Js.Text.getUuidRfc4122(),
+            requestId: B24Js.Text.getUuidRfc4122()
           })
 
+          // The payload is available only on a successful response
           if (!response.isSuccess) {
             console.error(response.getErrorMessages().join('; '))
             return
