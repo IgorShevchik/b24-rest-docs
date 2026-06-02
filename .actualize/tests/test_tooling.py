@@ -35,6 +35,7 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, 
 ```html
 <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
 <script>
+// Initialize the SDK inside a Bitrix24 frame
 const $b24 = await B24Js.initializeB24Frame()
 const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, requestId: B24Js.Text.getUuidRfc4122() })
 </script>
@@ -42,6 +43,84 @@ const r = await $b24.actions.v2.call.make({ method: 'crm.lead.add', params: {}, 
 
 {% endlist %}
 """
+
+# Template-compliant fixture for the style/comment checks: all four mandatory comments,
+# the success-guard, the catch comment, the Shape comment before the main result type, and
+# no trailing comma after requestId. Each style test breaks exactly one rule.
+STYLED = '''# Page
+
+{% list tabs %}
+
+- TS
+
+```ts
+import { Text } from '@bitrix24/b24jssdk'
+import type { B24Frame } from '@bitrix24/b24jssdk'
+declare const $b24: B24Frame
+
+// Shape of the payload returned in result (match the "response handling" section of the page)
+type DemoResult = {
+  id: number
+}
+
+try {
+  const response = await $b24.actions.v2.call.make<DemoResult>({
+    method: 'crm.lead.add',
+    params: {
+      title: 'x',
+    },
+    requestId: Text.getUuidRfc4122()
+  })
+
+  // The payload is available only on a successful response
+  if (!response.isSuccess) {
+    console.error(response.getErrorMessages().join('; '))
+  } else {
+    const result = response.getData()!.result
+    console.info(result.id)
+  }
+} catch (error) {
+  // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+  console.error(error)
+}
+```
+
+- UMD
+
+```html
+<script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+<script>
+async function demo() {
+  try {
+    // Initialize the SDK inside a Bitrix24 frame
+    const $b24 = await B24Js.initializeB24Frame()
+
+    const response = await $b24.actions.v2.call.make({
+      method: 'crm.lead.add',
+      params: {
+        title: 'x',
+      },
+      requestId: B24Js.Text.getUuidRfc4122()
+    })
+
+    // The payload is available only on a successful response
+    if (!response.isSuccess) {
+      console.error(response.getErrorMessages().join('; '))
+      return
+    }
+
+    const result = response.getData().result
+    console.info(result.id)
+  } catch (error) {
+    // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+    console.error(error)
+  }
+}
+</script>
+```
+
+{% endlist %}
+'''
 
 # A page with TWO {% list tabs %} blocks: a parameter-description block (no code)
 # then the code-examples block. validate/record must target the code one.
@@ -201,6 +280,47 @@ class ExtractTests(unittest.TestCase):
 
     def test_umd_without_actions(self):
         self._assert_fail(replace_nth(VALID, "$b24.actions.v2.call.make", "$b24.callApi", 2))
+
+    # --- template-uniformity (comment + code-style) checks -------------------
+    def test_styled_fixture_passes_style(self):
+        examples = validate.extract(self._write(STYLED))
+        self.assertEqual(len(examples), 1)
+
+    def test_missing_guard_comment_fails(self):
+        # remove the UMD success-guard comment (4-space indent, unique to UMD)
+        bad = STYLED.replace(
+            "    // The payload is available only on a successful response\n", "", 1)
+        self._assert_fail_msg(bad, "before `if (!response.isSuccess)`")
+
+    def test_missing_init_comment_fails(self):
+        bad = STYLED.replace(
+            "    // Initialize the SDK inside a Bitrix24 frame\n", "", 1)
+        self._assert_fail_msg(bad, "initializeB24Frame")
+
+    def test_missing_catch_comment_fails(self):
+        bad = STYLED.replace(
+            "    // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)\n", "", 1)
+        self._assert_fail_msg(bad, "first line of the catch block")
+
+    def test_trailing_comma_after_requestid_fails(self):
+        bad = STYLED.replace(
+            "requestId: Text.getUuidRfc4122()", "requestId: Text.getUuidRfc4122(),", 1)
+        self._assert_fail_msg(bad, "trailing comma after `requestId`")
+
+    def test_style_errors_flags_main_type_without_shape(self):
+        code = ("type DemoResult = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.call.make<DemoResult>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertTrue(any("main result type" in e for e in validate.style_errors(code)))
+
+    def test_style_errors_exempts_helper_types(self):
+        # a second type that is NOT used as a .make<X> generic needs no Shape comment
+        code = ('// Shape of the payload returned in result (x)\n'
+                "type DemoResult = {\n  id: number\n}\n"
+                "type Helper = {\n  x: number\n}\n"
+                "const r = await $b24.actions.v2.call.make<DemoResult>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertEqual(validate.style_errors(code), [])
 
 
 class HelperTests(unittest.TestCase):
@@ -456,6 +576,13 @@ class FixtureAnchorTests(unittest.TestCase):
         self.assertEqual(MULTIREGION.count("{% list tabs %}"), 2)
         self.assertEqual(len(_tabs.code_regions(MULTIREGION)), 1)  # only the code block has ```ts
 
+    def test_styled_fixture_is_template_compliant(self):
+        for c in (validate.GUARD_COMMENT, validate.INIT_COMMENT,
+                  validate.CATCH_COMMENT, validate.SHAPE_COMMENT):
+            self.assertIn(c, STYLED)
+        self.assertIn(".make<DemoResult>", STYLED)
+        self.assertNotIn("getUuidRfc4122(),", STYLED)
+
 
 class DocsConsistencyTests(unittest.TestCase):
     ACTUALIZE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -475,6 +602,14 @@ class DocsConsistencyTests(unittest.TestCase):
         self.assertIn("Text.getUuidRfc4122()", readme)
         # the deprecated getTotal() must not be recommended as the list pattern
         self.assertNotIn("for lists — `getTotal()`", readme)
+
+    def test_validate_comment_constants_are_in_prompt(self):
+        # validate.py enforces these exact strings; PROMPT.md must document the same canon,
+        # so the enforced rule and the template the agents follow cannot drift apart
+        p = self._read("PROMPT.md")
+        for const in (validate.GUARD_COMMENT, validate.INIT_COMMENT,
+                      validate.CATCH_COMMENT, validate.SHAPE_COMMENT):
+            self.assertIn(const, p)
 
 
 if __name__ == "__main__":

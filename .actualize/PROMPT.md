@@ -175,13 +175,21 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
 - **Body indentation:** inside the 4-space YFM tab indent, use **2-space** steps for the example
   body (not 4). `tsc` / `node --check` accept either, but the corpus standard is 2-space.
 - **Trailing commas:** include them in multi-line object / array literals (the last property of
-  `params`, `fields`, …); none after the final call argument.
+  nested literals like `params`, `fields`, …); **none** after the last property of the outer
+  `call.make({ … })` argument object — i.e. no trailing comma after `requestId`, the final call
+  argument (see the TS/UMD template above). `validate.py` enforces this.
+- **Mandatory template comments (enforced by `validate.py`):** the success-guard comment before
+  `if (!response.isSuccess)`, the UMD init comment before `initializeB24Frame()`, the catch comment
+  as the first line of `catch (error)`, and `// Shape of the payload returned in result (…)` before
+  the main result type. Use the exact wording from the template above.
 - **List NOTE — one canonical wording.** Above `const response` for `*.list` methods:
 
     ```ts
-    // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-    // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-    // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+    // <rest.method> returns a single page (max 50 records). For the whole result set
+    // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+    // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+    // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+    // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
     ```
 
 ## Validation (required)
