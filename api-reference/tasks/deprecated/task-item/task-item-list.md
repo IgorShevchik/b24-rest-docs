@@ -148,9 +148,11 @@
     type TaskItemListResult = Record<string, unknown>[]
 
     try {
-      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      // task.item.list returns a single page (max 50 records). For the whole result set
+      // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+      // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+      // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+      // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
       const response = await $b24.actions.v2.call.make<TaskItemListResult>({
         method: 'task.item.list',
         params: {},
@@ -181,9 +183,11 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          // task.item.list returns a single page (max 50 records). For the whole result set
+          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.list',
             params: {},
@@ -302,9 +306,11 @@
     type TaskItemListResult = Record<string, unknown>[]
 
     try {
-      // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-      // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-      // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+      // task.item.list returns a single page (max 50 records). For the whole result set
+      // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+      // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+      // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+      // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
       const response = await $b24.actions.v2.call.make<TaskItemListResult>({
         method: 'task.item.list',
         params: {
@@ -344,9 +350,11 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // NOTE: for a full multi-page fetch use $b24.actions.v2.callList.make() (returns the whole
-          // array at once) or $b24.actions.v2.fetchList.make() (async generator, chunk by chunk).
-          // Both helpers do NOT accept `order` (it is excluded from their parameter types).
+          // task.item.list returns a single page (max 50 records). For the whole result set
+          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
+          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
+          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
+          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.list',
             params: {
