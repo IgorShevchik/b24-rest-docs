@@ -82,6 +82,7 @@
     declare const $b24: B24Frame
 
     // result.task limited to the requested (select) fields, in the SDK camelCase form
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskGetResult = {
       task: {
         id: string
