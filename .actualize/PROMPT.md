@@ -175,7 +175,13 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
 - **Body indentation:** inside the 4-space YFM tab indent, use **2-space** steps for the example
   body (not 4). `tsc` / `node --check` accept either, but the corpus standard is 2-space.
 - **Trailing commas:** include them in multi-line object / array literals (the last property of
-  `params`, `fields`, …); none after the final call argument.
+  nested literals like `params`, `fields`, …); **none** after the last property of the outer
+  `call.make({ … })` argument object — i.e. no trailing comma after `requestId`, the final call
+  argument (see the TS/UMD template above). `validate.py` enforces this.
+- **Mandatory template comments (enforced by `validate.py`):** the success-guard comment before
+  `if (!response.isSuccess)`, the UMD init comment before `initializeB24Frame()`, the catch comment
+  as the first line of `catch (error)`, and `// Shape of the payload returned in result (…)` before
+  the main result type. Use the exact wording from the template above.
 - **List NOTE — one canonical wording.** Above `const response` for `*.list` methods:
 
     ```ts

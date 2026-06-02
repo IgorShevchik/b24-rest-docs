@@ -137,6 +137,13 @@ strings above are the verified canon (they were normalized across all 118 tasks 
 Acceptance: a file missing any of the four comments or with the wrong comma style FAILs; the 118
 actualized tasks files PASS (after §7).
 
+**Done (this branch):** all five checks live in `validate.py` (`style_errors`) with offline `tests/`
+fixtures (one PASS + one FAIL per rule); the trailing-comma rule and the mandatory comments are
+clarified in `PROMPT.md`; a unit test keeps `validate.py`'s strings in sync with `PROMPT.md`.
+Verified on the tasks corpus — **0** false positives for the four comment/comma rules; the
+Shape-comment rule flags **36** files (= the §7 scope, to backfill before the tasks content lands on
+a hardened `main`).
+
 ## 7. [minor] Backfill `// Shape of the payload` comment on scalar result types (tasks)
 
 The review found ~46 type aliases across ~40 tasks files where the **main** result type has no

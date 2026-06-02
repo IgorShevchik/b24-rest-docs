@@ -9,6 +9,9 @@ Checks (cheapest first):
      blocks found anywhere else on the page;
   3. forbidden tokens: no callMethod / callListMethod / fetchListMethod /
      processResult / processData; an actions.v{2,3} call is present in BOTH tabs;
+  3b. template uniformity: the mandatory comments (success-guard, UMD init, catch,
+      Shape-of-payload before the main result type) are present and `requestId`
+      carries no trailing comma — see PROMPT.md "Code style (mandatory)";
   4. types: `tsc --strict` against a reproducible, lockfile-pinned toolchain
      (.actualize/typecheck/package*.json installed with `npm ci --ignore-scripts`);
   5. syntax: `node --check` on the UMD inline script.
@@ -43,6 +46,13 @@ NODE_TIMEOUT = 120
 
 FORBIDDEN = ["callMethod", "callListMethod", "fetchListMethod",
              "processResult", "processData"]
+
+# Mandatory template comments — the verified canon (see PROMPT.md "TS tab" / "UMD tab").
+# Enforced structurally so the corpus cannot drift; a unit test keeps them in sync with PROMPT.md.
+GUARD_COMMENT = "// The payload is available only on a successful response"
+INIT_COMMENT = "// Initialize the SDK inside a Bitrix24 frame"
+CATCH_COMMENT = "// Thrown on transport or SDK failures (AjaxError, SdkError, etc.)"
+SHAPE_COMMENT = "// Shape of the payload returned in result"
 
 MAX_MD_BYTES = 2_000_000  # guard: a method page is never this big; refuse pathological input
 
@@ -79,6 +89,49 @@ def extract(md_path):
     return [_extract_region(r, i, len(regions)) for i, r in enumerate(regions, 1)]
 
 
+def _prev_nonblank(lines, i):
+    j = i - 1
+    while j >= 0 and not lines[j].strip():
+        j -= 1
+    return lines[j].strip() if j >= 0 else ""
+
+
+def _next_nonblank(lines, i):
+    j = i + 1
+    while j < len(lines) and not lines[j].strip():
+        j += 1
+    return lines[j].strip() if j < len(lines) else ""
+
+
+def style_errors(code):
+    """Template-uniformity lints over one code example (TS or UMD inner JS).
+
+    The mandatory comments and the no-trailing-comma-after-`requestId` canon are
+    enforced structurally so the corpus cannot drift (see PROMPT.md "Code style").
+    Helper types (not used as a `.make<X>` generic) are exempt from the Shape comment.
+    Returns a list of human-readable violation strings (empty == clean).
+    """
+    errs = []
+    lines = code.split("\n")
+    main_types = set(re.findall(r"\.make<(\w+)>", code))  # call/callList/fetchList.make<X>
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s == "if (!response.isSuccess) {" and _prev_nonblank(lines, i) != GUARD_COMMENT:
+            errs.append(f"missing `{GUARD_COMMENT}` before `if (!response.isSuccess)`")
+        if (s.startswith("const $b24") and "B24Js.initializeB24Frame()" in s
+                and _prev_nonblank(lines, i) != INIT_COMMENT):
+            errs.append(f"missing `{INIT_COMMENT}` before `initializeB24Frame()`")
+        if s == "} catch (error) {" and _next_nonblank(lines, i) != CATCH_COMMENT:
+            errs.append(f"missing `{CATCH_COMMENT}` as the first line of the catch block")
+        m = re.match(r"type (\w+) =", s)
+        if m and m.group(1) in main_types and SHAPE_COMMENT not in _prev_nonblank(lines, i):
+            errs.append(f"missing `{SHAPE_COMMENT} (…)` before the main result type `{m.group(1)}`")
+        if "getUuidRfc4122()," in s:
+            errs.append("trailing comma after `requestId` (drop it — it is the last property "
+                        "of the call.make({…}) argument)")
+    return errs
+
+
 def _extract_region(region, idx, total):
     """Validate one code-example region and return its (ts_code, umd_inner_js)."""
     where = f"code region {idx}/{total}"
@@ -105,6 +158,11 @@ def _extract_region(region, idx, total):
         fail(f"TS example in {where} does not use $b24.actions.v{{2,3}}.*")
     if "actions.v2." not in umd_inner and "actions.v3." not in umd_inner:
         fail(f"UMD example in {where} does not use $b24.actions.v{{2,3}}.*")
+
+    style = style_errors(ts) + style_errors(umd_inner)
+    if style:
+        fail(f"code-style/comment violations in {where}:\n"
+             + "\n".join(f"  - {e}" for e in style))
 
     return ts, umd_inner.strip("\n")
 
