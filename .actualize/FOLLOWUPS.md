@@ -107,6 +107,64 @@ If a file mistakenly loses `- TS` (a typo `- Ts`, an accidental tab deletion), C
 error. Options: additionally validate the PR-affected files from the ledger; or warn when a changed
 `api-reference/**` file has none of the expected tabs.
 
+## 6. [major] Enforce template comments + code-style in `validate.py` (uniformity drift)
+
+The five-perspective review of the tasks pilot (content PR #10) found notable **uniformity drift**:
+the agents inserted the template's mandatory JS-tab comments inconsistently. Across the 118 files —
+54 missing success-guard comments, 6 missing UMD init comments, 9 missing catch comments, and a
+split trailing-comma style after `requestId` (11 files with it, 107 without). A manual review-fix
+pass (commit `bb3228b` on the content branch) closed them, but at `crm` scale (~407 files) the same
+drift recurs ×4 and needs another manual sweep. `validate.py` should enforce the template
+structurally, so drift FAILs CI instead of depending on a human reviewer.
+
+Checks to add (over each TS/UMD code region returned by `_tabs.code_regions()`):
+1. `// The payload is available only on a successful response` immediately before
+   `if (!response.isSuccess) {`.
+2. `// Initialize the SDK inside a Bitrix24 frame` immediately before
+   `const $b24 = await B24Js.initializeB24Frame()` (UMD).
+3. `// Thrown on transport or SDK failures (AjaxError, SdkError, etc.)` as the first body line of
+   `} catch (error) {`.
+4. `// Shape of the payload returned in result (…)` before the **main** result type — the one used
+   as the `call.make<X>()` generic. Helper types (`ChecklistItem`, `AttachedObject`, …) are exempt
+   (see §7).
+5. Trailing-comma canon: **no** trailing comma after `requestId` (matches the template and the
+   `user`-tab examples).
+
+Also resolve the trailing-comma contradiction in `PROMPT.md` (Code style) explicitly: the last
+property of the `call.make({ … })` argument object — i.e. `requestId` — carries no trailing comma.
+Cover the new checks with offline `tests/` fixtures (one PASS + one FAIL per rule). The exact comment
+strings above are the verified canon (they were normalized across all 118 tasks files in `bb3228b`).
+Acceptance: a file missing any of the four comments or with the wrong comma style FAILs; the 118
+actualized tasks files PASS (after §7).
+
+## 7. [minor] Backfill `// Shape of the payload` comment on scalar result types (tasks)
+
+The review found ~46 type aliases across ~40 tasks files where the **main** result type has no
+preceding `// Shape of the payload returned in result (…)`, while object types (`= {`) do. These are
+mostly scalar/simple mains (`= boolean | number | null | Array<…> | Record<…>`). Out of scope for the
+A–F review-fix (which normalized the success-guard comment). Add the comment **only** before the main
+type (the `call.make<X>()` generic), never before helper types. Parenthetical by context: default
+`(match the "response handling" section of the page)`, events `(event.bind returns true on success)`,
+scalars may specialize (e.g. `(the method returns null on success)`). Depends on §6 (the check
+defines the standard); run after the hardening lands so `validate.py` confirms completeness. Helper
+script to list candidates (main types only — filters out helper types):
+
+```python
+import subprocess, re
+files = subprocess.check_output(
+    ['git','diff','--name-only','main..HEAD','--','api-reference/tasks']).decode().split()
+for f in files:
+    text = open(f, encoding='utf-8').read(); lines = text.split('\n')
+    mains = set(re.findall(r'call\.make<(\w+)>', text))
+    for i, l in enumerate(lines):
+        m = re.match(r'\s*type (\w+) =', l)
+        if m and m.group(1) in mains:
+            j = i - 1
+            while j >= 0 and not lines[j].strip(): j -= 1
+            if 'Shape of the payload returned in result' not in (lines[j] if j >= 0 else ''):
+                print(f"{f}:{i+1}  {l.strip()[:60]}")
+```
+
 ## Minor (minor/nit, as needed)
 
 - **[minor] Manual typing of result types is not verified against the live API.** The
