@@ -81,6 +81,7 @@
     declare const $b24: B24Frame
 
     // The server returns result:null on successful delete
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type DeleteElapsedItemResult = null
 
     try {

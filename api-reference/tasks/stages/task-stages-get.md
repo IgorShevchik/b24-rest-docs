@@ -88,6 +88,7 @@
     }
 
     // result is a map of stage ID → StageInfo
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type StagesGetResult = Record<string, StageInfo>
 
     try {

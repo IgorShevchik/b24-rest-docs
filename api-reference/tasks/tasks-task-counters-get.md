@@ -87,6 +87,7 @@
       code: number
     }
 
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type CountersGetResult = {
       expired?: CounterInfo
       new_comments?: CounterInfo

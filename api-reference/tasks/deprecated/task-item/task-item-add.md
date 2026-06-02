@@ -69,6 +69,7 @@
     declare const $b24: B24Frame
 
     // task.item.add returns the ID of the newly created task
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskItemAddResult = number
 
     try {
@@ -247,6 +248,7 @@
     declare const $b24: B24Frame
 
     // task.item.update returns true on success
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskItemUpdateResult = boolean
 
     try {

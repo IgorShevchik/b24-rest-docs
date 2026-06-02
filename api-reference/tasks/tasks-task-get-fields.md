@@ -64,6 +64,7 @@
       default?: unknown
       values?: Record<string, string> | string[]
     }
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskFieldsResult = {
       fields: Record<string, TaskFieldDescription>
     }

@@ -158,6 +158,7 @@
       isImportant: string
     }
 
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type CheckListItemsResult = {
       checkListItems: Record<string, CheckListItem>
     }

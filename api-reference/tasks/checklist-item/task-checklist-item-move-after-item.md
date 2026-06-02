@@ -81,6 +81,7 @@
     declare const $b24: B24Frame
 
     // result is null when the item is successfully moved
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type MoveChecklistItemResult = null
 
     try {

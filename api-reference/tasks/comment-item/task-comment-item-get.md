@@ -89,6 +89,7 @@
       VIEW_URL: string
     }
 
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type CommentItemGetResult = {
       POST_MESSAGE_HTML: string | null
       ID: string

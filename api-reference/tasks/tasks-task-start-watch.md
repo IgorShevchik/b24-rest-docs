@@ -73,6 +73,7 @@
       deadline: ISODate | null
     }
 
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskStartWatchResult = {
       task: TaskData
     }

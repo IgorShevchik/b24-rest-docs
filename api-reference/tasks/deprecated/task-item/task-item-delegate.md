@@ -68,6 +68,7 @@
     declare const $b24: B24Frame
 
     // TODO: verify API version — the page has no JSON response shape
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type DelegateResult = boolean
 
     try {

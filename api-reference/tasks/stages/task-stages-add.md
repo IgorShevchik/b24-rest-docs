@@ -107,6 +107,7 @@
     declare const $b24: B24Frame
 
     // ID of the added stage returned in result
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type StageAddResult = number
 
     try {

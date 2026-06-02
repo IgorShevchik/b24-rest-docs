@@ -73,6 +73,7 @@
     declare const $b24: B24Frame
 
     // result is null on success (the comment was unfixed from the task result)
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type DeleteFromCommentResult = null
 
     try {

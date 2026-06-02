@@ -63,6 +63,7 @@
 
     // Shape of the payload returned in result
     // NOTE: the manifest format may change without notice — it is for reference only
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type ManifestResult = Record<string, unknown>
 
     try {

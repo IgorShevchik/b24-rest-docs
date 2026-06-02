@@ -89,6 +89,7 @@
     declare const $b24: B24Frame
 
     // The method returns an array of allowed action IDs for the task
+    // Shape of the payload returned in result (match the "response handling" section of the page)
     type AllowedActionsResult = number[]
 
     try {
