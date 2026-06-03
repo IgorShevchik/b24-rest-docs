@@ -237,6 +237,19 @@ class ExtractTests(unittest.TestCase):
     def test_missing_umd_tab(self):
         self._assert_fail(VALID.replace("- UMD\n", "", 1))
 
+    def test_new_tab_labels_pass(self):
+        # canonical doc-team labels "JS (TS)" / "JS (UMD)" are accepted (VALID uses the legacy
+        # "TS" / "UMD"); code is extracted by fence language, not by the tab label
+        md = VALID.replace("- TS\n", "- JS (TS)\n", 1).replace("- UMD\n", "- JS (UMD)\n", 1)
+        examples = validate.extract(self._write(md))
+        self.assertEqual(len(examples), 1)
+        self.assertIn("actions.v2.", examples[0][0])
+
+    def test_new_label_missing_umd_fails(self):
+        # JS (TS) present but neither "JS (UMD)" nor legacy "UMD" -> fail
+        md = VALID.replace("- TS\n", "- JS (TS)\n", 1).replace("- UMD\n", "", 1)
+        self._assert_fail(md)
+
     def test_two_ts_blocks(self):
         self._assert_fail(VALID.replace("{% endlist %}", "```ts\nconst x = 1\n```\n\n{% endlist %}"))
 

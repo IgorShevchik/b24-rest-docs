@@ -3,7 +3,7 @@
 You are given a **path to a single documentation `.md` file** of the Bitrix24 REST API (usually
 under `api-reference/**`). The task is to replace the deprecated example in the **`- JS`** tab
 (which uses `$b24.callMethod` / `$b24.callListMethod` / `$b24.fetchListMethod`, removed in
-b24jssdk 2.0) with **two tabs** — **`- TS`** and **`- UMD`** — on the current SDK API. Do not
+b24jssdk 2.0) with **two tabs** — **`- JS (TS)`** and **`- JS (UMD)`** — on the current SDK API. Do not
 change the page content, only the example.
 
 Input: `<PATH>` — the path to the file.
@@ -13,9 +13,10 @@ Input: `<PATH>` — the path to the file.
 1. **Change only the example** inside the `{% list tabs %}` block. Do NOT touch the rest of the
    text: headings, parameter descriptions, the "response handling" section, error codes,
    "continue learning".
-2. **Remove the `- JS` tab** (old jsSDK) and put in its place, in order: **`- TS`**, then
-   **`- UMD`**. A page may have **several** `{% list tabs %}` code-example blocks (each with its
-   own `- JS` tab) — convert **every** one of them.
+2. **Remove the `- JS` tab** (old jsSDK) and put in its place, in order: **`- JS (TS)`**, then
+   **`- JS (UMD)`** (the doc-team tab-naming convention — keep the `JS (…)` wrapper exactly). A page
+   may have **several** `{% list tabs %}` code-example blocks (each with its own `- JS` tab) —
+   convert **every** one of them.
 3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest` tabs —
    neither the code nor the order.
 4. Carry the request parameters over from the old JS example **1:1** (`taskId`, `fields`,
@@ -54,8 +55,8 @@ usually matters.
 
 ## Reading the response: `getData()!` vs `getData()`
 
-- TS (in the `else` branch, i.e. `isSuccess === true`): `response.getData()!.result` (with `!`).
-- UMD (after `if (!isSuccess) { …; return }`): `response.getData().result` (without `!`).
+- JS (TS) — in the `else` branch (`isSuccess === true`): `response.getData()!.result` (with `!`).
+- JS (UMD) — after `if (!isSuccess) { …; return }`: `response.getData().result` (without `!`).
 - Do NOT use `response.getTotal()` — it is `@deprecated` / `@removed 2.0.0` (tied to the v2 `total`
   field, absent in v3). Page size — `result.<key>.length`; the full count — via a list helper
   (`callList.make` → whole array → `.length`) or `aggregate` (count) in v3.
@@ -75,8 +76,10 @@ usually matters.
 ## If there is nothing to change
 
 No `{% list tabs %}` block or no `- JS` tab → print `SKIP: no JS tab` and do not change the file.
+(The two new tabs are labelled `JS (TS)` and `JS (UMD)` — the `- JS` referred to here is the OLD
+single jsSDK tab being replaced, not the new ones.)
 
-## TS tab (assumes an already-initialized `$b24`)
+## JS (TS) tab (assumes an already-initialized `$b24`)
 
 ```ts
 // This snippet is an ES module: top-level await requires type="module" or a bundler.
@@ -113,7 +116,7 @@ try {
 }
 ```
 
-## UMD tab (full initialization)
+## JS (UMD) tab (full initialization)
 
 In UMD, `call.make` is called **without** the generic `<T>` parameter (this is plain JS, not TS).
 
@@ -155,13 +158,13 @@ In UMD, `call.make` is called **without** the generic `<T>` parameter (this is p
 Each tab: a `- Name` line, a blank line, then a code block indented by **4 spaces**:
 
 ```
-- TS
+- JS (TS)
 
     ```ts
     ...code...
     ```
 
-- UMD
+- JS (UMD)
 
     ```html
     ...code...
@@ -199,7 +202,7 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
 > runner does validation and the ledger write. The commands below are for a **manual** run.
 
 1. `python3 .actualize/validate.py <PATH>` → must be `PASS`. It checks: tab structure (no `- JS`,
-   `- TS`/`- UMD` present); extracts blocks ONLY from inside `{% list tabs %}` (every code-example
+   `- JS (TS)`/`- JS (UMD)` present); extracts blocks ONLY from inside `{% list tabs %}` (every code-example
    block — a page may have several, and each is validated); forbidden tokens
    (`callMethod`/`callListMethod`/`fetchListMethod`/`processResult`/`processData`); the presence of
    `$b24.actions.v{2,3}.*` in **both** tabs; `tsc --strict` against the PINNED `@bitrix24/b24jssdk`
@@ -218,7 +221,7 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 
 > Not filled in on `SKIP` (the file was not changed).
 
-- [ ] the `- JS` tab is removed, `- TS` and `- UMD` added (in every code-example block)
+- [ ] the `- JS` tab is removed, `- JS (TS)` and `- JS (UMD)` added (in every code-example block)
 - [ ] the other tabs and the page text are unchanged
 - [ ] no `callMethod` / `callListMethod` / `fetchListMethod` in the jsSDK example
 - [ ] no `processResult` / `processData` calls

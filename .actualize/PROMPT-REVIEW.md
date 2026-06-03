@@ -1,14 +1,14 @@
 # Prompt: review of an actualized file
 
 You are given a **path to a `.md` file** that has already been actualized per
-`.actualize/PROMPT.md`. Review it and fix it if needed. Change only the example (the `- TS` /
-`- UMD` tabs).
+`.actualize/PROMPT.md`. Review it and fix it if needed. Change only the example (the `- JS (TS)` /
+`- JS (UMD)` tabs).
 
 Input: `<PATH>`.
 
 ## What to check
 
-1. **Tab structure**: `- TS` and `- UMD` are present, the `- JS` tab (old jsSDK) is gone. The
+1. **Tab structure**: `- JS (TS)` and `- JS (UMD)` are present, the `- JS` tab (old jsSDK) is gone. The
    `cURL`, `PHP`, `BX24.js`, `PHP CRest` tabs are in place and unchanged. A page may have several
    `{% list tabs %}` code-example blocks — check that **every** one was converted.
 2. **No deprecated calls**: the example has no `callMethod`, `callListMethod`, `fetchListMethod`.
