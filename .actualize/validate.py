@@ -77,10 +77,13 @@ def extract(md_path):
 
     if "- JS\n" in s:
         fail('legacy "- JS" tab still present')
-    if "- TS\n" not in s:
-        fail('"- TS" tab missing')
-    if "- UMD\n" not in s:
-        fail('"- UMD" tab missing')
+    # Canonical tab labels are "JS (TS)" / "JS (UMD)" (doc-team convention). The older
+    # "- TS" / "- UMD" labels are still accepted during the transition (existing pages get
+    # renamed upstream and synced back); tighten to canonical-only once that sync lands.
+    if "- JS (TS)\n" not in s and "- TS\n" not in s:
+        fail('"JS (TS)" tab missing')
+    if "- JS (UMD)\n" not in s and "- UMD\n" not in s:
+        fail('"JS (UMD)" tab missing')
 
     regions = _tabs.code_regions(s)
     if not regions:

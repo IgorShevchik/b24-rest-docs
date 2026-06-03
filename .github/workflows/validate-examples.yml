@@ -92,8 +92,8 @@ jobs:
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             [ -f "$f" ] || continue
-            # only validate files that carry the actualized "- TS" tab
-            if grep -qE '^- TS$' "$f"; then
+            # only validate files that carry an actualized TS tab: "JS (TS)" (canonical) or legacy "TS"
+            if grep -qE '^- (JS \(TS\)|TS)$' "$f"; then
               echo "::group::validate $f"
               python3 .actualize/validate.py "$f" || rc=1
               echo "::endgroup::"

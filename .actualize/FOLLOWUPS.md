@@ -102,10 +102,24 @@ mandatory policy.
 
 ## 5. [major] The CI filter `grep '- TS'` silently skips files
 
-`validate-examples.yml` runs `validate.py` only on changed `*.md` files that contain a `- TS` line.
+`validate-examples.yml` runs `validate.py` only on changed `*.md` files that carry the TS-tab line
+(matched as `^- (JS \(TS\)|TS)$` — canonical `JS (TS)` or legacy `TS`, see §8).
 If a file mistakenly loses `- TS` (a typo `- Ts`, an accidental tab deletion), CI passes it without
 error. Options: additionally validate the PR-affected files from the ledger; or warn when a changed
 `api-reference/**` file has none of the expected tabs.
+
+## 8. [transitional] Tab labels renamed to `JS (TS)` / `JS (UMD)` (doc-team convention)
+
+The Bitrix documentation team standardised the example tab labels as **`JS (TS)`** and
+**`JS (UMD)`** (not `- TS` / `- UMD`). Applied to the rules: `PROMPT.md` / `PROMPT-REVIEW.md`
+templates, the `validate.py` structural check, the CI filter, and the test fixtures. Code extraction
+(`_tabs.py`) is unaffected — it keys off the fence language (` ```ts ` / ` ```html `), not the label.
+
+`validate.py` and the CI filter currently **accept both** the canonical labels and the legacy
+`- TS` / `- UMD` (transition): the already-merged `tasks/` and `user/` pages keep the old labels
+until the doc team renames them upstream and we pull that back into the fork. **Follow-up:** once
+that parent-sync lands, drop the legacy spellings (tighten `validate.py` + the CI filter to
+canonical-only) and re-record the ledger.
 
 ## 6. [major] Enforce template comments + code-style in `validate.py` (uniformity drift)
 

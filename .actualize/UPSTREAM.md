@@ -11,7 +11,7 @@ documentation repo. This runbook is the process for that hand-off.
 ## Scope — what goes upstream vs what stays in the fork
 
 **Goes upstream (content only):**
-- `api-reference/**` — the actualized `- TS` / `- UMD` examples (and nothing else on those pages;
+- `api-reference/**` — the actualized `- JS (TS)` / `- JS (UMD)` examples (and nothing else on those pages;
   prose, parameter tables, response sections are unchanged by actualization).
 
 **Stays in the fork (never sent upstream):**
