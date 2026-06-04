@@ -367,6 +367,38 @@ class ExtractTests(unittest.TestCase):
                 "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
         self.assertEqual(validate.style_errors(code), [])
 
+    def test_has_legacy_js_tab_only_inside_tabs(self):
+        # a prose "- JS" bullet must NOT count; only a "- JS" tab inside {% list tabs %} does
+        self.assertFalse(validate._has_legacy_js_tab("intro\n- JS\n- PHP\n\nmore prose\n"))
+        self.assertTrue(validate._has_legacy_js_tab(
+            "{% list tabs %}\n- JS\n\n```ts\nx\n```\n{% endlist %}"))
+
+    def test_extract_ignores_prose_js_bullet(self):
+        # a prose "- JS" line elsewhere on the page must not trip the legacy-tab check
+        md = VALID.replace("# Page\n", "# Page\n\nLanguages:\n- JS\n- PHP\n")
+        self.assertEqual(len(validate.extract(self._write(md))), 1)
+
+    def test_extract_accepts_python_tab(self):
+        # a b24pysdk "- Python" tab (```python) alongside the JS tabs must not affect validation
+        py_tab = "\n- Python\n\n```python\nresult = b24.call('crm.lead.add')\n```\n"
+        md = VALID.replace("\n{% endlist %}", py_tab + "\n{% endlist %}")
+        self.assertEqual(len(validate.extract(self._write(md))), 1)
+
+    def test_main_result_types_keeps_named_generics_only(self):
+        code = ("type Foo = {}\n .make<Foo>(1) .make<Foo[]>(1) "
+                ".make<number[]>(1) .make<{ a: 1 }>(1)")
+        self.assertEqual(validate.main_result_types(code), {"Foo", "number"})
+
+    def test_shape_coverage_splits_checked_and_uncovered(self):
+        code = ("type Foo = {\n  id: number\n}\n"
+                "const a = x.make<Foo[]>(1)\n"
+                "const b = x.make<number[]>(1)\n"
+                "const c = x.make<{ a: 1 }>(1)\n")
+        checked, uncovered = validate.shape_coverage(code)
+        self.assertEqual(checked, {"Foo"})
+        self.assertIn("number[]", uncovered)
+        self.assertTrue(any("{" in u for u in uncovered))
+
 
 class HelperTests(unittest.TestCase):
     def test_replace_nth_targets_only_the_nth(self):
