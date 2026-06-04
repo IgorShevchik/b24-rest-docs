@@ -17,8 +17,9 @@ Input: `<PATH>` — the path to the file.
    **`- JS (UMD)`** (the doc-team tab-naming convention — keep the `JS (…)` wrapper exactly). A page
    may have **several** `{% list tabs %}` code-example blocks (each with its own `- JS` tab) —
    convert **every** one of them.
-3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest` tabs —
-   neither the code nor the order.
+3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest`, or
+   `Python` (b24pysdk) tabs — neither the code nor the order. Only the `- JS (TS)` / `- JS (UMD)`
+   tabs are in scope; leave every other-language tab byte-for-byte unchanged.
 4. Carry the request parameters over from the old JS example **1:1** (`taskId`, `fields`,
    `select`, `filter`, `order`, `params`, `start`, `id`, `entityTypeId`, etc.).
 5. **Comments and example string values are in English.**

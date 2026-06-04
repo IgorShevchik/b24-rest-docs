@@ -95,9 +95,9 @@ def extract(md_path):
 
     if _has_legacy_js_tab(s):
         fail('legacy "- JS" tab still present')
-    # Canonical tab labels are "JS (TS)" / "JS (UMD)" (doc-team convention). The older
-    # "- TS" / "- UMD" labels are still accepted during the transition (existing pages get
-    # renamed upstream and synced back); tighten to canonical-only once that sync lands.
+    # Canonical tab labels are "JS (TS)" / "JS (UMD)" (doc-team convention). The rename has landed
+    # (corpus: 134 "- JS (TS)" pages, 0 legacy "- TS"); the older "- TS" / "- UMD" labels are kept
+    # accepted only as a thin safety margin. Tightening to canonical-only is the remaining §8 step.
     if "- JS (TS)\n" not in s and "- TS\n" not in s:
         fail('"JS (TS)" tab missing')
     if "- JS (UMD)\n" not in s and "- UMD\n" not in s:

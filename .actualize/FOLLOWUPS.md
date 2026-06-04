@@ -3,6 +3,9 @@
 GitHub Issues are disabled in the repository, so review items that do not block the tooling merge
 are recorded here. When Issues are enabled — migrate these.
 
+Section numbers are **stable IDs** (assigned in review order), not a reading order — entries are
+grouped by status/theme, so the headings may read 1, 2, … 5, 8, 6, 7. Cite items by their ID.
+
 ## 1. [major] SDK version policy: typecheck `@1.2.0` vs runtime `@1` drift
 
 Examples are typechecked against a lockfile-pinned `@bitrix24/b24jssdk`
@@ -120,11 +123,13 @@ The Bitrix documentation team standardised the example tab labels as **`JS (TS)`
 templates, the `validate.py` structural check, the CI filter, and the test fixtures. Code extraction
 (`_tabs.py`) is unaffected — it keys off the fence language (` ```ts ` / ` ```html `), not the label.
 
-`validate.py` and the CI filter currently **accept both** the canonical labels and the legacy
-`- TS` / `- UMD` (transition): the already-merged `tasks/` and `user/` pages keep the old labels
-until the doc team renames them upstream and we pull that back into the fork. **Follow-up:** once
-that parent-sync lands, drop the legacy spellings (tighten `validate.py` + the CI filter to
-canonical-only) and re-record the ledger.
+`validate.py` and the CI filter **accept both** the canonical labels and the legacy `- TS` / `- UMD`.
+**Update (tooling-hardening):** the rename has fully landed — the corpus is now **134 `- JS (TS)`
+pages, 0 legacy `- TS`** — so the dual acceptance is harmless dead-acceptance kept as a thin safety
+margin. **Remaining step:** drop the legacy spellings (tighten `validate.py` + the CI filter to
+canonical-only and switch the test fixtures from `- TS`/`- UMD` to `- JS (TS)`/`- JS (UMD)`). It is a
+focused cleanup with fixture churn, deferred out of the hardening PR to keep that PR's scope
+(security/observability) tight.
 
 ## 6. [major] Enforce template comments + code-style in `validate.py` (uniformity drift)
 
