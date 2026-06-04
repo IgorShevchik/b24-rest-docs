@@ -225,7 +225,7 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 > Not filled in on `SKIP` (the file was not changed).
 
 - [ ] the `- JS` tab is removed, `- JS (TS)` and `- JS (UMD)` added (in every code-example block)
-- [ ] the other tabs and the page text are unchanged
+- [ ] the other-language tabs (cURL / PHP / BX24.js / PHP CRest / `Python` b24pysdk) and the page text are unchanged
 - [ ] no `callMethod` / `callListMethod` / `fetchListMethod` in the jsSDK example
 - [ ] no `processResult` / `processData` calls
 - [ ] comments and values in English

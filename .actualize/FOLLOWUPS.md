@@ -61,15 +61,15 @@ Still deferred:
   `tsc`, so serial validation is not on the critical path;
 - **`record.py` batch mode** (N paths from stdin) — for now the write runs in a serial loop (single
   writer); needed only if the write becomes the bottleneck (today the agent edit dominates);
-- **blast-radius blind spots (known limitation).** The check works via `git status` and sees only
-  what git reports in the working tree. NOT caught: (a) writes **outside the repository** (an absolute
-  path — `~/.ssh`, `/tmp`); (b) **gitignored paths in the tree** (`.claude/`, `CLAUDE.md`); (c)
-  **`.git/`** (e.g. `.git/config` → `credential.helper`). The agent's `Edit` tool is not path-limited
-  (and `git clean -fd` on revert also leaves gitignored files — without `-x`). Closing this fully —
-  process-level FS sandboxing of the agent (bubblewrap/firejail), or a CLI allowlist
-  (`--add-dir`/`--allowedDirectories`) once it exists. Recorded in the test harness as
-  test-documentation: out-of-tree (test 7) and a gitignored path in the tree (test 8); the
-  `.git/config` vector has no test yet.
+- **blast-radius blind spots (partly closed).** The check sees what git reports in the working tree.
+  Now CAUGHT (tooling-hardening): **gitignored paths in the tree** — the check lists `ls-files
+  --others` *without* `--exclude-standard` and flags any new path absent from the pre-edit
+  `IGNORED_BEFORE` snapshot (test 8), while a developer's pre-existing ignored files are excluded
+  (test 8b); on abort the untracked escapees are removed surgically and tracked ones are reverted,
+  not deleted (test 6b). STILL NOT caught: (a) writes **outside the repository** (an absolute path —
+  `~/.ssh`, `/tmp`; test 7); (b) **`.git/`** (e.g. `.git/config` → `credential.helper`, no test yet).
+  The agent's `Edit` tool is not path-limited; closing these fully needs process-level FS sandboxing
+  of the agent (bubblewrap/firejail) or a CLI directory allowlist (`--add-dir`) once it exists.
 
 **Conditions before the first real `RUN=1`** (do not block the tooling merge, but are mandatory
 before a corpus run):
@@ -77,16 +77,17 @@ before a corpus run):
   script header; on `main`/`master` the script warns);
 - **not on a machine with production secrets** in `~` (`~/.ssh`, etc.) — while there is no FS
   sandboxing of the agent (see the blind spots above);
-- watch §1 (SDK version drift) and §5 (the CI filter `grep '- TS'`) — both cause a silent regression
-  on a bulk run;
-- make sure the `claude` binary supports `--permission-mode acceptEdits --allowed-tools` (the script
-  only checks the binary is present, not the flags).
+- watch §1 (SDK version drift) — it can cause a silent regression on a bulk run (§5's CI-filter gap
+  is now fixed: ledger-tracked pages are validated even if a tab is lost);
+- the `claude` binary must support `--permission-mode acceptEdits --allowed-tools` — the CLI preflight
+  now aborts with a clear message if `--help` does not advertise these flags.
 
 **Small nits (after the multi-review, low priority):**
 - the batch commit message does not include a file list (visible only via `git show`); if wanted —
   the first N names in the commit body;
-- `git clean -fdq -e .tscheck` on `SECURITY ABORT` does not touch gitignored escapees (without `-x`);
-  acceptable for now (no harm, `.tscheck` is a cache); to tighten — `git clean -fdxq --exclude=.tscheck`.
+- ~~`git clean -fdq -e .tscheck` on `SECURITY ABORT` does not touch gitignored escapees~~ **[done,
+  tooling-hardening]** — the abort now removes the exact untracked escapees surgically (`rm` per path,
+  skipping tracked ones), so gitignored loot is cleaned without nuking unrelated ignored files.
 
 ## 3. [minor] Full bash test harness for run-batch.sh
 
@@ -129,7 +130,8 @@ pages, 0 legacy `- TS`** — so the dual acceptance is harmless dead-acceptance 
 margin. **Remaining step:** drop the legacy spellings (tighten `validate.py` + the CI filter to
 canonical-only and switch the test fixtures from `- TS`/`- UMD` to `- JS (TS)`/`- JS (UMD)`). It is a
 focused cleanup with fixture churn, deferred out of the hardening PR to keep that PR's scope
-(security/observability) tight.
+(security/observability) tight. When Issues are enabled, file a tracking issue so this dead
+dual-acceptance does not calcify into permanent dead code.
 
 ## 6. [major] Enforce template comments + code-style in `validate.py` (uniformity drift)
 

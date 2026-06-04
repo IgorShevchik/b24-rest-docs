@@ -148,6 +148,19 @@ check "stray untracked file removed"   "[ ! -f \"\$REPO/api-reference/tasks/INJE
 check "nothing recorded in ledger"     "! grep -qE 'pass1|pass2' \"\$REPO/.actualize/ledger.tsv\""
 rm -rf "$REPO"
 
+# 6b) a TRACKED file the agent touches outside its plan must be REVERTED, not DELETED, on abort:
+#     `git checkout -- .` restores it and the surgical rm must SKIP tracked paths (regression guard).
+make_repo
+printf 'keep me\n' > "$REPO/notes.txt"            # a tracked file NOT in the batch plan
+git -C "$REPO" add notes.txt && git -C "$REPO" commit -q -m "add notes" >/dev/null
+out="$( cd "$REPO" && PATH="$REPO/bin:$PATH" RUN=1 \
+        STUB_ESCAPE_FILE="$REPO/notes.txt" \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "tracked escape aborts (exit 1)"      "[ $rc -eq 1 ]"
+check "tracked escape: file NOT deleted"    "[ -f \"\$REPO/notes.txt\" ]"
+check "tracked escape: reverted to HEAD"    "[ \"\$(cat \"\$REPO/notes.txt\")\" = 'keep me' ]"
+rm -rf "$REPO"
+
 # 7) KNOWN LIMITATION (documentation test): blast-radius is a WORKING-TREE check, so
 #    a write OUTSIDE the repo (an absolute path like ~/.ssh or /tmp) is NOT caught.
 #    This pins that gap: the batch proceeds normally and the out-of-tree file IS
@@ -272,6 +285,26 @@ out="$( cd "$REPO" && CLAUDE_BIN="$STUB" RUN=1 NO_COMMIT=1 \
         bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
 check "preflight: incompatible CLI exits 1"      "[ $rc -eq 1 ]"
 check "preflight: names the missing capability"  "printf '%s' \"\$out\" | grep -q 'does not advertise'"
+rm -rf "$REPO"; rm -f "$STUB"
+
+# 15b) CLI preflight POSITIVE: a binary whose --help advertises both flags passes through normally.
+make_repo
+STUB="$(mktemp)"
+cat > "$STUB" <<'SH'
+#!/usr/bin/env bash
+prompt=""; prev=""
+for a in "$@"; do [ "$prev" = "-p" ] && prompt="$a"; prev="$a"; done
+[ "$1" = "--help" ] && { echo "flags: --permission-mode --allowed-tools --model"; exit 0; }
+path=$(printf '%s\n' "$prompt" | grep -oE '<PATH>[^<]+</PATH>' | head -1 | sed 's/<PATH>//; s|</PATH>||')
+[ -n "$path" ] || exit 0
+printf '\n// edited by stub\n' >> "$path"
+exit 0
+SH
+chmod +x "$STUB"
+out="$( cd "$REPO" && CLAUDE_BIN="$STUB" RUN=1 NO_COMMIT=1 \
+        bash .actualize/run-batch.sh api-reference/tasks 10 2 2>&1 )"; rc=$?
+check "preflight positive: run proceeds (exit 0)" "[ $rc -eq 0 ]"
+check "preflight positive: not flagged"           "! printf '%s' \"\$out\" | grep -q 'does not advertise'"
 rm -rf "$REPO"; rm -f "$STUB"
 
 # 16) secret-scan: an AWS-key-shaped string injected by the agent blocks the commit (exit 1).

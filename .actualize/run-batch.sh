@@ -126,8 +126,10 @@ command -v "$CLAUDE_BIN" >/dev/null 2>&1 || {
 }
 # preflight: confirm the CLI still understands the flags we drive it with, so a renamed/removed flag
 # fails fast HERE (clear message) instead of silently no-op'ing every edit mid-batch. If --help is
-# unavailable or empty (e.g. a stubbed binary in tests), skip the probe rather than guess.
-if _help="$("$CLAUDE_BIN" --help 2>/dev/null)" && [ -n "$_help" ]; then
+# unavailable or empty (e.g. a stubbed binary in tests), skip the probe rather than guess. The probe
+# is timeout-guarded so a CLI that hangs on --help cannot wedge the batch.
+_probe=("$CLAUDE_BIN" --help); command -v timeout >/dev/null 2>&1 && _probe=(timeout 10 "${_probe[@]}")
+if _help="$("${_probe[@]}" 2>/dev/null)" && [ -n "$_help" ]; then
   for _flag in --permission-mode --allowed-tools; do
     case "$_help" in
       *"$_flag"*) : ;;
@@ -177,7 +179,7 @@ trap on_interrupt INT TERM
 # pre-existing ignored files (a local .env, editor cruft) and never falsely abort on the latter.
 declare -A IGNORED_BEFORE=()
 while IFS= read -r _i; do [ -n "$_i" ] && IGNORED_BEFORE["$_i"]=1; done \
-  < <(git -c core.quotepath=false ls-files --others)
+  < <(git -c core.quotepath=false ls-files --others | grep -v '^\.actualize/\.tscheck/')
 
 # --- 1. EDIT — parallel (slow step; files differ => no working-tree conflict) --
 edit_one() {
@@ -235,10 +237,13 @@ if [ "${#ESCAPED[@]}" -gt 0 ]; then
   printf '   %s\n' "${ESCAPED[@]}" >&2
   echo "   Reverting the entire batch; nothing committed. Logs: $LOGDIR" >&2
   KEEP_LOGS=1
-  git checkout -- . 2>/dev/null
-  # remove exactly the escapees (including any gitignored loot we just surfaced); surgical, so a
-  # developer's pre-existing ignored files (snapshotted in IGNORED_BEFORE) are left untouched.
-  for e in "${ESCAPED[@]}"; do rm -rf -- "$e" 2>/dev/null; done
+  git checkout -- . 2>/dev/null   # tracked escapees are reverted to HEAD here
+  # delete ONLY untracked escapees (new files, incl. gitignored loot); a tracked file the agent
+  # touched outside its plan was just reverted above — rm'ing it would destroy it instead. Paths are
+  # repo-relative and PWD is the repo root (asserted at startup), so rm stays inside the tree.
+  for e in "${ESCAPED[@]}"; do
+    git ls-files --error-unmatch -- "$e" >/dev/null 2>&1 || rm -rf -- "$e" 2>/dev/null
+  done
   exit 1
 fi
 
@@ -296,7 +301,9 @@ if [ "${#PASSED[@]}" -gt 0 ] && [ "${NO_COMMIT:-0}" != "1" ]; then
   # the agent may have pasted reach a commit. High-confidence formats only — these never appear in
   # API docs, so legitimate example payloads are not false-flagged.
   _secret_re='AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9A-Za-z-]{10,}'
-  if _hits="$(grep -nIEH "$_secret_re" -- "${PASSED[@]}" 2>/dev/null)"; then
+  # scan only the lines the agent ADDED (the working-tree diff), not whole files, so a pre-existing
+  # string is never mis-attributed and only agent-introduced content gates the commit.
+  if _hits="$(git diff -- "${PASSED[@]}" | grep -E "^\+.*($_secret_re)" 2>/dev/null)"; then
     echo ">> SECURITY ABORT: possible secret(s) in actualized file(s); NOT committing:" >&2
     printf '%s\n' "$_hits" >&2
     KEEP_LOGS=1

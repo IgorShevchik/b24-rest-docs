@@ -125,11 +125,12 @@ def _next_nonblank(lines, i):
 
 
 def main_result_types(code):
-    """Named element types fed to a call/callList/fetchList.make<X> or make<X[]> generic.
+    """Element type names taken from every `.make<X>` / `.make<X[]>` generic in the code.
 
-    Only simple word-char generics (`\\w+`, optional `[]`) name a type a local `type X =` can
-    declare; inline-literal or primitive generics (make<{…}>, make<number[]>) are surfaced by
-    shape_coverage() instead, so they are never silently dropped from the Shape check.
+    Returns only simple word-char generics (`\\w+`, optional `[]`); inline-literal or multi-type
+    generics (make<{…}>, make<Foo, Bar>) are excluded. A primitive like `number` (from make<number[]>)
+    does pass the `\\w+` filter and is returned, but it can never have a local `type number =`, so the
+    Shape lint in style_errors() is a no-op for it; shape_coverage() reports such generics explicitly.
     """
     out = set()
     for g in MAKE_RE.findall(code):
