@@ -32,7 +32,6 @@
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type PlacementBindResult = boolean
 
-    // TODO: verify API version
     try {
       const response = await $b24.actions.v2.call.make<PlacementBindResult>({
         method: 'placement.bind',
@@ -191,7 +190,7 @@
 
     // Shape of each event returned in result[]
     type PlacementEvent = {
-      id: string // TODO: verify API version
+      id: string
     }
 
     try {
@@ -338,7 +337,7 @@
     declare const $b24: B24Frame
 
     // Shape of the payload returned in result (match the "response handling" section of the page)
-    type ViewEventResult = boolean // TODO: verify API version
+    type ViewEventResult = boolean
 
     try {
       const response = await $b24.actions.v2.call.make<ViewEventResult>({
@@ -460,7 +459,7 @@
     declare const $b24: B24Frame
 
     // Shape of the payload returned in result (match the "response handling" section of the page)
-    type AddEventResult = boolean // TODO: verify API version
+    type AddEventResult = boolean
 
     try {
       const response = await $b24.actions.v2.call.make<AddEventResult>({
@@ -566,7 +565,7 @@
     declare const $b24: B24Frame
 
     // Shape of the payload returned in result (match the "response handling" section of the page)
-    type EditEventResult = boolean // TODO: verify API version
+    type EditEventResult = boolean
 
     try {
       const response = await $b24.actions.v2.call.make<EditEventResult>({
@@ -690,7 +689,7 @@
     declare const $b24: B24Frame
 
     // Shape of the payload returned in result (match the "response handling" section of the page)
-    type DeleteEventResult = boolean // TODO: verify API version
+    type DeleteEventResult = boolean
 
     try {
       const response = await $b24.actions.v2.call.make<DeleteEventResult>({

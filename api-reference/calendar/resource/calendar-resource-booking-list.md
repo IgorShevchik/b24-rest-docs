@@ -127,7 +127,7 @@
       DATE_FROM_FORMATTED: string
       DATE_TO_FORMATTED: string
       SECT_ID: string
-      RESOURCE_BOOKING_ID: number
+      RESOURCE_BOOKING_ID: string
     }
 
     try {
@@ -347,7 +347,7 @@
       DATE_FROM_FORMATTED: string
       DATE_TO_FORMATTED: string
       SECT_ID: string
-      RESOURCE_BOOKING_ID: number
+      RESOURCE_BOOKING_ID: string
     }
 
     try {

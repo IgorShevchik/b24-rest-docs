@@ -75,6 +75,17 @@
       DATE_FROM: string
       DATE_TO: string
       DESCRIPTION: string
+      EVENT_TYPE: string
+      TZ_FROM: string
+      TZ_TO: string
+      SECTION_ID: string
+      CREATED_BY: string
+      ACCESSIBILITY: string
+      IMPORTANCE: string
+      IS_MEETING: boolean
+      MEETING_STATUS: string
+      COLOR: string
+      LOCATION: string
     }
 
     try {
