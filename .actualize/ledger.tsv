@@ -129,7 +129,7 @@ date	file	sha256	status	method
 2026-06-03T13:58:13+00:00	api-reference/user/user-get.md	e8aff301a59aa7e5dc8ccfcd56a986874d24349edf31ccf86c31ac8762ef2895	done	user.get
 2026-06-03T13:58:13+00:00	api-reference/user/user-search.md	810c241378cd2ec19ecf11ab7cf017c183b98467953a68d87380ec070dae03bb	done	user.search
 2026-06-03T13:58:13+00:00	api-reference/user/user-update.md	f035bba8d1478fe200a208df91e886ef7a0e6477533bbaac940b1a9f89fdba64	done	user.update
-2026-06-03T13:58:13+00:00	api-reference/user/userfields/user-userfield-add.md	5321f770571d401bbd39e4556fe9fc1215f21292be5e3284f51070b04c55e75e	done	user.userfield.add
-2026-06-03T13:58:13+00:00	api-reference/user/userfields/user-userfield-delete.md	c63fe82797fa646eb6dc6cbcddaf1adb56f9aad969d04ca9afdf58ee73ca3e30	done	user.userfield.delete
-2026-06-03T13:58:13+00:00	api-reference/user/userfields/user-userfield-list.md	cddf1de4e81a229c37b12d2b8c8e3bb0b316351eef000159afd44f9a77ae56f1	done	user.userfield.list
-2026-06-03T13:58:13+00:00	api-reference/user/userfields/user-userfield-update.md	eecfa28ce37ead322b85436489b3c0705e99acd21e45c87fc441186d61c45a38	done	user.userfield.update
+2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-add.md	54301432cf1947d78b544b82cb552cb484b1a40486dc182d4cd3541af2c58290	done	user.userfield.add
+2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-delete.md	e1bb49a05df02365abb245f570fd5b475d0e33c93174ba274155a8c6a5c94526	done	user.userfield.delete
+2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-list.md	cbea4b2a3f8a12714c062a8f0eead1d2237527f6f0fd60c505f01acca9c95c42	done	user.userfield.list
+2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-update.md	aec7ee0b90125594773d91e2f190776141bc04ef40877905fd6fe25cfc3b3c2b	done	user.userfield.update
