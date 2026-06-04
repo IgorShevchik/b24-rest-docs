@@ -148,4 +148,4 @@ Strategic tasks (SDK version policy, batch-runner improvements) are in
 [`FOLLOWUPS.md`](FOLLOWUPS.md) (GitHub Issues are disabled in the repository).
 
 ---
-_Last reviewed: 2026-05-31_
+_Last reviewed: 2026-06-04_

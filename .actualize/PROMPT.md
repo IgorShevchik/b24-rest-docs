@@ -237,4 +237,4 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 - [ ] `record.py ... done` done
 
 ---
-_Last reviewed: 2026-05-31_
+_Last reviewed: 2026-06-04_
