@@ -100,13 +100,18 @@ isolation). Decompose by `api-reference/<section>/` (tasks — pilot ready, then
 calendar…), each section a separate PR on top of the batch-runner (see §2). Record this as a
 mandatory policy.
 
-## 5. [major] The CI filter `grep '- TS'` silently skips files
+## 5. [done] The CI filter `grep '- TS'` silently skips files
 
-`validate-examples.yml` runs `validate.py` only on changed `*.md` files that carry the TS-tab line
+**Done (tooling-hardening):** `validate-examples.yml` now validates a changed page if it carries the
+TS-tab line **or** is tracked in `ledger.tsv` (`cut -f2 … | grep -qxF`). A tracked page that loses
+its tab (typo `- Ts`, accidental deletion) is no longer silently skipped — `validate.py` runs and
+fails its structural "JS (TS) tab missing" check. Non-tracked tab-less pages are genuinely not
+actualized and are still skipped by design. Original note below.
+
+`validate-examples.yml` ran `validate.py` only on changed `*.md` files that carry the TS-tab line
 (matched as `^- (JS \(TS\)|TS)$` — canonical `JS (TS)` or legacy `TS`, see §8).
-If a file mistakenly loses `- TS` (a typo `- Ts`, an accidental tab deletion), CI passes it without
-error. Options: additionally validate the PR-affected files from the ledger; or warn when a changed
-`api-reference/**` file has none of the expected tabs.
+If a file mistakenly lost `- TS` (a typo `- Ts`, an accidental tab deletion), CI passed it without
+error.
 
 ## 8. [transitional] Tab labels renamed to `JS (TS)` / `JS (UMD)` (doc-team convention)
 
