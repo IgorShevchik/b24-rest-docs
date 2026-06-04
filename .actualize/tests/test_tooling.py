@@ -367,6 +367,41 @@ class ExtractTests(unittest.TestCase):
                 "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
         self.assertEqual(validate.style_errors(code), [])
 
+    def test_has_legacy_js_tab_only_inside_tabs(self):
+        # a prose "- JS" bullet must NOT count; only a "- JS" tab inside {% list tabs %} does
+        self.assertFalse(validate._has_legacy_js_tab("intro\n- JS\n- PHP\n\nmore prose\n"))
+        self.assertTrue(validate._has_legacy_js_tab(
+            "{% list tabs %}\n- JS\n\n```ts\nx\n```\n{% endlist %}"))
+
+    def test_extract_ignores_prose_js_bullet(self):
+        # a prose "- JS" line elsewhere on the page must not trip the legacy-tab check
+        md = VALID.replace("# Page\n", "# Page\n\nLanguages:\n- JS\n- PHP\n")
+        self.assertEqual(len(validate.extract(self._write(md))), 1)
+
+    def test_extract_accepts_python_tab(self):
+        # a b24pysdk "- Python" tab (```python) alongside the JS tabs must not affect validation
+        py_tab = "\n- Python\n\n```python\nresult = b24.call('crm.lead.add')\n```\n"
+        md = VALID.replace("\n{% endlist %}", py_tab + "\n{% endlist %}")
+        self.assertEqual(len(validate.extract(self._write(md))), 1)
+
+    def test_main_result_types_keeps_named_generics_only(self):
+        # named (incl. primitives) kept; inline-literal, multi-type excluded; spaces tolerated
+        code = ("type Foo = {}\n .make<Foo>(1) .make<Foo[]>(1) .make<number[]>(1) "
+                ".make<{ a: 1 }>(1) .make<Foo, Bar>(1) .make< Spaced[] >(1)")
+        self.assertEqual(validate.main_result_types(code), {"Foo", "number", "Spaced"})
+
+    def test_shape_coverage_splits_checked_and_uncovered(self):
+        code = ("type Foo = {\n  id: number\n}\n"
+                "const a = x.make<Foo[]>(1)\n"
+                "const b = x.make<number[]>(1)\n"
+                "const c = x.make<{ a: 1 }>(1)\n"
+                "const d = x.make<Foo, Bar>(1)\n")
+        checked, uncovered = validate.shape_coverage(code)
+        self.assertEqual(checked, {"Foo"})
+        self.assertIn("number[]", uncovered)
+        self.assertIn("Foo, Bar", uncovered)            # multi-type generic surfaced, not skipped
+        self.assertTrue(any("{" in u for u in uncovered))
+
 
 class HelperTests(unittest.TestCase):
     def test_replace_nth_targets_only_the_nth(self):
@@ -607,6 +642,39 @@ class ValidateMainTests(unittest.TestCase):
                 validate.main()
         self.assertEqual(e.exception.code, 0)
         self.assertEqual(run.call_count, 4)  # 2 examples x (tsc + node)
+
+    def _run_main_capture_stderr(self, md):
+        # run main() over `md` with the toolchain mocked green, returning captured stderr
+        import io, shutil
+        from contextlib import redirect_stderr
+        path = os.path.join(validate.REPO, "._tmp_obs_test.md")
+        with open(path, "w") as f:
+            f.write(md)
+        self.addCleanup(lambda: os.path.exists(path) and os.remove(path))
+        proj = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(proj, ignore_errors=True))
+        green = mock.Mock(returncode=0, stdout="", stderr="")
+        buf = io.StringIO()
+        with mock.patch.object(sys, "argv", ["validate.py", path, "--project", proj]), \
+                mock.patch.object(validate, "ensure_project"), \
+                mock.patch.object(validate.subprocess, "run", return_value=green), \
+                redirect_stderr(buf):
+            with self.assertRaises(SystemExit) as e:
+                validate.main()
+        self.assertEqual(e.exception.code, 0)
+        return buf.getvalue()
+
+    def test_main_observability_reports_checked_count(self):
+        # STYLED uses .make<DemoResult> with a local `type DemoResult` -> the Shape check sees it
+        err = self._run_main_capture_stderr(STYLED)
+        self.assertIn("[validate] Shape: 1 named result type(s) checked (DemoResult)", err)
+
+    def test_main_observability_notes_uncovered_generic(self):
+        # a make<number[]> generic has no local alias -> surfaced in the NOTICE, never silently skipped
+        md = VALID.replace("call.make(", "call.make<number[]>(", 1)
+        err = self._run_main_capture_stderr(md)
+        self.assertIn("[validate] note:", err)
+        self.assertIn("number[]", err)
 
 
 class FixtureAnchorTests(unittest.TestCase):

@@ -3,6 +3,9 @@
 GitHub Issues are disabled in the repository, so review items that do not block the tooling merge
 are recorded here. When Issues are enabled — migrate these.
 
+Section numbers are **stable IDs** (assigned in review order), not a reading order — entries are
+grouped by status/theme, so the headings may read 1, 2, … 5, 8, 6, 7. Cite items by their ID.
+
 ## 1. [major] SDK version policy: typecheck `@1.2.0` vs runtime `@1` drift
 
 Examples are typechecked against a lockfile-pinned `@bitrix24/b24jssdk`
@@ -58,15 +61,15 @@ Still deferred:
   `tsc`, so serial validation is not on the critical path;
 - **`record.py` batch mode** (N paths from stdin) — for now the write runs in a serial loop (single
   writer); needed only if the write becomes the bottleneck (today the agent edit dominates);
-- **blast-radius blind spots (known limitation).** The check works via `git status` and sees only
-  what git reports in the working tree. NOT caught: (a) writes **outside the repository** (an absolute
-  path — `~/.ssh`, `/tmp`); (b) **gitignored paths in the tree** (`.claude/`, `CLAUDE.md`); (c)
-  **`.git/`** (e.g. `.git/config` → `credential.helper`). The agent's `Edit` tool is not path-limited
-  (and `git clean -fd` on revert also leaves gitignored files — without `-x`). Closing this fully —
-  process-level FS sandboxing of the agent (bubblewrap/firejail), or a CLI allowlist
-  (`--add-dir`/`--allowedDirectories`) once it exists. Recorded in the test harness as
-  test-documentation: out-of-tree (test 7) and a gitignored path in the tree (test 8); the
-  `.git/config` vector has no test yet.
+- **blast-radius blind spots (partly closed).** The check sees what git reports in the working tree.
+  Now CAUGHT (tooling-hardening): **gitignored paths in the tree** — the check lists `ls-files
+  --others` *without* `--exclude-standard` and flags any new path absent from the pre-edit
+  `IGNORED_BEFORE` snapshot (test 8), while a developer's pre-existing ignored files are excluded
+  (test 8b); on abort the untracked escapees are removed surgically and tracked ones are reverted,
+  not deleted (test 6b). STILL NOT caught: (a) writes **outside the repository** (an absolute path —
+  `~/.ssh`, `/tmp`; test 7); (b) **`.git/`** (e.g. `.git/config` → `credential.helper`, no test yet).
+  The agent's `Edit` tool is not path-limited; closing these fully needs process-level FS sandboxing
+  of the agent (bubblewrap/firejail) or a CLI directory allowlist (`--add-dir`) once it exists.
 
 **Conditions before the first real `RUN=1`** (do not block the tooling merge, but are mandatory
 before a corpus run):
@@ -74,16 +77,17 @@ before a corpus run):
   script header; on `main`/`master` the script warns);
 - **not on a machine with production secrets** in `~` (`~/.ssh`, etc.) — while there is no FS
   sandboxing of the agent (see the blind spots above);
-- watch §1 (SDK version drift) and §5 (the CI filter `grep '- TS'`) — both cause a silent regression
-  on a bulk run;
-- make sure the `claude` binary supports `--permission-mode acceptEdits --allowed-tools` (the script
-  only checks the binary is present, not the flags).
+- watch §1 (SDK version drift) — it can cause a silent regression on a bulk run (§5's CI-filter gap
+  is now fixed: ledger-tracked pages are validated even if a tab is lost);
+- the `claude` binary must support `--permission-mode acceptEdits --allowed-tools` — the CLI preflight
+  now aborts with a clear message if `--help` does not advertise these flags.
 
 **Small nits (after the multi-review, low priority):**
 - the batch commit message does not include a file list (visible only via `git show`); if wanted —
   the first N names in the commit body;
-- `git clean -fdq -e .tscheck` on `SECURITY ABORT` does not touch gitignored escapees (without `-x`);
-  acceptable for now (no harm, `.tscheck` is a cache); to tighten — `git clean -fdxq --exclude=.tscheck`.
+- ~~`git clean -fdq -e .tscheck` on `SECURITY ABORT` does not touch gitignored escapees~~ **[done,
+  tooling-hardening]** — the abort now removes the exact untracked escapees surgically (`rm` per path,
+  skipping tracked ones), so gitignored loot is cleaned without nuking unrelated ignored files.
 
 ## 3. [minor] Full bash test harness for run-batch.sh
 
@@ -100,13 +104,18 @@ isolation). Decompose by `api-reference/<section>/` (tasks — pilot ready, then
 calendar…), each section a separate PR on top of the batch-runner (see §2). Record this as a
 mandatory policy.
 
-## 5. [major] The CI filter `grep '- TS'` silently skips files
+## 5. [done] The CI filter `grep '- TS'` silently skips files
 
-`validate-examples.yml` runs `validate.py` only on changed `*.md` files that carry the TS-tab line
+**Done (tooling-hardening):** `validate-examples.yml` now validates a changed page if it carries the
+TS-tab line **or** is tracked in `ledger.tsv` (`cut -f2 … | grep -qxF`). A tracked page that loses
+its tab (typo `- Ts`, accidental deletion) is no longer silently skipped — `validate.py` runs and
+fails its structural "JS (TS) tab missing" check. Non-tracked tab-less pages are genuinely not
+actualized and are still skipped by design. Original note below.
+
+`validate-examples.yml` ran `validate.py` only on changed `*.md` files that carry the TS-tab line
 (matched as `^- (JS \(TS\)|TS)$` — canonical `JS (TS)` or legacy `TS`, see §8).
-If a file mistakenly loses `- TS` (a typo `- Ts`, an accidental tab deletion), CI passes it without
-error. Options: additionally validate the PR-affected files from the ledger; or warn when a changed
-`api-reference/**` file has none of the expected tabs.
+If a file mistakenly lost `- TS` (a typo `- Ts`, an accidental tab deletion), CI passed it without
+error.
 
 ## 8. [transitional] Tab labels renamed to `JS (TS)` / `JS (UMD)` (doc-team convention)
 
@@ -115,11 +124,14 @@ The Bitrix documentation team standardised the example tab labels as **`JS (TS)`
 templates, the `validate.py` structural check, the CI filter, and the test fixtures. Code extraction
 (`_tabs.py`) is unaffected — it keys off the fence language (` ```ts ` / ` ```html `), not the label.
 
-`validate.py` and the CI filter currently **accept both** the canonical labels and the legacy
-`- TS` / `- UMD` (transition): the already-merged `tasks/` and `user/` pages keep the old labels
-until the doc team renames them upstream and we pull that back into the fork. **Follow-up:** once
-that parent-sync lands, drop the legacy spellings (tighten `validate.py` + the CI filter to
-canonical-only) and re-record the ledger.
+`validate.py` and the CI filter **accept both** the canonical labels and the legacy `- TS` / `- UMD`.
+**Update (tooling-hardening):** the rename has fully landed — the corpus is now **134 `- JS (TS)`
+pages, 0 legacy `- TS`** — so the dual acceptance is harmless dead-acceptance kept as a thin safety
+margin. **Remaining step:** drop the legacy spellings (tighten `validate.py` + the CI filter to
+canonical-only and switch the test fixtures from `- TS`/`- UMD` to `- JS (TS)`/`- JS (UMD)`). It is a
+focused cleanup with fixture churn, deferred out of the hardening PR to keep that PR's scope
+(security/observability) tight. When Issues are enabled, file a tracking issue so this dead
+dual-acceptance does not calcify into permanent dead code.
 
 ## 6. [major] Enforce template comments + code-style in `validate.py` (uniformity drift)
 

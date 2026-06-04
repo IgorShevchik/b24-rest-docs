@@ -17,8 +17,9 @@ Input: `<PATH>` — the path to the file.
    **`- JS (UMD)`** (the doc-team tab-naming convention — keep the `JS (…)` wrapper exactly). A page
    may have **several** `{% list tabs %}` code-example blocks (each with its own `- JS` tab) —
    convert **every** one of them.
-3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest` tabs —
-   neither the code nor the order.
+3. **Do NOT touch** the `cURL (Webhook)`, `cURL (OAuth)`, `PHP`, `BX24.js`, `PHP CRest`, or
+   `Python` (b24pysdk) tabs — neither the code nor the order. Only the `- JS (TS)` / `- JS (UMD)`
+   tabs are in scope; leave every other-language tab byte-for-byte unchanged.
 4. Carry the request parameters over from the old JS example **1:1** (`taskId`, `fields`,
    `select`, `filter`, `order`, `params`, `start`, `id`, `entityTypeId`, etc.).
 5. **Comments and example string values are in English.**
@@ -224,7 +225,7 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 > Not filled in on `SKIP` (the file was not changed).
 
 - [ ] the `- JS` tab is removed, `- JS (TS)` and `- JS (UMD)` added (in every code-example block)
-- [ ] the other tabs and the page text are unchanged
+- [ ] the other-language tabs (cURL / PHP / BX24.js / PHP CRest / `Python` b24pysdk) and the page text are unchanged
 - [ ] no `callMethod` / `callListMethod` / `fetchListMethod` in the jsSDK example
 - [ ] no `processResult` / `processData` calls
 - [ ] comments and values in English
@@ -236,4 +237,4 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 - [ ] `record.py ... done` done
 
 ---
-_Last reviewed: 2026-05-31_
+_Last reviewed: 2026-06-04_

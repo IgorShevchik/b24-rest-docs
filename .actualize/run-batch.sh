@@ -124,6 +124,21 @@ command -v "$CLAUDE_BIN" >/dev/null 2>&1 || {
   echo ">> agent binary not found: '$CLAUDE_BIN' — set CLAUDE_BIN or install claude." >&2
   exit 1
 }
+# preflight: confirm the CLI still understands the flags we drive it with, so a renamed/removed flag
+# fails fast HERE (clear message) instead of silently no-op'ing every edit mid-batch. If --help is
+# unavailable or empty (e.g. a stubbed binary in tests), skip the probe rather than guess. The probe
+# is timeout-guarded so a CLI that hangs on --help cannot wedge the batch.
+_probe=("$CLAUDE_BIN" --help); command -v timeout >/dev/null 2>&1 && _probe=(timeout 10 "${_probe[@]}")
+if _help="$("${_probe[@]}" 2>/dev/null)" && [ -n "$_help" ]; then
+  for _flag in --permission-mode --allowed-tools; do
+    case "$_help" in
+      *"$_flag"*) : ;;
+      *) echo ">> agent CLI '$CLAUDE_BIN' does not advertise '$_flag' — incompatible version?" >&2
+         echo "   run-batch drives it with acceptEdits + a Read/Edit/Grep allowlist; aborting." >&2
+         exit 1 ;;
+    esac
+  done
+fi
 # soft warning: a mutating run auto-commits; on the default branch that is rarely intended
 _branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
 case "$_branch" in
@@ -158,6 +173,13 @@ on_interrupt() {
   exit 130
 }
 trap on_interrupt INT TERM
+
+# Snapshot the untracked/gitignored files present BEFORE any edit, so the blast-radius check can
+# tell a NEWLY-created escapee (agent loot, even into a gitignored path) from a developer's
+# pre-existing ignored files (a local .env, editor cruft) and never falsely abort on the latter.
+declare -A IGNORED_BEFORE=()
+while IFS= read -r _i; do [ -n "$_i" ] && IGNORED_BEFORE["$_i"]=1; done \
+  < <(git -c core.quotepath=false ls-files --others | grep -v '^\.actualize/\.tscheck/')
 
 # --- 1. EDIT — parallel (slow step; files differ => no working-tree conflict) --
 edit_one() {
@@ -200,22 +222,28 @@ for f in "${FILES[@]}"; do PLANNED["$f"]=1; done
 # relpath); a quoted path would never match PLANNED and would cause a false abort.
 mapfile -t CHANGED < <(
   { git -c core.quotepath=false diff --name-only
-    git -c core.quotepath=false ls-files --others --exclude-standard; } | sort -u
+    git -c core.quotepath=false ls-files --others; } | sort -u  # NO --exclude-standard: also surface a gitignored escapee
 )
 ESCAPED=()
 for c in "${CHANGED[@]}"; do
   [ -z "$c" ] && continue
-  [ -n "${PLANNED[$c]:-}" ] || ESCAPED+=("$c")
+  case "$c" in .actualize/.tscheck/*) continue ;; esac   # the toolchain sandbox is expected here
+  [ -n "${PLANNED[$c]:-}" ] && continue                   # a planned batch file
+  [ -n "${IGNORED_BEFORE[$c]:-}" ] && continue            # pre-existing ignored file, not agent loot
+  ESCAPED+=("$c")
 done
 if [ "${#ESCAPED[@]}" -gt 0 ]; then
   echo ">> SECURITY ABORT: agent changed file(s) OUTSIDE the batch plan:" >&2
   printf '   %s\n' "${ESCAPED[@]}" >&2
   echo "   Reverting the entire batch; nothing committed. Logs: $LOGDIR" >&2
   KEEP_LOGS=1
-  git checkout -- . 2>/dev/null
-  # drop untracked escapees (the .tscheck sandbox is gitignored, so `git clean -fd`
-  # without -x already skips it; -e .tscheck is just explicit belt-and-braces)
-  git clean -fdq -e .tscheck 2>/dev/null
+  git checkout -- . 2>/dev/null   # tracked escapees are reverted to HEAD here
+  # delete ONLY untracked escapees (new files, incl. gitignored loot); a tracked file the agent
+  # touched outside its plan was just reverted above — rm'ing it would destroy it instead. Paths are
+  # repo-relative and PWD is the repo root (asserted at startup), so rm stays inside the tree.
+  for e in "${ESCAPED[@]}"; do
+    git ls-files --error-unmatch -- "$e" >/dev/null 2>&1 || rm -rf -- "$e" 2>/dev/null
+  done
   exit 1
 fi
 
@@ -269,6 +297,18 @@ done
 
 # --- 4. CHECKPOINT — commit exactly the passed .md + ledger (logs are in /tmp) -
 if [ "${#PASSED[@]}" -gt 0 ] && [ "${NO_COMMIT:-0}" != "1" ]; then
+  # secret-scan (defence in depth on top of the blast-radius check): never let an obvious credential
+  # the agent may have pasted reach a commit. High-confidence formats only — these never appear in
+  # API docs, so legitimate example payloads are not false-flagged.
+  _secret_re='AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[0-9A-Za-z]{36}|xox[baprs]-[0-9A-Za-z-]{10,}'
+  # scan only the lines the agent ADDED (the working-tree diff), not whole files, so a pre-existing
+  # string is never mis-attributed and only agent-introduced content gates the commit.
+  if _hits="$(git diff -- "${PASSED[@]}" | grep -E "^\+.*($_secret_re)" 2>/dev/null)"; then
+    echo ">> SECURITY ABORT: possible secret(s) in actualized file(s); NOT committing:" >&2
+    printf '%s\n' "$_hits" >&2
+    KEEP_LOGS=1
+    exit 1
+  fi
   if ! git add -- "${PASSED[@]}" .actualize/ledger.tsv; then
     echo ">> git add failed — ${#PASSED[@]} edit(s) recorded but NOT committed." >&2
     exit 1

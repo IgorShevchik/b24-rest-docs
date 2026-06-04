@@ -89,11 +89,15 @@ jobs:
       - name: Validate TS + UMD examples
         run: |
           rc=0
+          # A page is validated if it carries an actualized TS tab ("JS (TS)" canonical or legacy
+          # "TS") OR is tracked in the ledger. The ledger clause is the §5 fix: a tracked page that
+          # LOSES its tab (typo, accidental deletion) must FAIL loudly via validate.py's structural
+          # check, not be silently skipped. Non-tracked tab-less pages are genuinely not actualized.
+          ledger_paths="$(cut -f2 .actualize/ledger.tsv)"   # in a var, not a file in the checkout
           while IFS= read -r f; do
             [ -z "$f" ] && continue
             [ -f "$f" ] || continue
-            # only validate files that carry an actualized TS tab: "JS (TS)" (canonical) or legacy "TS"
-            if grep -qE '^- (JS \(TS\)|TS)$' "$f"; then
+            if grep -qE '^- (JS \(TS\)|TS)$' "$f" || grep -qxF "$f" <<<"$ledger_paths"; then
               echo "::group::validate $f"
               python3 .actualize/validate.py "$f" || rc=1
               echo "::endgroup::"

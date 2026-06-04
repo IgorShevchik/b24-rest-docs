@@ -2,7 +2,9 @@
 """Validate the b24jssdk TS + UMD examples inside a documentation .md file.
 
 Checks (cheapest first):
-  1. structural: legacy "- JS" tab is gone, "- TS" and "- UMD" tabs are present;
+  1. structural: the legacy combined "- JS" tab is gone (checked only inside
+     {% list tabs %} regions, never prose) and "JS (TS)"/"JS (UMD)" tabs are present
+     (legacy "- TS"/"- UMD" still accepted during the upstream rename);
   2. extraction: from EVERY {% list tabs %} … {% endlist %} region that holds a
      ```ts example (a page may have several code-example blocks), take the single
      ```ts block and the single UMD <script> — each example is validated, not
@@ -60,12 +62,22 @@ SHAPE_COMMENT = "// Shape of the payload returned in result"
 # " (parenthetical)", " array") still passes. Both forms are good docs; the check accepts either.
 SHAPE_RE = re.compile(r"// Shape of .+ returned in (?:the )?result\b")
 
+# Every `.make<…>` generic on the page (inner text up to the first `>`). main_result_types()
+# keeps the simple named ones; shape_coverage() surfaces the rest so none is silently skipped.
+MAKE_RE = re.compile(r"\.make<([^>]+)>")
+
 MAX_MD_BYTES = 2_000_000  # guard: a method page is never this big; refuse pathological input
 
 
 def fail(msg):
     print(f"FAIL: {msg}")
     sys.exit(1)
+
+
+def _has_legacy_js_tab(s):
+    """True iff a legacy combined "- JS" tab label appears INSIDE a {% list tabs %} region.
+    A prose "- JS" bullet elsewhere on the page must not count (it would be a false failure)."""
+    return any("- JS\n" in region for region in _tabs.TABS_RE.findall(s))
 
 
 def extract(md_path):
@@ -81,11 +93,11 @@ def extract(md_path):
     with open(md_path, encoding="utf-8") as f:
         s = f.read().replace("\r\n", "\n")  # normalise CRLF so the fence regexes match
 
-    if "- JS\n" in s:
+    if _has_legacy_js_tab(s):
         fail('legacy "- JS" tab still present')
-    # Canonical tab labels are "JS (TS)" / "JS (UMD)" (doc-team convention). The older
-    # "- TS" / "- UMD" labels are still accepted during the transition (existing pages get
-    # renamed upstream and synced back); tighten to canonical-only once that sync lands.
+    # Canonical tab labels are "JS (TS)" / "JS (UMD)" (doc-team convention). The rename has landed
+    # (corpus: 134 "- JS (TS)" pages, 0 legacy "- TS"); the older "- TS" / "- UMD" labels are kept
+    # accepted only as a thin safety margin. Tightening to canonical-only is the remaining §8 step.
     if "- JS (TS)\n" not in s and "- TS\n" not in s:
         fail('"JS (TS)" tab missing')
     if "- JS (UMD)\n" not in s and "- UMD\n" not in s:
@@ -112,6 +124,41 @@ def _next_nonblank(lines, i):
     return lines[j].strip() if j < len(lines) else ""
 
 
+def main_result_types(code):
+    """Element type names taken from every `.make<X>` / `.make<X[]>` generic in the code.
+
+    Returns only simple word-char generics (`\\w+`, optional `[]`); inline-literal or multi-type
+    generics (make<{…}>, make<Foo, Bar>) are excluded. A primitive like `number` (from make<number[]>)
+    does pass the `\\w+` filter and is returned, but it can never have a local `type number =`, so the
+    Shape lint in style_errors() is a no-op for it; shape_coverage() reports such generics explicitly.
+    """
+    out = set()
+    for g in MAKE_RE.findall(code):
+        base = g.strip().removesuffix("[]").strip()
+        if re.fullmatch(r"\w+", base):
+            out.add(base)
+    return out
+
+
+def shape_coverage(code):
+    """(checked, uncovered) for one TS example.
+
+    checked   — named main types with a local `type X =` (the Shape comment is enforced on these);
+    uncovered — make<…> generics with no local alias (inline literal / primitive / external) that
+    the Shape check cannot key on. Reported, never failed — so the silent-skip that hid the
+    list-generic bug is visible at a glance.
+    """
+    declared = set(re.findall(r"(?m)^\s*type (\w+) =", code))
+    checked, uncovered = set(), []
+    for g in MAKE_RE.findall(code):
+        base = g.strip().removesuffix("[]").strip()
+        if re.fullmatch(r"\w+", base) and base in declared:
+            checked.add(base)
+        else:
+            uncovered.append(g.strip())
+    return checked, uncovered
+
+
 def style_errors(code):
     """Template-uniformity lints over one code example (TS or UMD inner JS).
 
@@ -122,9 +169,7 @@ def style_errors(code):
     """
     errs = []
     lines = code.split("\n")
-    # match call/callList/fetchList.make<X> AND the list-generic make<X[]> (element type is X)
-    main_types = {g.removesuffix("[]")
-                  for g in re.findall(r"\.make<(\w+(?:\[\])?)>", code)}
+    main_types = main_result_types(code)  # simple named make<X> / make<X[]> element types
     for i, line in enumerate(lines):
         s = line.strip()
         if s == "if (!response.isSuccess) {" and _prev_nonblank(lines, i) != GUARD_COMMENT:
@@ -230,6 +275,20 @@ def main():
         fail(f"file not found: {abspath}")
 
     examples = extract(abspath)
+
+    # Observability: report what the Shape check actually saw, so a future regex gap (like the
+    # list-generic one this hardening followed) cannot silently check nothing again.
+    checked, uncovered = set(), []
+    for ts, _ in examples:
+        c, u = shape_coverage(ts)
+        checked |= c
+        uncovered += u
+    print(f"[validate] Shape: {len(checked)} named result type(s) checked"
+          + (f" ({', '.join(sorted(checked))})" if checked else ""), file=sys.stderr)
+    if uncovered:
+        print("[validate] note: make<…> generic(s) with no local type alias "
+              f"(Shape check N/A): {', '.join(uncovered)}", file=sys.stderr)
+
     ensure_project(a.project)
     tsc = os.path.join(a.project, "node_modules", ".bin", "tsc")
     total = len(examples)
