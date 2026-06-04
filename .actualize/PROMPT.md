@@ -208,8 +208,11 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
    `- JS (TS)`/`- JS (UMD)` present); extracts blocks ONLY from inside `{% list tabs %}` (every code-example
    block — a page may have several, and each is validated); forbidden tokens
    (`callMethod`/`callListMethod`/`fetchListMethod`/`processResult`/`processData`); the presence of
-   `$b24.actions.v{2,3}.*` in **both** tabs; `tsc --strict` against the PINNED `@bitrix24/b24jssdk`
-   version (= 0 errors); `node --check` on the UMD.
+   `$b24.actions.v{2,3}.*` in **both** tabs; a **field/method cross-check** (the `method:` must match
+   the page's cURL `/rest/.../<method>` endpoint, and every result-type field must appear in a JSON
+   response example or a `#| … |#` field table on the page — so the result type is grounded in the
+   page, not invented); `tsc --strict` against the PINNED `@bitrix24/b24jssdk` version (= 0 errors);
+   `node --check` on the UMD.
 2. If `FAIL` — fix the code and repeat until `PASS`.
 
 ## Recording completion
