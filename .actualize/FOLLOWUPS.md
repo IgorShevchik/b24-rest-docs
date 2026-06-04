@@ -175,7 +175,9 @@ type (the `call.make<X>()` generic), never before helper types. Parenthetical by
 `(match the "response handling" section of the page)`, events `(event.bind returns true on success)`,
 scalars may specialize (e.g. `(the method returns null on success)`). Depends on §6 (the check
 defines the standard); run after the hardening lands so `validate.py` confirms completeness. Helper
-script to list candidates (main types only — filters out helper types):
+script to list candidates (main types only — filters out helper types). NOTE: this snippet predates
+PR #15 — its `call\.make<(\w+)>` regex misses the list-generic `make<X[]>`; use
+`\.make<(\w+(?:\[\])?)>` and strip a trailing `[]` if you re-run it:
 
 ```python
 import subprocess, re
