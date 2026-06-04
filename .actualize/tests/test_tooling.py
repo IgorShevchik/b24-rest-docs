@@ -335,6 +335,22 @@ class ExtractTests(unittest.TestCase):
                 "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
         self.assertEqual(validate.style_errors(code), [])
 
+    def test_style_errors_flags_list_main_type_without_shape(self):
+        # regression: the old `\.make<(\w+)>` regex missed the list-generic `make<X[]>`,
+        # silently skipping the Shape check on every list method. It must be flagged now.
+        code = ("type UserItem = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.callList.make<UserItem[]>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertTrue(any("main result type" in e for e in validate.style_errors(code)))
+
+    def test_style_errors_accepts_list_element_shape_wording(self):
+        # for a list method the element-form Shape comment is accepted, not only the object form
+        code = ("// Shape of each user returned in result[]\n"
+                "type UserItem = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.callList.make<UserItem[]>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertEqual(validate.style_errors(code), [])
+
 
 class HelperTests(unittest.TestCase):
     def test_replace_nth_targets_only_the_nth(self):

@@ -83,6 +83,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each checklist item returned in result[]
     type ChecklistItem = {
       ID: string
       TASK_ID: string

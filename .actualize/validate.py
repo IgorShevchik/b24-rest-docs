@@ -47,12 +47,16 @@ NODE_TIMEOUT = 120
 FORBIDDEN = ["callMethod", "callListMethod", "fetchListMethod",
              "processResult", "processData"]
 
-# Mandatory template comments — the verified canon (see PROMPT.md "TS tab" / "UMD tab").
+# Mandatory template comments — the verified canon (see PROMPT.md "JS (TS) tab" / "JS (UMD) tab").
 # Enforced structurally so the corpus cannot drift; a unit test keeps them in sync with PROMPT.md.
 GUARD_COMMENT = "// The payload is available only on a successful response"
 INIT_COMMENT = "// Initialize the SDK inside a Bitrix24 frame"
 CATCH_COMMENT = "// Thrown on transport or SDK failures (AjaxError, SdkError, etc.)"
 SHAPE_COMMENT = "// Shape of the payload returned in result"
+# The Shape comment has two accepted forms: the object form (SHAPE_COMMENT, "… the payload …") and,
+# for list methods, an element form ("// Shape of each|one <item> returned in result[]"). Both are
+# good docs; the check below accepts either via SHAPE_RE.
+SHAPE_RE = re.compile(r"// Shape of .+ returned in (?:the )?result")
 
 MAX_MD_BYTES = 2_000_000  # guard: a method page is never this big; refuse pathological input
 
@@ -116,7 +120,9 @@ def style_errors(code):
     """
     errs = []
     lines = code.split("\n")
-    main_types = set(re.findall(r"\.make<(\w+)>", code))  # call/callList/fetchList.make<X>
+    # match call/callList/fetchList.make<X> AND the list-generic make<X[]> (element type is X)
+    main_types = {re.sub(r"\[\]$", "", g)
+                  for g in re.findall(r"\.make<(\w+(?:\[\])?)>", code)}
     for i, line in enumerate(lines):
         s = line.strip()
         if s == "if (!response.isSuccess) {" and _prev_nonblank(lines, i) != GUARD_COMMENT:
@@ -127,7 +133,7 @@ def style_errors(code):
         if s == "} catch (error) {" and _next_nonblank(lines, i) != CATCH_COMMENT:
             errs.append(f"missing `{CATCH_COMMENT}` as the first line of the catch block")
         m = re.match(r"type (\w+) =", s)
-        if m and m.group(1) in main_types and SHAPE_COMMENT not in _prev_nonblank(lines, i):
+        if m and m.group(1) in main_types and not SHAPE_RE.search(_prev_nonblank(lines, i)):
             errs.append(f"missing `{SHAPE_COMMENT} (…)` before the main result type `{m.group(1)}`")
         if "getUuidRfc4122()," in s:
             errs.append("trailing comma after `requestId` (drop it — it is the last property "

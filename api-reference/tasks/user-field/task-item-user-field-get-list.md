@@ -100,6 +100,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each user-field item returned in result[]
     type UserFieldItem = {
       ID: string
       ENTITY_ID: string
