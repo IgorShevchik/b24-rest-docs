@@ -143,6 +143,7 @@
     declare const $b24: B24Frame
 
     // TODO: verify API version — no response shape defined on this page
+    // Shape of each task item returned in result[]
     type TaskItem = Record<string, unknown>
 
     try {
@@ -302,6 +303,7 @@
     declare const $b24: B24Frame
 
     // TODO: verify API version — no response shape defined on this page
+    // Shape of each task item returned in result[]
     type TaskItem = Record<string, unknown>
 
     try {

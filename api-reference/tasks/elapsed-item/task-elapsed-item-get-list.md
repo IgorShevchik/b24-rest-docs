@@ -161,6 +161,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each elapsed-time item returned in result[]
     type ElapsedItem = {
       ID: string
       TASK_ID: string

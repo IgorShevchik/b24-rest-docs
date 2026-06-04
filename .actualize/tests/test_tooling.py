@@ -335,6 +335,38 @@ class ExtractTests(unittest.TestCase):
                 "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
         self.assertEqual(validate.style_errors(code), [])
 
+    def test_style_errors_flags_list_main_type_without_shape(self):
+        # regression: the old `\.make<(\w+)>` regex missed the list-generic `make<X[]>`,
+        # silently skipping the Shape check on every list method. It must be flagged now.
+        code = ("type UserItem = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.callList.make<UserItem[]>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertTrue(any("main result type" in e for e in validate.style_errors(code)))
+
+    def test_style_errors_accepts_list_element_shape_wording(self):
+        # for a list method the element-form Shape comment is accepted, not only the object form
+        code = ("// Shape of each user returned in result[]\n"
+                "type UserItem = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.callList.make<UserItem[]>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertEqual(validate.style_errors(code), [])
+
+    def test_style_errors_rejects_typo_shape_wording(self):
+        # SHAPE_RE anchors on `result\b`: a pluralised/typo tail ("results[]") must NOT satisfy it
+        code = ("// Shape of each user returned in results[]\n"
+                "type UserItem = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.callList.make<UserItem[]>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertTrue(any("main result type" in e for e in validate.style_errors(code)))
+
+    def test_style_errors_object_form_still_accepted(self):
+        # the object form (make<X>, "… the payload …" with a trailing parenthetical) still passes
+        code = ("// Shape of the payload returned in result (match the page)\n"
+                "type DemoResult = {\n  id: number\n}\n"
+                "const r = await $b24.actions.v2.call.make<DemoResult>("
+                "{ method: 'm', params: {}, requestId: Text.getUuidRfc4122() })\n")
+        self.assertEqual(validate.style_errors(code), [])
+
 
 class HelperTests(unittest.TestCase):
     def test_replace_nth_targets_only_the_nth(self):
@@ -623,6 +655,8 @@ class DocsConsistencyTests(unittest.TestCase):
         for const in (validate.GUARD_COMMENT, validate.INIT_COMMENT,
                       validate.CATCH_COMMENT, validate.SHAPE_COMMENT):
             self.assertIn(const, p)
+        # the list-method element form must also be documented so authors don't drift (PR #15)
+        self.assertIn("Shape of each <item> returned in result[]", p)
 
 
 if __name__ == "__main__":

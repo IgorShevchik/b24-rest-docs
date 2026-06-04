@@ -184,7 +184,9 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
 - **Mandatory template comments (enforced by `validate.py`):** the success-guard comment before
   `if (!response.isSuccess)`, the UMD init comment before `initializeB24Frame()`, the catch comment
   as the first line of `catch (error)`, and `// Shape of the payload returned in result (…)` before
-  the main result type. Use the exact wording from the template above.
+  the main result type. Use the exact wording from the template above. **List methods** (the
+  `.make<X[]>` generic) use the element form instead — `// Shape of each <item> returned in result[]`
+  — describing one element of the `result[]` array; `validate.py` accepts either form.
 - **List NOTE — one canonical wording.** Above `const response` for `*.list` methods:
 
     ```ts

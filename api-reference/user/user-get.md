@@ -138,6 +138,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each user object returned in result[]
     type UserData = {
       ID: string
       ACTIVE: boolean
@@ -351,6 +352,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each user object returned in result[]
     type UserData = {
       ID: string
       ACTIVE: boolean
@@ -540,6 +542,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each user object returned in result[]
     type UserData = {
       ID: string
       ACTIVE: boolean
@@ -729,6 +732,7 @@
 
     declare const $b24: B24Frame
 
+    // Shape of each user object returned in result[]
     type UserData = {
       ID: string
       ACTIVE: boolean
