@@ -246,3 +246,16 @@ for f in files:
   the deprecated API); if needed — forbid such comments in PROMPT.md.
 - **[nit] CI cache without `restore-keys`.** Deliberately all-or-nothing; on frequent SDK bumps — a
   cold `npm ci`. Acceptable at the current scale.
+- **[minor] UMD example tag is unpinned + no SRI.** The doc examples load the SDK from a CDN by the
+  floating major tag (`unpkg.com/@bitrix24/b24jssdk@1/...`) with no Subresource Integrity hash.
+  Readers copy these snippets verbatim, so a compromised publish/CDN would reach them silently. The
+  floating tag is intentional (copy-paste starters, not pinned prod assets) — but a corpus-wide
+  decision to pin an exact version + add an `integrity=` hash (refreshed on each SDK bump) would
+  harden it. Touches the canonical UMD template + all 150+ already-actualized files → a separate
+  pass, not part of a content PR. (Raised in the PR #19 review.)
+- **[minor] No machine guardrail on the cURL-tab exception.** PROMPT.md now lets the agent edit the
+  cURL (Webhook/OAuth) tabs when the method/endpoint cross-check flags a copy-paste bug. The only
+  guard is the prompt wording (manual: confirm; batch: leave + flag). Optional hardening: have
+  `validate.py` (or the run-batch blast-radius step) report which cURL lines changed, so an
+  unexpected cURL edit in batch mode is visible in the log and can gate the commit. (Raised in the
+  PR #19 review.)
