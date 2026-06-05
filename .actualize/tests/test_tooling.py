@@ -648,6 +648,18 @@ class CrossCheckTests(unittest.TestCase):
             "    type Helper = {\n      categoryId: number\n    }\n    type DealResult = {", 1)
         self.assertEqual(validate.cross_check(page), ([], []))
 
+    def test_record_result_type_does_not_false_fail(self):
+        # PROMPT "Result type patterns": a result type `Record<string, Item>` has no {}-body, so its
+        # keys are not scanned, and the helper `Item` is skipped (scoped to the make<X> name) — an
+        # undocumented Item field is NOT flagged as invented. Mirrors *.fields / localization maps.
+        page = _page("crm.deal.get", "crm.deal.get", "  ID: string").replace(
+            "    type DealResult = {\n  ID: string\n    }\n"
+            "    const r = await $b24.actions.v2.call.make<DealResult>(",
+            "    type FieldItem = {\n      undocumentedKey: string\n    }\n"
+            "    type CurrencyResult = Record<string, FieldItem>\n"
+            "    const r = await $b24.actions.v2.call.make<CurrencyResult>(", 1)
+        self.assertEqual(validate.cross_check(page), ([], []))
+
     def test_field_grounded_by_table_only(self):
         # universe populated from a `|| **field** ||` table alone (no JSON block) still grounds
         page = _page("crm.deal.get", "crm.deal.get", "  TITLE: string", result_json=None)
@@ -872,6 +884,16 @@ class ValidateMainTests(unittest.TestCase):
         err = self._run_main_capture_stderr(md)
         self.assertIn("[validate] note:", err)
         self.assertIn("number[]", err)
+
+    def test_main_primitive_boolean_generic_passes_with_na_note(self):
+        # PROMPT "Result type patterns": a primitive make<boolean> (no local type, no Shape comment)
+        # must PASS end-to-end — surfaced as the advisory "Shape check N/A" note, not a failure.
+        # _run_main_capture_stderr asserts exit code 0 internally, so this also proves cross_check
+        # and style_errors do not reject a bare primitive generic.
+        md = VALID.replace("call.make(", "call.make<boolean>(", 1)
+        err = self._run_main_capture_stderr(md)
+        self.assertIn("[validate] note:", err)
+        self.assertIn("boolean", err)
 
 
 class FixtureAnchorTests(unittest.TestCase):

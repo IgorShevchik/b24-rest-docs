@@ -46,7 +46,10 @@ python -m unittest discover -s .actualize/tests -p 'test_*.py'
 The first `validate.py` run installs the dependencies from the committed
 `.actualize/typecheck/package-lock.json` (via `npm ci --ignore-scripts`) into
 `.actualize/.tscheck/` (which is `.gitignore`d). The example UMD tag is the major tag `@1`;
-the typecheck is pinned by the lockfile (a specific 1.x). **Bumping the SDK version:** update
+the typecheck is pinned by the lockfile (a specific 1.x). The doc examples intentionally use the
+floating `@1` tag **without** an SRI `integrity` hash — they are copy-paste starting points, not
+pinned production assets; corpus-wide version pinning + SRI is tracked in `FOLLOWUPS.md`.
+**Bumping the SDK version:** update
 `.actualize/typecheck/package.json` + `package-lock.json` and re-run `validate.py` over the
 `done` files.
 
@@ -143,6 +146,11 @@ before the docs land. `ledger.tsv` conflicts across parallel PRs are absorbed by
 - List methods: a single variant — `call.make` with `start` (preserves `order`). Above
   `const response`, a hint about both helpers `callList.make` / `fetchList.make` with a `NOTE` that
   they do NOT accept `order` (excluded from their type — a `tsc` error if passed).
+- cURL tabs (Webhook/OAuth): a sanctioned exception to "leave the other tabs unchanged" — when the
+  `validate.py` method/endpoint cross-check fails because a cURL endpoint was copy-pasted from
+  another method, fix those two cURL tabs (endpoint + payload) to match the page; other tabs (PHP
+  CRest / BX24.js / `Python`) stay untouched and the residual is flagged in the PR. In batch mode an
+  ambiguous case is left untouched (`SKIP`), never guessed.
 
 ## Deferred items
 
@@ -150,4 +158,4 @@ Strategic tasks (SDK version policy, batch-runner improvements) are in
 [`FOLLOWUPS.md`](FOLLOWUPS.md) (GitHub Issues are disabled in the repository).
 
 ---
-_Last reviewed: 2026-06-04_
+_Last reviewed: 2026-06-05_

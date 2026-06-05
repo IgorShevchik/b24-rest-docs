@@ -185,7 +185,9 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
 - **Mandatory template comments (enforced by `validate.py`):** the success-guard comment before
   `if (!response.isSuccess)`, the UMD init comment before `initializeB24Frame()`, the catch comment
   as the first line of `catch (error)`, and `// Shape of the payload returned in result (…)` before
-  the main result type. Use the exact wording from the template above. **List methods** (the
+  the main result type. Use the exact wording from the template above. (Exception: a **primitive**
+  result — a bare `call.make<boolean>` / `<string>` / `<number>` with no local `type` alias —
+  carries no Shape comment; see **Result type patterns**.) **List methods** (the
   `.make<X[]>` generic) use the element form instead — `// Shape of each <item> returned in result[]`
   — describing one element of the `result[]` array; `validate.py` accepts either form.
 - **List NOTE — one canonical wording.** Above `const response` for `*.list` methods:
@@ -197,6 +199,49 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
     // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
     // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
     ```
+
+## Result type patterns
+
+The `<T>` in `call.make<T>` follows the response shape; three shapes recur (all seen in `crm/currency`):
+
+- **Primitive** (`result: true`, an id string, a count) → `call.make<boolean>` (or
+  `call.make<string>` / `call.make<number>`) with **no local `type` and no Shape comment** (the
+  Shape comment is enforced only on a local `type X = { … }` alias — see Code style). `validate.py`
+  then prints an advisory `make<…> generic(s) with no local type alias (Shape check N/A)` — that is
+  expected, not a failure.
+- **Object keyed by dynamic keys** (`*.fields` → `{ FIELD: {…} }`; localization maps →
+  `{ lang: {…} }`) → `type X = Record<string, Item>` plus a helper `type Item = { … }`; the Shape
+  comment goes before the alias. Document `Item`'s fields from the page's JSON response example (the
+  same block you would use for a normal result type). The field cross-check confronts **neither**
+  with the page: the `Record<…>` alias has no `{ }` body (nothing to scan), and the helper `Item` is
+  skipped because the check is scoped to the `.make<X>` generic *by name* — `Item` is not the
+  generic, so it cannot false-fail. Read the map with `Object.keys(result)` / `result[key]`.
+- **List returning the array directly** (`result: [ … ]`, not `result.<key>`) → `call.make<Item[]>`;
+  `response.getData()!.result` IS the array (`result.length`, iterate it). This is still a `*.list`
+  method, so keep the `call.make` + `start` variant and add the list NOTE above `const response`
+  (see the **List NOTE** bullet in Code style) — the only difference is that `result` itself is the
+  array.
+
+`getData()!` (the TS non-null `!`) is safe **only inside the `else` branch**, after the
+`isSuccess` guard has passed — do not hoist it above the guard.
+
+## When the cURL endpoint disagrees with the page (cross-check failure)
+
+`validate.py` cross-checks the SDK `method:` against the cURL `/rest/.../<method>` endpoint. A
+mismatch is almost always a **copy-paste bug** in a cURL/PHP tab (an endpoint — and often its
+params — pasted in from another method). The real method is what the page **title**, the JS /
+PHP-core tabs and the "response handling" section agree on.
+
+- Take the SDK `method:` from the page — **never** bend the example to match a wrong cURL endpoint.
+- Fix the **cURL (Webhook)** and **cURL (OAuth)** tabs (endpoint **and** payload) to match the page.
+  This is a narrow, sanctioned exception to rule 3: a wrong endpoint in a copy-paste example
+  actively misleads readers. Do it **only when the correct method is unambiguous** — stated in the
+  page title and agreed by the JS / PHP-core tabs and the response section. If it is not: in a
+  **manual** run, confirm with whoever assigned the task before editing; in **batch mode**
+  (`run-batch.sh` — no interactive channel) do **not** touch the cURL tab, leave it and record the
+  mismatch as a finding (let the file `SKIP` if needed). Never guess an endpoint.
+- Leave the remaining other-language tabs (PHP CRest, BX24.js, `Python`) untouched and record the
+  residual mismatch as a finding for the PR.
 
 ## Validation (required)
 
@@ -236,8 +281,9 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 - [ ] `requestId` via `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
 - [ ] `getData()!` in TS / `getData()` in UMD; for lists — `.length` (NOT `getTotal()`, it is deprecated)
 - [ ] for lists — a hint about `callList.make` and `fetchList.make` (with a `NOTE` about ignoring `order`)
+- [ ] SDK `method:` equals the cURL endpoint — a mismatch means a copy-paste bug on the page (fix the cURL Webhook/OAuth tabs: endpoint **and** payload; flag the rest; in batch mode leave ambiguous cases untouched)
 - [ ] `validate.py` → PASS
 - [ ] `record.py ... done` done
 
 ---
-_Last reviewed: 2026-06-04_
+_Last reviewed: 2026-06-05_
