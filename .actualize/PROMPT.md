@@ -198,6 +198,37 @@ Keep examples uniform — across 400+ files small drifts compound and make revie
     // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
     ```
 
+## Result type patterns
+
+The `<T>` in `call.make<T>` follows the response shape; three shapes recur (all seen in `crm/currency`):
+
+- **Primitive** (`result: true`, an id string, a count) → `call.make<boolean>` / `<string>` /
+  `<number>` with **no local `type` and no Shape comment**. `validate.py` then prints an advisory
+  `make<…> generic with no local type alias (Shape check N/A)` — that is expected, not a failure.
+- **Object keyed by dynamic keys** (`*.fields` → `{ FIELD: {…} }`; localization maps →
+  `{ lang: {…} }`) → `type X = Record<string, Item>` plus a helper `type Item = { … }`; the Shape
+  comment goes before the alias. The field cross-check is scoped to the `.make<X>` result type, and
+  a `Record<…>` alias has no `{ }` body — so its keys, and the helper type, are not confronted with
+  the page (document the helper from the page's JSON, but it will not false-fail). Read the map with
+  `Object.keys(result)` / `result[key]`.
+- **List returning the array directly** (`result: [ … ]`, not `result.<key>`) → `call.make<Item[]>`;
+  `response.getData()!.result` IS the array (`result.length`, iterate it). Still add the list-helper
+  NOTE above `const response` (see Code style).
+
+## When the cURL endpoint disagrees with the page (cross-check failure)
+
+`validate.py` cross-checks the SDK `method:` against the cURL `/rest/.../<method>` endpoint. A
+mismatch is almost always a **copy-paste bug** in a cURL/PHP tab (an endpoint — and often its
+params — pasted in from another method). The real method is what the page **title**, the JS /
+PHP-core tabs and the "response handling" section agree on.
+
+- Take the SDK `method:` from the page — **never** bend the example to match a wrong cURL endpoint.
+- Fix the **cURL (Webhook)** and **cURL (OAuth)** tabs (endpoint **and** payload) to match the page.
+  This is a narrow, sanctioned exception to rule 3: a wrong endpoint in a copy-paste example
+  actively misleads readers. If the call is non-obvious, confirm with the requester first.
+- Leave the remaining other-language tabs (PHP CRest, BX24.js, `Python`) untouched and record the
+  residual mismatch as a finding for the PR.
+
 ## Validation (required)
 
 > **In batch mode (`run-batch.sh`)** the steps below are done by the ORCHESTRATOR, not you: the
@@ -236,8 +267,9 @@ date, sha256, status, method) into `.actualize/ledger.tsv`. Drift control:
 - [ ] `requestId` via `Text.getUuidRfc4122()` (TS) / `B24Js.Text.getUuidRfc4122()` (UMD)
 - [ ] `getData()!` in TS / `getData()` in UMD; for lists — `.length` (NOT `getTotal()`, it is deprecated)
 - [ ] for lists — a hint about `callList.make` and `fetchList.make` (with a `NOTE` about ignoring `order`)
+- [ ] SDK `method:` equals the cURL endpoint — a mismatch means a copy-paste bug on the page (fix the cURL Webhook/OAuth tabs, flag the rest)
 - [ ] `validate.py` → PASS
 - [ ] `record.py ... done` done
 
 ---
-_Last reviewed: 2026-06-04_
+_Last reviewed: 2026-06-05_
