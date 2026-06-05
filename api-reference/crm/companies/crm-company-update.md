@@ -170,11 +170,10 @@
     declare const $b24: B24Frame
 
     try {
-      const id = prompt('Enter ID')
       const response = await $b24.actions.v2.call.make<boolean>({
         method: 'crm.company.update',
         params: {
-          id,
+          id: 43,
           fields: {
             CURRENCY_ID: 'RUB',
             REVENUE: 500000,
@@ -209,11 +208,10 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          const id = prompt('Enter ID')
           const response = await $b24.actions.v2.call.make({
             method: 'crm.company.update',
             params: {
-              id,
+              id: 43,
               fields: {
                 CURRENCY_ID: 'RUB',
                 REVENUE: 500000,

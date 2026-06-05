@@ -69,11 +69,10 @@
     declare const $b24: B24Frame
 
     try {
-      const id = prompt('Enter ID')
       const response = await $b24.actions.v2.call.make<boolean>({
         method: 'crm.company.delete',
         params: {
-          id,
+          id: 50,
         },
         requestId: Text.getUuidRfc4122()
       })
@@ -102,11 +101,10 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          const id = prompt('Enter ID')
           const response = await $b24.actions.v2.call.make({
             method: 'crm.company.delete',
             params: {
-              id,
+              id: 50,
             },
             requestId: B24Js.Text.getUuidRfc4122()
           })

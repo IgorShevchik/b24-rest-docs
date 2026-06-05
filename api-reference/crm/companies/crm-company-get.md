@@ -82,11 +82,10 @@
     }
 
     try {
-      const id = prompt('Enter ID')
       const response = await $b24.actions.v2.call.make<CrmCompanyResult>({
         method: 'crm.company.get',
         params: {
-          id,
+          id: 12,
         },
         requestId: Text.getUuidRfc4122()
       })
@@ -115,11 +114,10 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          const id = prompt('Enter ID')
           const response = await $b24.actions.v2.call.make({
             method: 'crm.company.get',
             params: {
-              id,
+              id: 12,
             },
             requestId: B24Js.Text.getUuidRfc4122()
           })

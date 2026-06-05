@@ -26,11 +26,11 @@ date	file	sha256	status	method
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-items-get.md	09bf94973b0c21bfa1fb7d5b3f2012b0145760f23470a999311b51de447419e4	done	crm.company.contact.items.get
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-items-set.md	faff5dd17ac312b9a998cd12ed6b8b11dcfc914d30aa71864ccc174c6dc7ac78	done	crm.company.contact.items.set
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-add.md	ed7b1c6ee075dc146f5f824520e2c0d30ec278cb7b49a6363ea9faafe9c203e8	done	crm.company.add
-2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-delete.md	27f2acb1d60b93f25f54bc5d44d626068fdcaf5cc26f1b51f639fd4bfe0688ef	done	crm.company.delete
+2026-06-05T17:42:50+00:00	api-reference/crm/companies/crm-company-delete.md	7da7ff2f79d58dd55e5b060128534c5a8912d974ad8702c6e229bbaee9cb5061	done	crm.company.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-fields.md	a2feed4fa2f4663cffc9e8ecbab8197434fb656d86f53812f8a27676ee4f13ae	done	crm.company.fields
-2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-get.md	0a041427c5b500c46a32c3469cab18f252312065087ca3868af6b6eb13ad00ef	done	crm.company.get
+2026-06-05T17:42:49+00:00	api-reference/crm/companies/crm-company-get.md	04807541f3f81b791f5f701e1ea3af2ecfed0fb9aeafaa544e9c0001c3317f5b	done	crm.company.get
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-list.md	b3842b7827d89bf53aa990284ef11790d708125355f6c834604aa1a6937e1fc3	done	crm.company.list
-2026-06-05T17:34:38+00:00	api-reference/crm/companies/crm-company-update.md	7b55d070f5fca96ec011db1d651d23cbc4b4c6be346887bb83c84eed899a2d7d	done	crm.company.update
+2026-06-05T17:42:50+00:00	api-reference/crm/companies/crm-company-update.md	9ed8d2b63e531bba29d82862629486718e3171d27ce4480aaf7d0484bb2b4323	done	crm.company.update
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/custom-form/crm-company-details-configuration-force-common-scope-for-all.md	58d80c53ad4fece445202622aadb55f3435a5d62083b2f10dc8921b62f814616	done	crm.company.details.configuration.forceCommonScopeForAll
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/custom-form/crm-company-details-configuration-get.md	18da68df8bc9dfc50d15a0a9d06e2b5184ab4c9e10d26058fa0136602f5bbdab	done	crm.company.details.configuration.get
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/custom-form/crm-company-details-configuration-reset.md	5dc908f1ff1d48abdf741ae54a19bb94ec2b42bd5eaf60eab5c5eb602fa4ea20	done	crm.company.details.configuration.reset
