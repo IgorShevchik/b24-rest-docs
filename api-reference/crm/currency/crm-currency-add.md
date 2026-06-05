@@ -315,7 +315,7 @@ fields: {
         curl -X POST \
         -H "Content-Type: application/json" \
         -H "Accept: application/json" \
-        -d '{"fields":{"CURRENCY":"IDR","AMOUNT":54.8738,"AMOUNT_CNT":10000,"SORT":8000,"LANG":{"ru":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"рупия","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"},"en":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"# CNY","FULL_NAME":"rupee","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"}}}}' \
+        -d '{"fields":{"CURRENCY":"IDR","AMOUNT":54.8738,"AMOUNT_CNT":10000,"SORT":8000,"LANG":{"ru":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"рупия","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"},"en":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"rupee","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"}}}}' \
         https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/crm.currency.add
         ```
 
@@ -325,7 +325,7 @@ fields: {
         curl -X POST \
         -H "Content-Type: application/json" \
         -H "Accept: application/json" \
-        -d '{"fields":{"CURRENCY":"IDR","AMOUNT":54.8738,"AMOUNT_CNT":10000,"SORT":8000,"LANG":{"ru":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"рупия","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"},"en":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"# CNY","FULL_NAME":"rupee","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"}}},"auth":"**put_access_token_here**"}' \
+        -d '{"fields":{"CURRENCY":"IDR","AMOUNT":54.8738,"AMOUNT_CNT":10000,"SORT":8000,"LANG":{"ru":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"рупия","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"},"en":{"DECIMALS":2,"DEC_POINT":".","FORMAT_STRING":"Rp#","FULL_NAME":"rupee","HIDE_ZERO":"Y","THOUSANDS_VARIANT":"C"}}},"auth":"**put_access_token_here**"}' \
         https://**put_your_bitrix24_address**/rest/crm.currency.add
         ```
 
@@ -360,7 +360,7 @@ fields: {
                   en: {
                     DECIMALS: 2,
                     DEC_POINT: '.',
-                    FORMAT_STRING: '# CNY',
+                    FORMAT_STRING: 'Rp#',
                     FULL_NAME: 'Rupee',
                     HIDE_ZERO: 'Y',
                     THOUSANDS_VARIANT: 'C',
@@ -415,7 +415,7 @@ fields: {
                       en: {
                         DECIMALS: 2,
                         DEC_POINT: '.',
-                        FORMAT_STRING: '# CNY',
+                        FORMAT_STRING: 'Rp#',
                         FULL_NAME: 'Rupee',
                         HIDE_ZERO: 'Y',
                         THOUSANDS_VARIANT: 'C',
@@ -469,7 +469,7 @@ fields: {
                         'en' => [
                             'DECIMALS' => 2,
                             'DEC_POINT' => '.',
-                            'FORMAT_STRING' => '# CNY',
+                            'FORMAT_STRING' => 'Rp#',
                             'FULL_NAME' => 'rupee',
                             'HIDE_ZERO' => 'Y',
                             'THOUSANDS_VARIANT' => 'C',
