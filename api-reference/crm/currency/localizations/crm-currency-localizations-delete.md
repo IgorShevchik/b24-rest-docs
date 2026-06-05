@@ -198,9 +198,13 @@
     require_once('crest.php');
 
     $result = CRest::call(
-        'crm.automatedsolution.delete',
+        'crm.currency.localizations.delete',
         [
-            'id' => 5
+            'id'   => 'CLF',
+            'lids' => [
+                'en',
+                'de'
+            ]
         ]
     );
 
