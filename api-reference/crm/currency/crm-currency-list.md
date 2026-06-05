@@ -86,7 +86,7 @@
       DEC_POINT: string
       THOUSANDS_SEP: string | null
       DECIMALS: string
-      DATE_UPDATE: ISODate
+      DATE_UPDATE: ISODate | null
     }
 
     try {

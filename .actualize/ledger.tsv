@@ -24,8 +24,8 @@ date	file	sha256	status	method
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-base-set.md	852910654e3240e101ce688fba4d6f1e95438f41b991740b0f7c62fd79bdc08f	done	crm.currency.base.set
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-delete.md	a8099a5abaf93c18e218a19e4db2d6a7b30096d36b92ab93df9f77fe5e306c05	done	crm.currency.delete
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-fields.md	95ec1a5db925d1f08a75887870e75af4195a27b0b83fcf86a3995fcd7b446869	done	crm.currency.fields
-2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-get.md	2866428cb51c0d5cd7e5b084190785f47fad12436e541ed7d842dc1c570cf5cd	done	crm.currency.get
-2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-list.md	12946435865e8f38f8bc4baa34a38d797263579f9d49fbc229dc7f8dff66acc0	done	crm.currency.list
+2026-06-05T12:45:36+00:00	api-reference/crm/currency/crm-currency-get.md	a522e898bbc8a81d176c3f391c3fc87d7a38de9da1d0ad4b1d297ae19489d7d9	done	crm.currency.get
+2026-06-05T12:45:36+00:00	api-reference/crm/currency/crm-currency-list.md	f3237e1dccf1831c579a1a8adac8029927322d9cdb11ecc663d2c8cd328d9ff4	done	crm.currency.list
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-update.md	283befbd6a95793c402c4b45b4f6403d226ec5d489159b1032205a4c4a5c99fa	done	crm.currency.update
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/localizations/crm-currency-localizations-delete.md	514cdd25cac7aa0c10efc0bf263965d2169d7f26b8352aa168534a607380626a	done	crm.currency.localizations.delete
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/localizations/crm-currency-localizations-fields.md	91a6980c8672a7e0248bed247eac75e84d5f5057c0013ff5d44cd18f6ce07748	done	crm.currency.localizations.fields

@@ -84,9 +84,9 @@
       LID: string
       FORMAT_STRING: string
       DEC_POINT: string
-      THOUSANDS_SEP: string
+      THOUSANDS_SEP: string | null
       DECIMALS: string
-      DATE_UPDATE: ISODate
+      DATE_UPDATE: ISODate | null
       LANG: Record<string, CrmCurrencyLang>
     }
 
