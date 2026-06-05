@@ -31,6 +31,7 @@ date	file	sha256	status	method
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/localizations/crm-currency-localizations-fields.md	91a6980c8672a7e0248bed247eac75e84d5f5057c0013ff5d44cd18f6ce07748	done	crm.currency.localizations.fields
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/localizations/crm-currency-localizations-get.md	2fd0629ac2fad9e927a8849c40caedf00c83af9a43a56e3b626d8cc26a6d1ae5	done	crm.currency.localizations.get
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/localizations/crm-currency-localizations-set.md	91944362e4c7cc1ee57dd4b2fc1f193b3791628a98130679d2047ddc034adc0a	done	crm.currency.localizations.set
+2026-06-05T16:17:20+00:00	api-reference/crm/deals/crm-deal-get.md	333ed8f47e194f6f5055c347f44d47b04b3f1d616cd178e9eef6fd6cc528f6ee	done	crm.deal.get
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-add.md	bc26c014c8d53caec236126c5c9a2e924ffbfcab5f8e05182d18409c1c854c42	done	task.checklistitem.add
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-complete.md	29b5e27d223eaa1e45b433a95bcba998ceac90a25f0f0df21ff234cbee071993	done	task.checklistitem.complete
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-delete.md	bc0f576f4130ac0a2d939db4af19a7b51ff84d54a14b9934229f3ecd17371a4a	done	task.checklistitem.delete
