@@ -114,9 +114,11 @@ expected.
 validation/write phase — the tree may keep edits and/or ledger rows that were written but not
 committed; the script prints a hint — check `git status` and either commit or revert.
 
-**Note:** `validate.py` is a structural gate (tabs, tokens, `tsc`, `node --check`); it does **not**
-check semantics (choosing `v2`/`v3`, mapping `result` fields) — run a sample through
-`PROMPT-REVIEW.md` and mark it `reviewed`.
+**Note:** `validate.py` is a structural gate (tabs, tokens, `tsc`, `node --check`) plus a field/method
+cross-check that grounds the result type in the page (the `method:` must match the cURL endpoint, and
+result-type field names must appear in a JSON example or a `|| **field** ||` table). It still does
+**not** check value semantics (choosing `v2`/`v3`, field types/nesting, business logic) — run a sample
+through `PROMPT-REVIEW.md` and mark it `reviewed`.
 
 **Ledger and merge order.** Tooling and documentation edits go in separate PRs; the tooling PR is
 merged **first**. `ledger.tsv` is empty in the tooling PR (header only) — rows are added as files

@@ -14,6 +14,10 @@ Checks (cheapest first):
   3b. template uniformity: the mandatory comments (success-guard, UMD init, catch,
       Shape-of-payload before the main result type) are present and `requestId`
       carries no trailing comma — see PROMPT.md "Code style (mandatory)";
+  3c. field/method cross-check: the self-declared result type is confronted with the
+      PAGE itself (not just with itself, the gap tsc cannot see) — the SDK `method:`
+      must match the cURL `/rest/.../<method>` endpoint, and every result-type field
+      must be documented in a JSON example or a `#| … |#` table (see cross_check());
   4. types: `tsc --strict` against a reproducible, lockfile-pinned toolchain
      (.actualize/typecheck/package*.json installed with `npm ci --ignore-scripts`);
   5. syntax: `node --check` on the UMD inline script.
@@ -26,6 +30,8 @@ in CI it is never overridden. Exit code 0 = PASS, non-zero = FAIL. Toolchain
 versions are pinned by .actualize/typecheck/package-lock.json (bump deliberately —
 see README).
 """
+from __future__ import annotations
+
 import argparse
 import hashlib
 import json
@@ -68,10 +74,48 @@ MAKE_RE = re.compile(r"\.make<([^>]+)>")
 
 MAX_MD_BYTES = 2_000_000  # guard: a method page is never this big; refuse pathological input
 
+# --- field/method cross-checks (the "self-declared-type blind spot" guard) -----------
+# tsc only proves the example compiles against the type the agent wrote in the SAME file;
+# it never confronts that type with the real API. These checks confront it with the PAGE:
+#   - method: the cURL/PHP/etc. tabs are out of scope for the agent (PROMPT rule 3), so the
+#     `/rest/.../<method>` endpoint is an INDEPENDENT source of truth for the REST method;
+#   - fields: the JSON response example(s) + the bold field names in the `|| **field** ||` rows
+#     of the page's `#| … |#` tables are the documented field universe. A result-type key absent
+#     from ALL of it is a strong hallucination signal. The universe is a deliberately generous
+#     superset (request params included), so false positives are LOW — with one known gap: the
+#     response-envelope keys present on essentially every page (`result`, `time`, `start`, `next`,
+#     `total`, `error`) are always "documented", so a result field literally named one of those is
+#     not caught. The field check is scoped to the result type(s) only — the `.make<X>` generics —
+#     so a helper/param type the agent declares never false-fails the page (see type_body_keys()).
+REST_URL_RE = re.compile(r"/rest/(?:[^\s/'\"]+/)*([A-Za-z][\w.]*?)(?:\.json)?(?=[\s'\"?#]|$)")
+JSON_BLOCK_RE = re.compile(r"```json\n(.*?)\n```", re.DOTALL)
+JSON_KEY_RE = re.compile(r'"([A-Za-z_]\w*)"\s*:')
+# `\*?` before the closing `**` absorbs the trailing required-field marker, e.g. `|| **type***`.
+TABLE_FIELD_RE = re.compile(r"\|\|\s*\*\*([A-Za-z_]\w*)\*?\*\*")
+TYPE_OPEN_RE = re.compile(r"^\s*type\s+(\w+)\s*=\s*\{")  # group 1 = type name (used for scoping)
+PROP_KEY_RE = re.compile(r"^\s*([A-Za-z_]\w*)\s*\??\s*:")
+# DOTALL + lazy `.*?` stops at the first `</script>`; a literal `'</script>'` inside the JS body
+# (never seen in the corpus) would truncate the snippet — acceptable, not worth a parser for it.
+SCRIPT_RE = re.compile(r"<script\b[^>]*>(.*?)</script>", re.DOTALL)
+
 
 def fail(msg):
     print(f"FAIL: {msg}")
     sys.exit(1)
+
+
+def _read_md(path: str) -> str:
+    """Read a .md file behind the MAX_MD_BYTES guard, with CRLF normalised.
+
+    The single reader every consumer goes through (extract() AND the cross-check in main()),
+    so the size guard cannot be bypassed by a second, unguarded open() — which would otherwise
+    feed an unbounded page into the DOTALL regexes (JSON_BLOCK_RE / SCRIPT_RE).
+    """
+    size = os.path.getsize(path)
+    if size > MAX_MD_BYTES:
+        fail(f"file too large: {size} bytes (limit {MAX_MD_BYTES})")
+    with open(path, encoding="utf-8") as f:
+        return f.read().replace("\r\n", "\n")  # normalise CRLF so the fence regexes match
 
 
 def _has_legacy_js_tab(s):
@@ -87,11 +131,7 @@ def extract(md_path):
     plus one or more code-example blocks); every region holding a ```ts example is
     validated and returned, so the caller can type-check each one independently.
     """
-    size = os.path.getsize(md_path)
-    if size > MAX_MD_BYTES:
-        fail(f"file too large: {size} bytes (limit {MAX_MD_BYTES})")
-    with open(md_path, encoding="utf-8") as f:
-        s = f.read().replace("\r\n", "\n")  # normalise CRLF so the fence regexes match
+    s = _read_md(md_path)
 
     if _has_legacy_js_tab(s):
         fail('legacy "- JS" tab still present')
@@ -190,6 +230,125 @@ def style_errors(code):
     return errs
 
 
+def curl_methods(region: str) -> set[str]:
+    """REST method name(s) from the cURL `/rest/.../<method>` URLs in a tabs region.
+
+    Webhook (`/rest/<id>/<webhook>/<method>`) and OAuth (`/rest/<method>`) forms both
+    encode the same method as the final path segment; a trailing `.json` is stripped.
+    Returns a set (normally one element — both cURL tabs name the same method).
+    """
+    return set(REST_URL_RE.findall(region))
+
+
+def umd_inner_js(html_block: str) -> str:
+    """First non-empty <script> body in a UMD html block ('' if none).
+
+    Real UMD blocks carry two <script> tags — the CDN loader `<script src=…></script>`
+    (empty body) followed by the logic script; the empty loader is skipped, the logic returned.
+    """
+    scripts = SCRIPT_RE.findall(html_block)
+    return next((sc for sc in scripts if sc.strip()), "")
+
+
+def type_body_keys(ts: str, only: set[str] | None = None) -> set[str]:
+    """Property key names declared inside the result-type `type X = { … }` block(s).
+
+    `only` — when given, collect keys solely from blocks whose name is in this set (the result
+    types used as `.make<X>` generics). A helper/param type the agent declares alongside the
+    result type (e.g. `type FilterFields = { categoryId: … }`) is then never confronted with the
+    page, so a legitimate request-side key cannot false-fail it. only=None keeps every block.
+
+    A brace-depth walk scopes extraction to the type body, so request-side keys (the
+    `params: { … }` / `call.make({ … })` arguments) are never collected. A key on the SAME line
+    as the opening brace (`type X = { id: …`) is captured too. Nested keys on their own line are
+    included; an inline `{ k: v }` on a property line yields the outer key only (a false NEGATIVE
+    at worst — never a false positive that fails a page). Returns a set.
+    """
+    keys, depth, in_type = set(), 0, False
+    for line in ts.split("\n"):
+        if not in_type:
+            m = TYPE_OPEN_RE.search(line)
+            if not m:
+                continue
+            net = line.count("{") - line.count("}")
+            if net <= 0 or (only is not None and m.group(1) not in only):
+                continue  # empty `{}` type, or a block whose name we were not asked to scan
+            depth, in_type = net, True
+            opener = PROP_KEY_RE.match(line.split("{", 1)[1].strip())  # `type X = { id: …`
+            if opener:
+                keys.add(opener.group(1))
+            continue
+        m = PROP_KEY_RE.match(line)
+        if m:
+            keys.add(m.group(1))
+        depth += line.count("{") - line.count("}")
+        if depth <= 0:
+            in_type = False
+    return keys
+
+
+def documented_field_names(page_text: str) -> set[str]:
+    """Every field name documented anywhere on the page — the field universe.
+
+    Keys of all ```json blocks (success + error response examples) plus the bold field
+    names in the `#| … |#` tables. Deliberately a GENEROUS superset (request params and
+    response fields together): the cross-check only asserts result-type keys are a SUBSET
+    of this, so extra names lower false positives while a truly invented key is still caught.
+    """
+    names = set()
+    for block in JSON_BLOCK_RE.findall(page_text):
+        names |= set(JSON_KEY_RE.findall(block))
+    names |= set(TABLE_FIELD_RE.findall(page_text))
+    return names
+
+
+def cross_check(page_text: str) -> tuple[list[str], list[str]]:
+    """Field/method cross-check for one page → (errors, notes).
+
+    errors gate the page (non-empty == FAIL); notes are advisory (printed, never fail).
+
+    Method (gate) — per code-example region, the SDK `method:` in the TS and UMD tabs must
+    equal each other and the cURL `/rest/.../<method>` endpoint in that same region (when one
+    is present). Fields (gate) — every result-type key (scoped to the `.make<X>` generics;
+    helper/param types excluded) across the page's examples must appear in the documented field
+    universe (a JSON example or a `|| **field** ||` table row). Keys from all regions are pooled
+    before the single universe check, so the error lists names without per-region attribution.
+
+    A gate needs a reference to have authority: when the page documents NO response fields at
+    all (empty universe — e.g. a widget/placement tutorial with no "response handling" section),
+    the type cannot be grounded, so any keys are reported as a note instead of failing — a page
+    that is structurally impossible to satisfy must not brick the batch. Real method pages (all
+    of crm) carry a response section, so their result types still gate hard. See the module header.
+    """
+    errors, notes = [], []
+    universe = documented_field_names(page_text)
+    type_keys = set()
+    for idx, region in enumerate(_tabs.code_regions(page_text), 1):
+        ts_blocks = _tabs.find_ts(region)
+        html_blocks = _tabs.find_html(region)
+        ts_code = textwrap.dedent(ts_blocks[0]) if ts_blocks else ""
+        umd = umd_inner_js(html_blocks[0]) if html_blocks else ""
+        ts_m = _tabs.first_method(ts_code)
+        umd_m = _tabs.first_method(umd)
+        curls = curl_methods(region)
+        if ts_m and umd_m and ts_m != umd_m:
+            errors.append(f"code region {idx}: method mismatch — TS `{ts_m}` vs UMD `{umd_m}`")
+        sdk_m = ts_m or umd_m
+        if sdk_m and curls and sdk_m not in curls:
+            errors.append(f"code region {idx}: SDK method `{sdk_m}` is not the cURL endpoint "
+                          f"{{{', '.join(sorted(curls))}}} documented on the page")
+        type_keys |= type_body_keys(ts_code, only=main_result_types(ts_code))
+    ungrounded = sorted(type_keys - universe)
+    if ungrounded:
+        if universe:
+            errors.append("result-type field(s) documented nowhere on the page (not in any JSON "
+                          f"example or `#| … |#` table) — likely invented: {', '.join(ungrounded)}")
+        else:
+            notes.append("page documents no response fields (no JSON example or field table); "
+                         f"result-type field(s) are ungrounded guesses: {', '.join(ungrounded)}")
+    return errors, notes
+
+
 def _extract_region(region, idx, total):
     """Validate one code-example region and return its (ts_code, umd_inner_js)."""
     where = f"code region {idx}/{total}"
@@ -204,8 +363,7 @@ def _extract_region(region, idx, total):
     html = textwrap.dedent(html_blocks[0])
 
     # first non-empty <script> (a library <script src=…> is empty and skipped)
-    scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", html, re.DOTALL)
-    umd_inner = next((sc for sc in scripts if sc.strip()), None)
+    umd_inner = umd_inner_js(html) or None
     if umd_inner is None:
         fail(f"UMD html block in {where} has no non-empty <script> with logic")
 
@@ -288,6 +446,19 @@ def main():
     if uncovered:
         print("[validate] note: make<…> generic(s) with no local type alias "
               f"(Shape check N/A): {', '.join(uncovered)}", file=sys.stderr)
+
+    # Field/method cross-check: confront the self-declared type with the PAGE (cURL endpoint
+    # + JSON response + field tables), not just with itself — the gap tsc cannot see.
+    page_text = _read_md(abspath)
+    xerrs, xnotes = cross_check(page_text)
+    for n in xnotes:
+        print(f"[validate] note: {n}", file=sys.stderr)
+    if xerrs:
+        fail("field/method cross-check failed (the example disagrees with the page):\n"
+             + "\n".join(f"  - {e}" for e in xerrs))
+    field_status = "see field note(s) above" if xnotes else "result-type fields documented on the page"
+    print(f"[validate] cross-check: method(s) match the cURL endpoint; {field_status}",
+          file=sys.stderr)
 
     ensure_project(a.project)
     tsc = os.path.join(a.project, "node_modules", ".bin", "tsc")

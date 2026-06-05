@@ -458,6 +458,203 @@ class TabsTests(unittest.TestCase):
         self.assertEqual(len(_tabs.code_regions(block + "\n" + block)), 2)
 
 
+def _page(method_ts, method_umd, type_body, curl="crm.deal.get",
+          result_json='{ "result": { "ID": "1", "TITLE": "x" } }'):
+    """A minimal but realistic method page for the cross-check tests: one code region with
+    cURL + JS (TS) + JS (UMD) tabs (the UMD block carries the real two-<script> shape: CDN loader
+    + logic), and a JSON response block. `curl=None` omits the cURL tab; `result_json=None` omits
+    the response section (=> empty field universe); `method_ts=None` omits the TS `method:` (so the
+    SDK method falls back to the UMD tab)."""
+    ts_arg = "{ }" if method_ts is None else f"{{ method: '{method_ts}' }}"
+    curl_tab = "" if curl is None else (
+        "- cURL (Webhook)\n\n"
+        "    ```bash\n"
+        f"    curl -X POST -d '{{}}' https://**x**/rest/**u**/**w**/{curl}\n"
+        "    ```\n\n")
+    resp = "" if result_json is None else f"\n## Обработка ответа\n\n```json\n{result_json}\n```\n"
+    return (
+        "# Page\n\n{% list tabs %}\n\n"
+        f"{curl_tab}"
+        "- JS (TS)\n\n"
+        "    ```ts\n"
+        f"    type DealResult = {{\n{type_body}\n    }}\n"
+        f"    const r = await $b24.actions.v2.call.make<DealResult>({ts_arg})\n"
+        "    ```\n\n"
+        "- JS (UMD)\n\n"
+        "    ```html\n"
+        '    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>\n'
+        "    <script>\n"
+        f"    const r = await $b24.actions.v2.call.make({{ method: '{method_umd}' }})\n"
+        "    </script>\n"
+        "    ```\n\n"
+        "{% endlist %}\n"
+        f"{resp}")
+
+
+class CrossCheckParseTests(unittest.TestCase):
+    def test_curl_methods_webhook_and_oauth(self):
+        region = ("https://x/rest/**u**/**w**/calendar.section.get\n"
+                  "https://x/rest/calendar.section.get")
+        self.assertEqual(validate.curl_methods(region), {"calendar.section.get"})
+
+    def test_curl_methods_strips_json_suffix(self):
+        self.assertEqual(validate.curl_methods("https://x/rest/a/b/ai.engine.register.json"),
+                         {"ai.engine.register"})
+
+    def test_curl_methods_dotted_and_multiple(self):
+        region = "/rest/x/y/calendar.event.get.nearest\n/rest/crm.deal.add"
+        self.assertEqual(validate.curl_methods(region),
+                         {"calendar.event.get.nearest", "crm.deal.add"})
+
+    def test_curl_methods_none(self):
+        self.assertEqual(validate.curl_methods("no rest url here"), set())
+
+    def test_type_body_keys_nested_and_scoped(self):
+        ts = ("type X = {\n"
+              "  ID: string\n"
+              "  PERM: {\n"
+              "    view: boolean\n"
+              "  }\n"
+              "}\n"
+              "const r = await call.make<X>({ method: 'm', params: { ownerId: 1, start: 0 } })")
+        # nested key kept; request-side params (ownerId/start/method) excluded
+        self.assertEqual(validate.type_body_keys(ts), {"ID", "PERM", "view"})
+
+    def test_type_body_keys_scalar_alias_has_none(self):
+        self.assertEqual(validate.type_body_keys("type Ok = boolean"), set())
+
+    def test_documented_field_names_json_and_table(self):
+        page = ('```json\n{ "result": { "ID": "1" }, "time": { "start": 1 } }\n```\n'
+                "|| **TITLE**\n`string` | desc ||\n"
+                "|| **Название** | header (cyrillic, excluded) ||")
+        names = validate.documented_field_names(page)
+        self.assertIn("ID", names)
+        self.assertIn("TITLE", names)
+        self.assertNotIn("Название", names)
+
+    def test_curl_methods_strips_json_suffix_oauth(self):
+        # OAuth form (no webhook segments) with a trailing .json is also stripped
+        self.assertEqual(validate.curl_methods("https://x/rest/ai.engine.register.json"),
+                         {"ai.engine.register"})
+
+    def test_curl_methods_real_webhook_placeholder_format(self):
+        # the exact shape the corpus uses: **put_your_..._here** placeholder segments
+        url = ("https://**put_your_bitrix24**/rest/**put_your_user_id_here**/"
+               "**put_your_webhook_here**/calendar.section.get")
+        self.assertEqual(validate.curl_methods(url), {"calendar.section.get"})
+
+    def test_curl_methods_ignores_query_and_fragment(self):
+        # a trailing ?query or #fragment must not be glued onto the method name
+        self.assertEqual(validate.curl_methods("/rest/x/y/crm.deal.add?foo=1"), {"crm.deal.add"})
+        self.assertEqual(validate.curl_methods("/rest/x/y/crm.deal.add#anchor"), {"crm.deal.add"})
+
+    def test_umd_inner_js_skips_cdn_loader_script(self):
+        # the real two-<script> shape: empty CDN loader first, logic second -> logic returned
+        html = ('<script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js">'
+                "</script>\n<script>\nconst r = 1\n</script>")
+        self.assertEqual(validate.umd_inner_js(html).strip(), "const r = 1")
+        self.assertEqual(validate.umd_inner_js("<script></script>"), "")  # no body -> ''
+
+    def test_type_body_keys_inline_nested_yields_outer_key_only(self):
+        # an inline `{ … }` on a property line contributes the OUTER key only (documented gap)
+        ts = "type X = {\n  id: string\n  addr: { city: string }\n}"
+        self.assertEqual(validate.type_body_keys(ts), {"id", "addr"})
+
+    def test_type_body_keys_key_on_opening_brace_line(self):
+        # a key sharing the opening-brace line is captured, not skipped
+        ts = "type X = { ID: string\n  NAME: string\n}"
+        self.assertEqual(validate.type_body_keys(ts), {"ID", "NAME"})
+
+    def test_type_body_keys_scoped_to_named_types(self):
+        # only=… restricts collection to the named result type(s); helper types are ignored
+        ts = ("type Helper = {\n  reqOnly: number\n}\n"
+              "type DealResult = {\n  ID: string\n}\n")
+        self.assertEqual(validate.type_body_keys(ts, only={"DealResult"}), {"ID"})
+        self.assertEqual(validate.type_body_keys(ts), {"reqOnly", "ID"})  # None => every block
+
+    def test_documented_field_names_includes_envelope_keys(self):
+        # documents the generous-superset gap: response-envelope keys are always "documented"
+        page = '```json\n{ "result": { "ID": "1" }, "time": { "start": 1 } }\n```'
+        names = validate.documented_field_names(page)
+        self.assertTrue({"result", "time", "start", "ID"} <= names)
+
+
+class CrossCheckTests(unittest.TestCase):
+    def test_clean_page_has_no_errors_or_notes(self):
+        errs, notes = validate.cross_check(_page("crm.deal.get", "crm.deal.get",
+                                                 "  ID: string\n  TITLE: string"))
+        self.assertEqual((errs, notes), ([], []))
+
+    def test_method_ts_umd_mismatch(self):
+        errs, _ = validate.cross_check(_page("crm.deal.get", "crm.deal.update", "  ID: string"))
+        self.assertTrue(any("method mismatch" in e for e in errs))
+
+    def test_method_sdk_vs_curl_mismatch(self):
+        errs, _ = validate.cross_check(_page("crm.deal.list", "crm.deal.list", "  ID: string",
+                                             curl="crm.deal.get"))
+        self.assertTrue(any("is not the cURL endpoint" in e for e in errs))
+
+    def test_invented_field_with_universe_is_an_error(self):
+        errs, notes = validate.cross_check(_page("crm.deal.get", "crm.deal.get",
+                                                 "  ID: string\n  BOGUS: string"))
+        self.assertEqual(notes, [])
+        self.assertTrue(any("BOGUS" in e and "invented" in e for e in errs))
+
+    def test_ungrounded_field_without_universe_is_a_note(self):
+        # no response section => empty universe => report, do NOT gate
+        errs, notes = validate.cross_check(_page("placement.getEvents", "placement.getEvents",
+                                                 "  id: string", curl=None, result_json=None))
+        self.assertEqual(errs, [])
+        self.assertTrue(any("ungrounded" in n and "id" in n for n in notes))
+
+    def test_no_curl_tab_skips_method_cross_check(self):
+        # internal TS==UMD still holds; absent cURL endpoint must not fail
+        errs, _ = validate.cross_check(_page("crm.deal.get", "crm.deal.get", "  ID: string",
+                                             curl=None))
+        self.assertEqual(errs, [])
+
+    def test_region_isolation_each_method_matches_its_own_curl(self):
+        page = (_page("crm.deal.get", "crm.deal.get", "  ID: string", curl="crm.deal.get")
+                + _page("crm.deal.add", "crm.deal.add", "  ID: string", curl="crm.deal.add"))
+        errs, _ = validate.cross_check(page)
+        self.assertEqual(errs, [])
+
+    def test_method_umd_only_vs_curl_mismatch(self):
+        # TS tab carries no method: (sdk_m falls back to UMD) — the UMD method must still match cURL
+        errs, _ = validate.cross_check(
+            _page(None, "crm.deal.update", "  ID: string", curl="crm.deal.get"))
+        self.assertTrue(any("is not the cURL endpoint" in e for e in errs))
+
+    def test_region2_mismatch_attributed_to_region2(self):
+        # region 1 clean, region 2 has a TS/UMD method mismatch -> the error names region 2
+        page = (_page("crm.deal.get", "crm.deal.get", "  ID: string")
+                + _page("crm.deal.get", "crm.deal.update", "  ID: string"))
+        errs, _ = validate.cross_check(page)
+        self.assertTrue(any("region 2" in e and "method mismatch" in e for e in errs))
+
+    def test_method_mismatch_and_ungrounded_note_coexist(self):
+        # an error (method mismatch) and a note (empty universe) can be produced together
+        errs, notes = validate.cross_check(
+            _page("crm.deal.get", "crm.deal.update", "  id: string", curl=None, result_json=None))
+        self.assertTrue(errs and notes)
+        self.assertTrue(any("method mismatch" in e for e in errs))
+        self.assertTrue(any("ungrounded" in n for n in notes))
+
+    def test_helper_type_not_used_as_generic_is_not_cross_checked(self):
+        # a helper type's request-side key must NOT be grounded against the page (scoping fix):
+        # categoryId is documented nowhere, yet the page is clean because Helper is not .make<>'d
+        page = _page("crm.deal.get", "crm.deal.get", "  ID: string").replace(
+            "    type DealResult = {",
+            "    type Helper = {\n      categoryId: number\n    }\n    type DealResult = {", 1)
+        self.assertEqual(validate.cross_check(page), ([], []))
+
+    def test_field_grounded_by_table_only(self):
+        # universe populated from a `|| **field** ||` table alone (no JSON block) still grounds
+        page = _page("crm.deal.get", "crm.deal.get", "  TITLE: string", result_json=None)
+        page += "\n#|\n|| **Поле** | Описание ||\n|| **TITLE***\n`string` | name ||\n|#\n"
+        self.assertEqual(validate.cross_check(page), ([], []))
+
+
 class LedgerTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
