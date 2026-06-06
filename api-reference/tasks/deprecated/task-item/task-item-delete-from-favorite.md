@@ -68,7 +68,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify API version
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type DeleteFromFavoriteResult = boolean
 

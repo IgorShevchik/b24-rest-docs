@@ -64,7 +64,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify API version — no JSON response section found on this page
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskItemCompleteResult = boolean | null
 
@@ -101,7 +100,6 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // TODO: verify API version — no JSON response section found on this page
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.complete',
             params: {
