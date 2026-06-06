@@ -142,7 +142,9 @@ before the docs land. `ledger.tsv` conflicts across parallel PRs are absorbed by
 - Comments and string values are in English (the SDK targets international developers). The
   PHP/BX24.js/cURL tabs stay as they are, including Russian comments and pre-existing
   `processData()` — that is out of scope.
-- Version: `actions.v2` by default; `actions.v3` for `rest-v3/**` and `result.item` responses.
+- Version: `actions.v2` by default; `actions.v3` only for `rest-v3/**` files or examples that
+  already call `actions.v3.*` (not inferred from `result.item` — `crm.item.*` are rest-v2 but
+  return `result.item`).
 - List methods: a single variant — `call.make` with `start` (preserves `order`). Above
   `const response`, a hint about both helpers `callList.make` / `fetchList.make` with a `NOTE` that
   they do NOT accept `order` (excluded from their type — a `tsc` error if passed).
