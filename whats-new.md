@@ -2,6 +2,23 @@
 
 ## 2026
 
+### 05 июня, 2026
+
+- Добавили методы раздела [Записи о рабочем времени](./api-reference/rest-v3/timeman/index.md)
+- Добавили методы раздела [Отделы и команды](./api-reference/rest-v3/humanresources/node/index.md)
+- Добавили методы раздела [Участники отделов и команд](./api-reference/rest-v3/humanresources/node-member/index.md)
+
+### 04 июня, 2026
+
+- Обновили страницу [Права на методы и скоупы](./api-reference/scopes/index.md)
+- Обновили страницу [Импорт данных в CRM: обзор методов](./api-reference/crm/universal/import/index.md)
+- Обновили страницу [Товарные позиции в объектах CRM: обзор методов](./api-reference/crm/universal/product-rows/index.md)
+- Обновили страницу [Обзор событий при работе с элементами смарт-процессов](./api-reference/crm/universal/events/index.md)
+
+### 03 июня, 2026
+
+- Добавили статью [Передача контекста боту при открытии чата](./api-reference/chat-bots/chat-bots-v2/imbot.v2/bot-context.md)
+
 ### 28 мая, 2026
 
 - Добавили раздел для работы с [методами почты для REST 3.0](./api-reference/rest-v3/mail/index.md)
