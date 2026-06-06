@@ -88,13 +88,31 @@
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
     import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
+    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 
     declare const $b24: B24Frame
 
+    // crm.item.update (rest-v2) returns the updated element under `item`; fields per
+    // ../universal/crm-item-update.md
+    // Shape of the payload returned in result (the `item` object below)
+    type CrmItemUpdateResult = {
+      item: {
+        id: number
+        entityTypeId: number
+        title: string
+        categoryId: number
+        stageId: string
+        assignedById: number
+        opened: string
+        opportunity: number
+        currencyId: string
+        createdTime: ISODate
+        updatedTime: ISODate
+      }
+    }
+
     try {
-      // TODO: verify API version (this overview page has no JSON response example to ground the result type)
-      const response = await $b24.actions.v2.call.make<unknown>({
+      const response = await $b24.actions.v2.call.make<CrmItemUpdateResult>({
         method: 'crm.item.update',
         params: {
           entityTypeId: 2,
@@ -112,7 +130,7 @@
         console.error(response.getErrorMessages().join('; '))
       } else {
         const result = response.getData()!.result
-        console.info('Updated item:', result)
+        console.info('Updated item:', result.item.id, result.item.stageId)
       }
     } catch (error) {
       // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
@@ -151,7 +169,7 @@
           }
 
           const result = response.getData().result
-          console.info('Updated item:', result)
+          console.info('Updated item:', result.item.id, result.item.stageId)
         } catch (error) {
           // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
           console.error(error)

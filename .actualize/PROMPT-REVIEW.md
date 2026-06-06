@@ -14,7 +14,8 @@ Input: `<PATH>`.
    PROMPT.md, "When the cURL endpoint disagrees with the page"). A page may have several
    `{% list tabs %}` code-example blocks — check that **every** one was converted.
 2. **No deprecated calls**: the example has no `callMethod`, `callListMethod`, `fetchListMethod`.
-   The call goes through `actions.v2.call.make` (or `actions.v3.call.make` for rest-v3 / a
+   The call goes through `actions.v2.call.make` (or `actions.v3.call.make` ONLY for a
+   `rest-v3/**` file or an example that already calls `actions.v3.*` — not inferred from a
    `result.item` response) — the same version in **both** tabs (TS and UMD).
 3. **Response handling**: `try/catch` + an `if (!response.isSuccess)` check with
    `getErrorMessages()`, then reading `getData()!.result` (TS) / `getData().result` (UMD).

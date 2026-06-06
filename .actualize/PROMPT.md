@@ -30,10 +30,15 @@ Input: `<PATH>` — the path to the file.
 ## API version (v2 / v3)
 
 - Default — **`actions.v2`**.
-- Use **`actions.v3`** if the file lives under `api-reference/rest-v3/**` OR the "response
-  handling" section returns `result.item` (not `result.<entity>`).
-- If the version cannot be determined (the page has no JSON response) — use `actions.v2` and leave
-  a `// TODO: verify API version` comment.
+- It is **`actions.v3`** ONLY if one of these two explicit signals holds:
+  - the file lives under `api-reference/rest-v3/**`, OR
+  - the old JS example being converted already calls `actions.v3.*`.
+- Do **NOT** infer the version from the response shape. `result.item` describes the *payload*,
+  not the API version — e.g. `crm.item.*` are rest-v2 yet return `result.item`. Type the `item`
+  shape from the page, but keep `actions.v2`.
+- Any other case (neither signal applies, or the version is unclear) — do **NOT** guess v3: keep
+  the `actions.v2` default and flag it for maintainer confirmation (manual run: ask; batch run:
+  leave a `// TODO: confirm API version` comment and report it).
 - Take the result type `<T>` from the response shape on the page: `{ task: {...} }`,
   `{ item: {...} }`, `{ tasks: [...] }`, `{ fields: {...} }`, `{ order: {...} }`, `boolean` fields,
   etc.
