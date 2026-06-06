@@ -207,6 +207,19 @@ for f in files:
                 print(f"{f}:{i+1}  {l.strip()[:60]}")
 ```
 
+## 9. [paused] crm/contacts (17 pages) — actualization on hold pending review
+
+The four Tier-1 CRM core subsections are actualized and merged to `main`: status (8),
+deals (29), leads (23), companies (21) = **81 example pages** (see the review checklist,
+exported to a file while Issues are disabled). `crm/contacts` is the remaining Tier-1
+subsection: **17 pages still carry the legacy jsSDK** (`remaining.py api-reference/crm/contacts`
+reports 17, spread over the top level + `company/`, `custom-form/`, `events/`, `userfield/`).
+
+It is **intentionally paused** at the maintainer's request until the review of the
+already-merged sections finishes — so any review finding can adjust the approach before the
+next batch is produced. Resume with the same flow as #22–#26 (actualize on a fresh branch →
+`validate.py` PASS → one PR for the section). Nothing is staged for it yet.
+
 ## Minor (minor/nit, as needed)
 
 - **[minor] Manual typing of result types is not verified against the live API.** The
