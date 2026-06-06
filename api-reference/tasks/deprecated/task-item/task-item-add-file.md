@@ -68,7 +68,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify API version — the page does not show a JSON response example
     // Shape of the payload returned in result (ID of the uploaded file)
     type AddFileResult = number
 

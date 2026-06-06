@@ -70,7 +70,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify API version
     // Shape of the payload returned in result
     type TaskDescriptionResult = string
 

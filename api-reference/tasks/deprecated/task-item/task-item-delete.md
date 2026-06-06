@@ -65,7 +65,6 @@
     declare const $b24: B24Frame
 
     try {
-      // TODO: verify API version — this page has no JSON response example
       const response = await $b24.actions.v2.call.make<boolean>({
         method: 'task.item.delete',
         params: {
@@ -98,7 +97,6 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
-          // TODO: verify API version — this page has no JSON response example
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.delete',
             params: {

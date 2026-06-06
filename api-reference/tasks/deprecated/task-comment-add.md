@@ -67,7 +67,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify API version
     // Shape of the payload returned in result (comment ID)
     type TaskCommentAddResult = number
 

@@ -81,7 +81,6 @@
 
     declare const $b24: B24Frame
 
-    // TODO: verify result shape — no response example is provided on this page
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type AddToFavouriteResult = boolean
 
