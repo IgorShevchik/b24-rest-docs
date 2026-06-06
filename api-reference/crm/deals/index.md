@@ -92,7 +92,7 @@
 
     declare const $b24: B24Frame
 
-    // crm.item.update (rest-v3) returns the updated element under `item`; fields per
+    // crm.item.update (rest-v2) returns the updated element under `item`; fields per
     // ../universal/crm-item-update.md
     // Shape of the payload returned in result (the `item` object below)
     type CrmItemUpdateResult = {

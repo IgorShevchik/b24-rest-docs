@@ -70,7 +70,7 @@ date	file	sha256	status	method
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/custom-form/crm-deal-details-configuration-get.md	9313957063a0741cbb5cd05c39e2ab0b4d1c97d1c6fd9671ea3ee6fb0f2a395b	done	crm.deal.details.configuration.get
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/custom-form/crm-deal-details-configuration-reset.md	6233364c635be9b47ec8f622925fd54e8e8191e1b87dd6556932cb34ed65c096	done	crm.deal.details.configuration.reset
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/custom-form/crm-deal-details-configuration-set.md	b4d34a4756858e5f348ef0c59d76398e8abf4af333d6f0a18dff76ef5e9c6b5a	done	crm.deal.details.configuration.set
-2026-06-06T05:01:50+00:00	api-reference/crm/deals/index.md	d7e0837b65dbe5deb74fe8046ff3f718f1710fef307d12fe6100704af583e35c	done	crm.item.update
+2026-06-06T05:08:55+00:00	api-reference/crm/deals/index.md	de6e1f71fec77b426cd33b4882e12f6f18d2223986991d788d256ecc9ba74ec9	done	crm.item.update
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-add.md	63538f33627327ceb8296cece4079acf1835825472f16ce000fb4fe2f61d69f6	done	crm.deal.recurring.add
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-delete.md	2d8bf760383aa074f767fdd35f4a6241244463c96d4eb2a90aef7f531382d92f	done	crm.deal.recurring.delete
 2026-06-05T16:29:26+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-expose.md	5a81a0d3b887ab9ecd0a66c4039164ba68285e5b134e8a4e92633fba8d00a74a	done	crm.deal.recurring.expose
