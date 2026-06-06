@@ -426,6 +426,12 @@ def main():
     ap.add_argument("--project", default=os.path.join(HERE, ".tscheck"))
     a = ap.parse_args()
 
+    # tsc/node are launched with cwd=<project>, so the sandbox dir must be absolute:
+    # a relative --project (e.g. ".actualize/.tscheck-x") would make the relative tsc
+    # binary path unresolvable from inside that cwd (FileNotFoundError). The default is
+    # already absolute (HERE-based); this normalizes an explicitly-passed relative one.
+    a.project = os.path.abspath(a.project)
+
     abspath = os.path.abspath(a.path)
     if os.path.commonpath([abspath, REPO]) != REPO:
         fail(f"path is outside the repository: {abspath}")
