@@ -1,0 +1,401 @@
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  :root{
+    --bg:#0e0f13; --panel:#16181d; --panel2:#1c1f26; --line:#2a2e37;
+    --txt:#e7e9ee; --muted:#8a909c; --dim:#5b616e;
+    --ok:#6ee7a8; --rem:#fb923c; --warn:#fbbf24; --info:#60a5fa; --skip:#6b7280;
+    --warnbg:rgba(251,191,36,.12); --infobg:rgba(96,165,250,.12); --rembg:rgba(251,146,60,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.45}
+  .mono{font-family:'IBM Plex Mono',monospace}
+  .wrap{max-width:1060px;margin:0 auto;padding:22px 18px 96px}
+
+  header{position:sticky;top:0;z-index:20;background:linear-gradient(var(--bg),var(--bg) 78%,transparent);
+    padding:6px 0 14px;margin:-6px 0 4px}
+  h1{font-size:17px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .sub b{color:var(--txt);font-weight:600}
+
+  .bar{height:8px;border-radius:6px;background:var(--panel2);overflow:hidden;display:flex;border:1px solid var(--line)}
+  .bar i{display:block;height:100%}
+  .bar .ok{background:var(--ok)} .bar .skip{background:var(--skip)}
+  .counts{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:10px 0 12px;font-size:12px;color:var(--muted)}
+  .counts .n{color:var(--txt);font-weight:600;font-family:'IBM Plex Mono',monospace}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+  .dot.ok{background:var(--ok)} .dot.skip{background:var(--skip)} .dot.pend{background:var(--dim)} .dot.rem{background:var(--rem)}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .filters button{background:var(--panel);color:var(--muted);border:1px solid var(--line);
+    padding:5px 11px;border-radius:7px;cursor:pointer;font:inherit;font-size:12px;transition:.12s}
+  .filters button:hover{border-color:var(--dim);color:var(--txt)}
+  .filters button.on{background:var(--panel2);color:var(--txt);border-color:var(--ok);box-shadow:0 0 0 1px var(--ok) inset}
+  .filters button .c{color:var(--dim);margin-left:5px;font-family:'IBM Plex Mono',monospace}
+  input.search{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+    padding:7px 11px;border-radius:7px;font:inherit;font-size:13px;outline:none}
+  input.search:focus{border-color:var(--ok)}
+  .reset{background:transparent;border:1px solid var(--line);color:var(--dim);padding:5px 10px;
+    border-radius:7px;cursor:pointer;font:inherit;font-size:12px}
+  .reset:hover{color:var(--warn);border-color:var(--warn)}
+
+  .sec{margin-top:22px}
+  .sec h2{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;
+    margin:0 0 8px;display:flex;align-items:center;gap:10px}
+  .sec h2 .sp{font-family:'IBM Plex Mono',monospace;color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
+
+  .row{border:1px solid var(--line);border-radius:9px;background:var(--panel);margin-bottom:6px;transition:.1s;overflow:hidden}
+  .row:hover{border-color:var(--dim)}
+  .row.hasrem{border-left:3px solid var(--rem)}
+  .row.ok .head{opacity:.55} .row.skip .head{opacity:.45}
+  .row.ok .name,.row.skip .name{text-decoration:line-through;text-decoration-color:var(--dim)}
+  .head{display:flex;align-items:flex-start;gap:11px;padding:9px 11px}
+  .head:hover{background:var(--panel2)}
+
+  .chk{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line);
+    background:var(--panel2);cursor:pointer;margin-top:1px;display:grid;place-items:center;
+    color:transparent;font-size:13px;font-weight:700;transition:.1s;user-select:none}
+  .chk:hover{border-color:var(--ok)}
+  .row.ok .chk{background:var(--ok);border-color:var(--ok);color:#0e0f13;opacity:1}
+  .row.skip .chk{background:var(--skip);border-color:var(--skip);color:#0e0f13;opacity:1}
+
+  .body{flex:1;min-width:0}
+  .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .name{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;word-break:break-word}
+  .badge{font-size:10px;padding:1px 6px;border-radius:5px;font-weight:600;letter-spacing:.03em;flex:none}
+  .badge.warn{background:var(--warnbg);color:var(--warn)}
+  .badge.info{background:var(--infobg);color:var(--info)}
+  .badge.rem{background:var(--rembg);color:var(--rem)}
+  .note{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+  .note.warn{color:#e9c46a}
+
+  .actions{display:flex;gap:7px;flex:none;margin-top:1px;align-items:center}
+  .actions a,.actions button{font-size:12px;text-decoration:none;padding:4px 9px;border-radius:6px;
+    border:1px solid var(--line);color:var(--muted);white-space:nowrap;transition:.1s;background:transparent;
+    font:inherit;cursor:pointer}
+  .actions a:hover{color:var(--ok);border-color:var(--ok)}
+  .actions a.docs:hover{color:var(--info);border-color:var(--info)}
+  .actions .rembtn:hover{color:var(--rem);border-color:var(--rem)}
+  .actions .rembtn.active{color:var(--rem);border-color:var(--rem);background:var(--rembg)}
+  .skipbtn:hover{color:var(--skip);border-color:var(--skip)}
+  .row.skip .skipbtn{color:var(--skip);border-color:var(--skip)}
+
+  .editor{padding:0 11px 11px 42px;display:none}
+  .row.open .editor{display:block}
+  textarea{width:100%;min-height:84px;resize:vertical;background:#0b0c10;border:1px solid var(--line);
+    color:var(--txt);border-radius:8px;padding:9px 11px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+    line-height:1.5;outline:none}
+  textarea:focus{border-color:var(--rem)}
+  .ehint{color:var(--dim);font-size:11px;margin-top:4px;display:flex;justify-content:space-between}
+
+  .empty{color:var(--dim);text-align:center;padding:40px;font-size:13px}
+  .savenote{position:fixed;bottom:62px;right:16px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--muted);font-size:11px;padding:6px 12px;border-radius:8px;opacity:0;transition:.3s;pointer-events:none;z-index:40}
+  .savenote.show{opacity:1}
+
+  .footbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,15,19,.92);
+    backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 18px}
+  .footbar .inner{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .footbar .fstat{color:var(--muted);font-size:12px}
+  .footbar .fstat .n{color:var(--rem);font-weight:600;font-family:'IBM Plex Mono',monospace}
+  .build{margin-left:auto;background:var(--ok);color:#0a0b0e;border:none;padding:9px 18px;border-radius:8px;
+    font:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:.12s}
+  .build:hover{filter:brightness(1.08)}
+
+  .modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:24px}
+  .modal.show{display:flex}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(820px,100%);
+    max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+  .sheet h3{margin:0;padding:16px 18px;font-size:14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .sheet h3 .x{margin-left:auto;cursor:pointer;color:var(--dim);font-size:18px;line-height:1}
+  .sheet h3 .x:hover{color:var(--txt)}
+  .opts{display:flex;gap:16px;padding:11px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .opts label{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .opts input{accent-color:var(--ok)}
+  .out{flex:1;margin:0;border:none;border-radius:0;min-height:300px;border-top:none}
+  .mbtns{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+  .mbtns button{padding:8px 16px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--txt)}
+  .mbtns .copy{background:var(--ok);color:#0a0b0e;border:none;font-weight:600}
+  .mbtns .copy.done{background:var(--info)}
+  .hide{display:none!important}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Ревью jsSDK-примеров · TS + UMD</h1>
+    <div class="sub"><b>81</b> пример + <b>1</b> tooling-фикс · форк <span class="mono">@ 7f667d9</span> · пиши замечание к пункту → собери в один md для PR</div>
+
+    <div class="bar"><i class="ok" id="barOk"></i><i class="skip" id="barSkip"></i></div>
+    <div class="counts">
+      <span><span class="n" id="pct">0%</span> просмотрено</span>
+      <span><span class="dot ok"></span><span class="n" id="cOk">0</span> ок</span>
+      <span><span class="dot rem"></span><span class="n" id="cRem">0</span> с замечаниями</span>
+      <span><span class="dot skip"></span><span class="n" id="cSkip">0</span> skip</span>
+      <span><span class="dot pend"></span><span class="n" id="cPend">0</span> осталось</span>
+    </div>
+
+    <div class="controls">
+      <input class="search" id="search" placeholder="Фильтр по имени файла…" autocomplete="off">
+      <div class="filters" id="filters">
+        <button data-f="all" class="on">Все <span class="c" id="fAll"></span></button>
+        <button data-f="pending">Осталось <span class="c" id="fPend"></span></button>
+        <button data-f="rem">С замеч. <span class="c" id="fRem"></span></button>
+        <button data-f="warn">⚠️ <span class="c" id="fWarn"></span></button>
+        <button data-f="info">ℹ️ <span class="c" id="fInfo"></span></button>
+        <button data-f="ok">Ок <span class="c" id="fOk"></span></button>
+        <button data-f="skip">Skip <span class="c" id="fSkip"></span></button>
+      </div>
+      <button class="reset" id="reset">сброс</button>
+    </div>
+  </header>
+
+  <div id="list"></div>
+</div>
+
+<div class="footbar">
+  <div class="inner">
+    <span class="fstat"><span class="n" id="footRem">0</span> замечаний готово к сборке</span>
+    <button class="build" id="build">Собрать .md →</button>
+  </div>
+</div>
+
+<div class="savenote" id="savenote">сохранено</div>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h3>Результат ревью — markdown для PR <span class="x" id="mClose">✕</span></h3>
+    <div class="opts">
+      <label><input type="checkbox" id="optRem" checked> замечания</label>
+      <label><input type="checkbox" id="optOk"> проверенные (ок)</label>
+      <label><input type="checkbox" id="optSkip"> пропущенные</label>
+      <label><input type="checkbox" id="optPend"> непросмотренные</label>
+    </div>
+    <textarea class="out" id="out" readonly spellcheck="false"></textarea>
+    <div class="mbtns">
+      <button class="copy" id="mCopy">Копировать</button>
+      <button id="mDownload">Скачать .md</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ITEMS = [{"section": "crm/status (8)", "prefix": "status", "name": "crm-status-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-add.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-delete.md", "note": "ℹ️ Два блока примеров (обычное удаление + `FORCED`) — конвертированы оба.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-delete.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-entity-items.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-entity-items.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-entity-items.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-entity-items.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-entity-items.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-entity-types.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-entity-types.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-entity-types.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-entity-types.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-entity-types.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-fields.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-get.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-list.html"}, {"section": "crm/status (8)", "prefix": "status", "name": "crm-status-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/status/crm-status-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fstatus%2Fcrm-status-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fstatus%2Fcrm-status-update.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/status/crm-status-update.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-add.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-delete.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-fields.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-items-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-items-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-items-delete.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-items-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-items-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-items-get.html"}, {"section": "crm/deals (29)", "prefix": "deals/contacts", "name": "crm-deal-contact-items-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/contacts/crm-deal-contact-items-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcontacts%2Fcrm-deal-contact-items-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/contacts/crm-deal-contact-items-set.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-add.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-delete.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-fields.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-get.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-list.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-productrows-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-productrows-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-productrows-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-productrows-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-productrows-get.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-productrows-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-productrows-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-productrows-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-productrows-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-productrows-set.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "crm-deal-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/crm-deal-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcrm-deal-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcrm-deal-update.md", "note": "ℹ️ В PHP / PHP CRest табе присутствует `processData()` — вне области (правки только в JS-табе), оставлено как было.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/crm-deal-update.html"}, {"section": "crm/deals (29)", "prefix": "deals/custom-form", "name": "crm-deal-details-configuration-force-common-scope-for-all.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/custom-form/crm-deal-details-configuration-force-common-scope-for-all.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-force-common-scope-for-all.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-force-common-scope-for-all.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/custom-form/crm-deal-details-configuration-force-common-scope-for-all.html"}, {"section": "crm/deals (29)", "prefix": "deals/custom-form", "name": "crm-deal-details-configuration-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/custom-form/crm-deal-details-configuration-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-get.md", "note": "ℹ️ Multi-block (scope P + C) — конвертированы оба блока.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/custom-form/crm-deal-details-configuration-get.html"}, {"section": "crm/deals (29)", "prefix": "deals/custom-form", "name": "crm-deal-details-configuration-reset.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/custom-form/crm-deal-details-configuration-reset.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-reset.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-reset.md", "note": "ℹ️ Multi-block (scope P + C).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/custom-form/crm-deal-details-configuration-reset.html"}, {"section": "crm/deals (29)", "prefix": "deals/custom-form", "name": "crm-deal-details-configuration-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/custom-form/crm-deal-details-configuration-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fcustom-form%2Fcrm-deal-details-configuration-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/custom-form/crm-deal-details-configuration-set.html"}, {"section": "crm/deals (29)", "prefix": "deals", "name": "index.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/index.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Findex.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Findex.md", "note": "⚠️ Пример `crm.item.update`: на странице **нет JSON-ответа** → результат оставлен **нетипизированным** с комментарием `// TODO: verify API version`. Проверить версию API и тип результата вручную.", "flag": "warn", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/index.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-add.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-delete.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-expose.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-expose.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-expose.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-expose.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-expose.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-fields.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-get.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-list.html"}, {"section": "crm/deals (29)", "prefix": "deals/recurring-deals", "name": "crm-deal-recurring-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/recurring-deals/crm-deal-recurring-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Frecurring-deals%2Fcrm-deal-recurring-update.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/recurring-deals/crm-deal-recurring-update.html"}, {"section": "crm/deals (29)", "prefix": "deals/user-defined-fields", "name": "crm-deal-userfield-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-delete.html"}, {"section": "crm/deals (29)", "prefix": "deals/user-defined-fields", "name": "crm-deal-userfield-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-get.html"}, {"section": "crm/deals (29)", "prefix": "deals/user-defined-fields", "name": "crm-deal-userfield-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fdeals%2Fuser-defined-fields%2Fcrm-deal-userfield-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-add.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-delete.md", "note": "ℹ️ В BX24.js-табе остался оригинальный `prompt(\"Введите ID\")` (вне области). В TS/UMD — конкретный `id: 123`.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-delete.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-fields.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-get.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-list.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-productrows-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-productrows-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-productrows-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-productrows-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-productrows-get.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-productrows-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-productrows-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-productrows-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-productrows-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-productrows-set.html"}, {"section": "crm/leads (23)", "prefix": "leads", "name": "crm-lead-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/crm-lead-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcrm-lead-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcrm-lead-update.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/crm-lead-update.html"}, {"section": "crm/leads (23)", "prefix": "leads/custom-form", "name": "crm-lead-details-configuration-force-common-scope-for-all.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/custom-form/crm-lead-details-configuration-force-common-scope-for-all.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-force-common-scope-for-all.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-force-common-scope-for-all.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/custom-form/crm-lead-details-configuration-force-common-scope-for-all.html"}, {"section": "crm/leads (23)", "prefix": "leads/custom-form", "name": "crm-lead-details-configuration-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/custom-form/crm-lead-details-configuration-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-get.md", "note": "ℹ️ Multi-block (scope P + C).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/custom-form/crm-lead-details-configuration-get.html"}, {"section": "crm/leads (23)", "prefix": "leads/custom-form", "name": "crm-lead-details-configuration-reset.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/custom-form/crm-lead-details-configuration-reset.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-reset.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-reset.md", "note": "ℹ️ Multi-block (scope P + C).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/custom-form/crm-lead-details-configuration-reset.html"}, {"section": "crm/leads (23)", "prefix": "leads/custom-form", "name": "crm-lead-details-configuration-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/custom-form/crm-lead-details-configuration-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fcustom-form%2Fcrm-lead-details-configuration-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/custom-form/crm-lead-details-configuration-set.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-add.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-delete.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-fields.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-items-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-items-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-items-delete.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-items-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-items-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-items-get.html"}, {"section": "crm/leads (23)", "prefix": "leads/management-communication", "name": "crm-lead-contact-items-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/management-communication/crm-lead-contact-items-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fmanagement-communication%2Fcrm-lead-contact-items-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/management-communication/crm-lead-contact-items-set.html"}, {"section": "crm/leads (23)", "prefix": "leads/userfield", "name": "crm-lead-userfield-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/userfield/crm-lead-userfield-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-add.md", "note": "ℹ️ Multi-block (string + enum). Мультиязычные `lang`-карты (en/ru/de) сохранены как есть (по прецеденту currency.add).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/userfield/crm-lead-userfield-add.html"}, {"section": "crm/leads (23)", "prefix": "leads/userfield", "name": "crm-lead-userfield-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/userfield/crm-lead-userfield-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/userfield/crm-lead-userfield-delete.html"}, {"section": "crm/leads (23)", "prefix": "leads/userfield", "name": "crm-lead-userfield-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/userfield/crm-lead-userfield-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/userfield/crm-lead-userfield-get.html"}, {"section": "crm/leads (23)", "prefix": "leads/userfield", "name": "crm-lead-userfield-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/userfield/crm-lead-userfield-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/userfield/crm-lead-userfield-list.html"}, {"section": "crm/leads (23)", "prefix": "leads/userfield", "name": "crm-lead-userfield-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/leads/userfield/crm-lead-userfield-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fleads%2Fuserfield%2Fcrm-lead-userfield-update.md", "note": "ℹ️ Мультиязычные `lang`-карты (en/ru/de) сохранены как есть.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/leads/userfield/crm-lead-userfield-update.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-add.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-add.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-delete.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-fields.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-items-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-items-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-items-delete.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-items-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-items-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-items-get.html"}, {"section": "crm/companies (21)", "prefix": "companies/contacts", "name": "crm-company-contact-items-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/contacts/crm-company-contact-items-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcontacts%2Fcrm-company-contact-items-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/contacts/crm-company-contact-items-set.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-add.md", "note": "ℹ️ Русские демо-строки (TITLE и т.п.) переведены на английский; коды/ID — 1:1.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-add.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-delete.md", "note": "⚠️ Был `prompt('Enter ID')` → `id: 50` (review-фикс).", "flag": "warn", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-delete.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-fields.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-fields.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-fields.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-fields.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-fields.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-get.md", "note": "⚠️ При трансформации был интерактивный `prompt('Enter ID')` (скопирован из BX24.js-таба) → заменён на `id: 12` из cURL (review-фикс).", "flag": "warn", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-get.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-list.html"}, {"section": "crm/companies (21)", "prefix": "companies", "name": "crm-company-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/crm-company-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcrm-company-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcrm-company-update.md", "note": "⚠️ Был `prompt('Enter ID')` → `id: 43` (review-фикс). Также русские демо-строки переведены на английский.", "flag": "warn", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/crm-company-update.html"}, {"section": "crm/companies (21)", "prefix": "companies/custom-form", "name": "crm-company-details-configuration-force-common-scope-for-all.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/custom-form/crm-company-details-configuration-force-common-scope-for-all.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-force-common-scope-for-all.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-force-common-scope-for-all.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/custom-form/crm-company-details-configuration-force-common-scope-for-all.html"}, {"section": "crm/companies (21)", "prefix": "companies/custom-form", "name": "crm-company-details-configuration-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/custom-form/crm-company-details-configuration-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-get.md", "note": "ℹ️ Multi-block (scope P + C).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/custom-form/crm-company-details-configuration-get.html"}, {"section": "crm/companies (21)", "prefix": "companies/custom-form", "name": "crm-company-details-configuration-reset.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/custom-form/crm-company-details-configuration-reset.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-reset.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-reset.md", "note": "ℹ️ Multi-block (scope P + C).", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/custom-form/crm-company-details-configuration-reset.html"}, {"section": "crm/companies (21)", "prefix": "companies/custom-form", "name": "crm-company-details-configuration-set.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/custom-form/crm-company-details-configuration-set.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-set.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fcustom-form%2Fcrm-company-details-configuration-set.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/custom-form/crm-company-details-configuration-set.html"}, {"section": "crm/companies (21)", "prefix": "companies/userfields", "name": "crm-company-userfield-add.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/userfields/crm-company-userfield-add.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-add.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-add.md", "note": "ℹ️ Multi-block (string + enum). 3-й `{% list tabs %}` — SETTINGS-док (не код), не тронут. Русские строки переведены.", "flag": "info", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/userfields/crm-company-userfield-add.html"}, {"section": "crm/companies (21)", "prefix": "companies/userfields", "name": "crm-company-userfield-delete.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/userfields/crm-company-userfield-delete.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-delete.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-delete.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/userfields/crm-company-userfield-delete.html"}, {"section": "crm/companies (21)", "prefix": "companies/userfields", "name": "crm-company-userfield-get.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/userfields/crm-company-userfield-get.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-get.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-get.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/userfields/crm-company-userfield-get.html"}, {"section": "crm/companies (21)", "prefix": "companies/userfields", "name": "crm-company-userfield-list.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/userfields/crm-company-userfield-list.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-list.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-list.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/userfields/crm-company-userfield-list.html"}, {"section": "crm/companies (21)", "prefix": "companies/userfields", "name": "crm-company-userfield-update.md", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/api-reference/crm/companies/userfields/crm-company-userfield-update.md", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20api-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-update.md&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2Fapi-reference%2Fcrm%2Fcompanies%2Fuserfields%2Fcrm-company-userfield-update.md", "note": "", "flag": "", "docs": "https://apidocs.bitrix24.ru/api-reference/crm/companies/userfields/crm-company-userfield-update.html"}, {"section": "Tooling (не пример — фикс инструментария)", "prefix": ".actualize", "name": "validate.py", "file": "https://github.com/IgorShevchik/b24-rest-docs/blob/main/.actualize/validate.py", "issue": "https://github.com/IgorShevchik/b24-rest-docs/issues/new?title=Review%3A%20.actualize%2Fvalidate.py&body=https%3A%2F%2Fgithub.com%2FIgorShevchik%2Fb24-rest-docs%2Fblob%2Fmain%2F.actualize%2Fvalidate.py", "note": "ℹ️ фикс: относительный `--project` теперь резолвится (был `FileNotFoundError`).", "flag": "info", "docs": ""}];
+const KEY='b24-jssdk-review-v2', OLDKEY='b24-jssdk-review-v1';
+const FORK='7f667d9';
+ITEMS.forEach((it,i)=>{ it.id=i+'|'+it.name; });
+
+let st={};          // id -> {status:'ok'|'skip', remark:string}
+let open={};        // id -> bool (editor expanded)
+let filter='all', query='';
+
+function rec(it){ if(!st[it.id]) st[it.id]={status:'',remark:''}; return st[it.id]; }
+function status(it){ return (st[it.id]&&st[it.id].status)||''; }
+function remark(it){ return (st[it.id]&&st[it.id].remark)||''; }
+function hasRem(it){ return remark(it).trim().length>0; }
+
+async function load(){
+  try{
+    const r=await window.storage.get(KEY);
+    if(r&&r.value){ st=JSON.parse(r.value); }
+    else{
+      const old=await window.storage.get(OLDKEY).catch(()=>null);
+      if(old&&old.value){ const o=JSON.parse(old.value);
+        Object.keys(o).forEach(id=>{ st[id]={status:o[id]==='done'?'ok':o[id],remark:''}; }); }
+    }
+  }catch(e){ st={}; }
+  render();
+}
+let saveT=null;
+function saveSoon(){ clearTimeout(saveT); saveT=setTimeout(save,500); }
+async function save(){ try{ await window.storage.set(KEY,JSON.stringify(st)); flash(); }catch(e){ console.error(e); } }
+let flashT=null;
+function flash(){ const n=document.getElementById('savenote'); n.classList.add('show');
+  clearTimeout(flashT); flashT=setTimeout(()=>n.classList.remove('show'),900); }
+
+function cycle(it){ const s=status(it); rec(it).status = s===''?'ok':(s==='ok'?'skip':''); save(); render(); }
+function toggleEditor(it){ open[it.id]=!open[it.id]; render(); }
+
+function passes(it){
+  const s=status(it);
+  if(filter==='pending' && (s!==''||hasRem(it))) return false;
+  if(filter==='ok' && s!=='ok') return false;
+  if(filter==='skip' && s!=='skip') return false;
+  if(filter==='rem' && !hasRem(it)) return false;
+  if(filter==='warn' && it.flag!=='warn') return false;
+  if(filter==='info' && it.flag!=='info') return false;
+  if(query && !it.name.toLowerCase().includes(query)) return false;
+  return true;
+}
+
+function render(){
+  const list=document.getElementById('list'); list.innerHTML='';
+  const secs=[], bySec={};
+  ITEMS.forEach(it=>{ if(!bySec[it.section]){bySec[it.section]=[];secs.push(it.section);} bySec[it.section].push(it); });
+  let shown=0;
+  secs.forEach(sec=>{
+    const all=bySec[sec], vis=all.filter(passes);
+    if(!vis.length) return; shown+=vis.length;
+    const seen=all.filter(i=>status(i)!==''||hasRem(i)).length;
+    const sd=document.createElement('div'); sd.className='sec';
+    sd.innerHTML=`<h2>${esc(sec)} <span class="sp">${seen}/${all.length}</span></h2>`;
+    vis.forEach(it=>sd.appendChild(rowEl(it)));
+    list.appendChild(sd);
+  });
+  if(!shown) list.innerHTML='<div class="empty">Ничего не подходит под фильтр.</div>';
+  stats();
+}
+
+function rowEl(it){
+  const s=status(it), hr=hasRem(it), op=!!open[it.id];
+  const d=document.createElement('div');
+  d.className='row'+(s==='ok'?' ok':'')+(s==='skip'?' skip':'')+(hr?' hasrem':'')+(op?' open':'');
+  const mark=s==='ok'?'✓':(s==='skip'?'–':'');
+  let badge = it.flag==='warn'?'<span class="badge warn">⚠️ проверить</span>'
+            : it.flag==='info'?'<span class="badge info">ℹ️ нюанс</span>':'';
+  if(hr) badge += '<span class="badge rem">● замечание</span>';
+  const note=it.note?`<div class="note ${it.flag==='warn'?'warn':''}">${esc(stripFlag(it.note))}</div>`:'';
+  d.innerHTML=`
+    <div class="head">
+      <div class="chk" title="клик: pending → ок → skip">${mark}</div>
+      <div class="body">
+        <div class="top"><span class="name">${esc(it.prefix)} / ${esc(it.name)}</span>${badge}</div>
+        ${note}
+      </div>
+      <div class="actions">
+        <a class="file" href="${it.file}" target="_blank" rel="noopener">↗ файл</a>
+        ${it.docs?`<a class="docs" href="${it.docs}" target="_blank" rel="noopener">↗ доки</a>`:''}
+        <button class="rembtn${hr?' active':''}">✎ замечание</button>
+        <button class="skipbtn">skip</button>
+      </div>
+    </div>
+    <div class="editor">
+      <textarea placeholder="Замечание в markdown… (пусто = нет замечаний)">${esc(remark(it))}</textarea>
+      <div class="ehint"><span>markdown сохраняется автоматически</span><span class="cnt"></span></div>
+    </div>`;
+  d.querySelector('.chk').addEventListener('click',e=>{e.stopPropagation();cycle(it);});
+  d.querySelector('.skipbtn').addEventListener('click',e=>{e.stopPropagation();rec(it).status=status(it)==='skip'?'':'skip';save();render();});
+  d.querySelector('.rembtn').addEventListener('click',e=>{e.stopPropagation();toggleEditor(it);});
+  const ta=d.querySelector('textarea');
+  const cnt=d.querySelector('.cnt');
+  const upd=()=>{ cnt.textContent=ta.value.trim()?ta.value.length+' симв.':''; };
+  upd();
+  ta.addEventListener('input',()=>{ rec(it).remark=ta.value; upd(); saveSoon(); stats(); refreshRowFlag(d,it); });
+  if(op) setTimeout(()=>ta.focus(),0);
+  return d;
+}
+function refreshRowFlag(d,it){
+  const hr=hasRem(it);
+  d.classList.toggle('hasrem',hr);
+  d.querySelector('.rembtn').classList.toggle('active',hr);
+}
+
+function stats(){
+  let ok=0,skip=0,rem=0;
+  ITEMS.forEach(it=>{ const s=status(it); if(s==='ok')ok++; else if(s==='skip')skip++; if(hasRem(it))rem++; });
+  const total=ITEMS.length, seen=ITEMS.filter(it=>status(it)!==''||hasRem(it)).length, pend=total-seen;
+  set('cOk',ok);set('cSkip',skip);set('cRem',rem);set('cPend',pend);
+  set('pct',Math.round(seen/total*100)+'%');
+  document.getElementById('barOk').style.width=(ok/total*100)+'%';
+  document.getElementById('barSkip').style.width=(skip/total*100)+'%';
+  set('fAll',total);set('fPend',pend);set('fOk',ok);set('fSkip',skip);set('fRem',rem);
+  set('fWarn',ITEMS.filter(i=>i.flag==='warn').length);
+  set('fInfo',ITEMS.filter(i=>i.flag==='info').length);
+  set('footRem',rem);
+}
+function set(id,v){ const e=document.getElementById(id); if(e)e.textContent=v; }
+function stripFlag(t){ return t.replace(/^⚠️\s*/,'').replace(/^ℹ️\s*/,''); }
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---- build markdown ---- */
+function buildMd(){
+  const o={rem:document.getElementById('optRem').checked, ok:document.getElementById('optOk').checked,
+           skip:document.getElementById('optSkip').checked, pend:document.getElementById('optPend').checked};
+  const total=ITEMS.length;
+  let nOk=0,nSkip=0,nRem=0,nPend=0;
+  ITEMS.forEach(it=>{ const s=status(it); if(hasRem(it))nRem++; if(s==='ok')nOk++; else if(s==='skip')nSkip++;
+    if(s===''&&!hasRem(it))nPend++; });
+  const seen=total-nPend;
+
+  let L=[];
+  L.push('# Ревью актуализации jsSDK-примеров (TS + UMD)');
+  L.push('');
+  L.push(`Замена таба \`- JS\` (\`callMethod\`/\`callListMethod\`/\`fetchListMethod\`, удалены в b24jssdk 2.0) на \`- JS (TS)\` + \`- JS (UMD)\` на actions API. Форк \`@ ${FORK}\`.`);
+  L.push('');
+  L.push(`**Итог:** просмотрено ${seen}/${total} · с замечаниями: ${nRem} · ок: ${nOk} · пропущено: ${nSkip}.`);
+  L.push('');
+
+  // group sections preserving order
+  const secs=[], bySec={};
+  ITEMS.forEach(it=>{ if(!bySec[it.section]){bySec[it.section]=[];secs.push(it.section);} bySec[it.section].push(it); });
+
+  if(o.rem){
+    L.push('## Замечания');
+    L.push('');
+    let any=false;
+    secs.forEach(sec=>{
+      const withRem=bySec[sec].filter(hasRem);
+      if(!withRem.length) return; any=true;
+      L.push(`### ${sec}`); L.push('');
+      withRem.forEach(it=>{
+        L.push(`#### \`${it.name}\` — [файл](${it.file})`+(it.docs?` · [доки](${it.docs})`:''));
+        if(it.flag==='warn') L.push('> ⚠️ '+stripFlag(it.note));
+        else if(it.flag==='info') L.push('> ℹ️ '+stripFlag(it.note));
+        L.push('');
+        L.push(remark(it).trim());
+        L.push('');
+      });
+    });
+    if(!any){ L.push('_Замечаний нет._'); L.push(''); }
+  }
+
+  const appendix=(title,pred)=>{
+    const arr=ITEMS.filter(pred);
+    if(!arr.length) return;
+    L.push('## '+title); L.push('');
+    const bs={},so=[];
+    arr.forEach(it=>{ if(!bs[it.section]){bs[it.section]=[];so.push(it.section);} bs[it.section].push(it); });
+    so.forEach(sec=>{ L.push(`**${sec}**`); bs[sec].forEach(it=>L.push(`- \`${it.name}\``)); L.push(''); });
+  };
+  if(o.ok)   appendix('Проверено без замечаний', it=>status(it)==='ok'&&!hasRem(it));
+  if(o.skip) appendix('Пропущено', it=>status(it)==='skip');
+  if(o.pend) appendix('Не просмотрено', it=>status(it)===''&&!hasRem(it));
+
+  return L.join('\n').replace(/\n{3,}/g,'\n\n').trimEnd()+'\n';
+}
+function refreshOut(){ document.getElementById('out').value=buildMd(); }
+
+/* ---- events ---- */
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return; filter=b.dataset.f;
+  [...document.querySelectorAll('#filters button')].forEach(x=>x.classList.toggle('on',x===b)); render();
+});
+document.getElementById('search').addEventListener('input',e=>{ query=e.target.value.toLowerCase().trim(); render(); });
+document.getElementById('reset').addEventListener('click',()=>{ if(confirm('Сбросить весь прогресс и замечания?')){ st={};open={};save();render(); }});
+
+const modal=document.getElementById('modal');
+document.getElementById('build').addEventListener('click',()=>{ refreshOut(); modal.classList.add('show'); });
+document.getElementById('mClose').addEventListener('click',()=>modal.classList.remove('show'));
+modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('show'); });
+['optRem','optOk','optSkip','optPend'].forEach(id=>document.getElementById(id).addEventListener('change',refreshOut));
+
+document.getElementById('mCopy').addEventListener('click',async()=>{
+  const out=document.getElementById('out'); const btn=document.getElementById('mCopy');
+  out.focus(); out.select();
+  let okc=false;
+  try{ await navigator.clipboard.writeText(out.value); okc=true; }
+  catch(e){ try{ okc=document.execCommand('copy'); }catch(_){ okc=false; } }
+  btn.textContent=okc?'Скопировано ✓':'Выдели и Ctrl+C'; btn.classList.add('done');
+  setTimeout(()=>{ btn.textContent='Копировать'; btn.classList.remove('done'); },1600);
+});
+document.getElementById('mDownload').addEventListener('click',()=>{
+  const blob=new Blob([document.getElementById('out').value],{type:'text/markdown'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='b24-jssdk-review-result.md'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') modal.classList.remove('show'); });
+
+load();
+</script>
