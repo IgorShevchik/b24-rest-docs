@@ -5,8 +5,9 @@ developed and validated. Finished sections are then contributed **upstream** to 
 documentation repo. This runbook is the process for that hand-off.
 
 > The actualization agent's GitHub access is restricted to this fork, so it cannot open a PR
-> on the parent. The agent **prepares** a clean content patch here; a maintainer applies it to
-> the parent and opens the upstream PR.
+> on the parent. A maintainer runs `contribute-to-upstream.sh` / `.ps1` (see below) from a fork
+> clone: it pushes one branch per section to the fork and prints a compare URL; the maintainer
+> clicks "Create pull request" on each.
 
 ## Scope — what goes upstream vs what stays in the fork
 
@@ -21,16 +22,41 @@ documentation repo. This runbook is the process for that hand-off.
 Patches under `.actualize/upstream/*.patch` are content-only by construction (scoped to
 `api-reference/**`), so applying one to the parent cannot leak fork tooling.
 
-## Ready to ship
+## Shipped to upstream (awaiting review)
 
-| Section | Patch | State |
+Submitted **2026-06-07** via `contribute-to-upstream.sh`, one PR per section
+(fork branch `actualize/<slug>` → `bitrix-tools:main`):
+
+| Section | Fork branch | Pages |
 |---|---|---|
-| `user/` | `.actualize/upstream/user-section.patch` | 10 method pages, all `validate.py` PASS, ledger 0 drift |
+| `crm/status` | `actualize/crm-status` | 8 |
+| `crm/deals` | `actualize/crm-deals` | 29 |
+| `crm/leads` | `actualize/crm-leads` | 23 |
+| `crm/companies` | `actualize/crm-companies` | 21 |
+| `crm/currency` | `actualize/crm-currency` | 12 |
+| `calendar` | `actualize/calendar` | 20 |
 
-The `user/` patch was generated from this fork's `user/` actualization and verified to apply
-cleanly onto the pre-actualization (legacy = parent-equivalent) tree.
+All passed `validate.py` in the fork; ledger 0 drift. To address a reviewer's request: fix in
+the fork's `main`, re-run the script, and force-update the section branch
+(`git push --force-with-lease origin actualize/<slug>`) — the open PR updates automatically.
 
-## Apply a section to the parent
+> `user/` and `tasks/` were **dropped from the hand-off**: upstream actualized those pages
+> itself (found during the fork↔upstream sync), so the earlier `user-section.patch` is
+> obsolete — shipping it would duplicate.
+
+## Contribute with the script (preferred)
+
+```bash
+# from a CLEAN clone of the FORK, already synced to upstream:
+bash .actualize/upstream/contribute-to-upstream.sh        # or .ps1 on Windows
+```
+
+It branches each section off fresh `upstream/main`, copies in only that section's content from
+the fork, pushes the branch to the fork, and prints a compare URL per section. Open each PR with
+the title/body from `.actualize/upstream/PR-TEMPLATE.md`. The shipped sections live in the
+`SECTIONS` array in the script — add/remove there.
+
+## Apply a section to the parent (manual / patch alternative)
 
 ```bash
 # 1. fresh, up-to-date clone of the PARENT repo (not this fork)
@@ -77,6 +103,11 @@ git diff <section-pr-squash>^ <section-pr-squash> -- api-reference/<section>/ \
 
 ## Next sections
 
-`crm` (~404 pages, includes multi-example pages now handled by the validator), then `disk`,
-`calendar`, … — same flow: actualize + validate in the fork → generate a content patch → a
-maintainer opens the upstream PR.
+- **`crm/contacts` (17 pages)** — the remaining Tier-1 CRM subsection, currently **paused**
+  (see FOLLOWUPS #9). Resume → actualize + `validate.py` → ship via the script.
+- Then `disk`, `telephony`, … — same flow: actualize + validate in the fork → ship via the
+  script → a maintainer opens the upstream PR.
+
+Already actualized in the fork and **shipped** (see above): crm core
+(status/deals/leads/companies), crm/currency, calendar. `tasks`/`user` are actualized upstream
+already, so they are not contributed from here.
