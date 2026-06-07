@@ -1,21 +1,32 @@
-# Upstream PR — title & body (use one per section)
+# Upstream PR — title & body (one per section)
 
-Replace `<section>` with `status` / `deals` / `leads` / `companies`.
+The script ships 6 sections, each as its own branch/PR:
+
+| Label (commit scope) | Branch | Content |
+|---|---|---|
+| `crm/status` | `actualize/crm-status` | `api-reference/crm/status` |
+| `crm/deals` | `actualize/crm-deals` | `api-reference/crm/deals` |
+| `crm/leads` | `actualize/crm-leads` | `api-reference/crm/leads` |
+| `crm/companies` | `actualize/crm-companies` | `api-reference/crm/companies` |
+| `crm/currency` | `actualize/crm-currency` | `api-reference/crm/currency` |
+| `calendar` | `actualize/calendar` | `api-reference/calendar` |
 
 ---
 
 ## Title
 
 ```
-docs(crm/<section>): actualize JS examples to TS + UMD (b24jssdk actions API)
+docs(<label>): actualize JS examples to TS + UMD (b24jssdk actions API)
 ```
+
+e.g. `docs(crm/deals): …`, `docs(crm/currency): …`, `docs(calendar): …`.
 
 ## Body
 
 ```markdown
 ## What
 
-Actualizes the JavaScript examples in **crm/<section>**: the legacy `- JS` tab
+Actualizes the JavaScript examples in **<label>**: the legacy `- JS` tab
 (`$b24.callMethod` / `callListMethod` / `fetchListMethod`) is replaced by two tabs —
 `- JS (TS)` and `- JS (UMD)` — on the current actions API (`$b24.actions.v2.call.make`).
 
@@ -43,7 +54,7 @@ No breaking changes — documentation examples only.
 
 ### Notes
 
-- `crm/tasks` and `user` were **not** included: upstream has already actualized those pages
+- `crm/tasks` and `user` are **not** shipped: upstream has already actualized those pages
   itself (the fork kept its own variants during the sync). Shipping them would duplicate.
-- `currency` is actualized in the fork too; add `currency` to `$SECTIONS` in the script if
-  you decide to contribute it as a 5th PR.
+- All six sections above are the fork's own actualization (originally PRs #17/#20–#26 in the
+  fork) and are still legacy upstream — i.e. genuinely new there.
