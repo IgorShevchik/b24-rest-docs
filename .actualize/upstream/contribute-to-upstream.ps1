@@ -1,19 +1,19 @@
 <#
-  Contribute the actualized CRM examples from this fork up to the parent repo.
+  Contribute the actualized example sections from this fork up to the parent repo.
   One section = one branch = one PR (per .actualize/UPSTREAM.md).
 
   WHAT IT DOES
     For each section it:
-      1. creates a branch off the FRESH upstream/main  (actualize/crm-<section>)
+      1. creates a branch off the FRESH upstream/main  (actualize/<slug>)
       2. copies in ONLY that section's content from your fork's main
-         (api-reference/crm/<section>/ - no .actualize tooling, no ledger)
-      3. commits with the conventional message
+         (no .actualize tooling, no ledger, no CI files)
+      3. commits with the conventional message  docs(<label>): ...
       4. pushes the branch to your fork (origin)
       5. prints the URL to open the upstream PR (base: bitrix-tools : main)
 
   PRECONDITIONS
     - Run from a CLEAN clone of YOUR fork (github.com/IgorShevchik/b24-rest-docs),
-      already synced to upstream.
+      synced to upstream (origin/main already carries the actualization).
     - git push rights to your fork. The script never pushes to upstream.
 
   USAGE  (PowerShell)
@@ -24,13 +24,21 @@ $ErrorActionPreference = "Stop"
 
 $UpstreamUrl = "https://github.com/bitrix-tools/b24-rest-docs.git"
 $ForkOwner   = "IgorShevchik"
-# Sections to ship (reviewed). Add "currency" if you also want to contribute it.
-$Sections    = @("status", "deals", "leads", "companies")
 
-function Say  ($m) { Write-Host $m -ForegroundColor Cyan }
-function Die  ($m) { Write-Host "ERROR: $m" -ForegroundColor Red; exit 1 }
-# Run git and stop on non-zero exit.
-function Git  { & git @args; if ($LASTEXITCODE -ne 0) { Die ("git " + ($args -join " ") + " failed") } }
+# Sections to ship: Label -> branch actualize/<Label with '/'->'-'> and commit "docs(<Label>): ..."
+# Path -> the content copied from origin/main.
+$Sections = @(
+  @{ Label = "crm/status";    Path = "api-reference/crm/status" },
+  @{ Label = "crm/deals";     Path = "api-reference/crm/deals" },
+  @{ Label = "crm/leads";     Path = "api-reference/crm/leads" },
+  @{ Label = "crm/companies"; Path = "api-reference/crm/companies" },
+  @{ Label = "crm/currency";  Path = "api-reference/crm/currency" },
+  @{ Label = "calendar";      Path = "api-reference/calendar" }
+)
+
+function Say ($m) { Write-Host $m -ForegroundColor Cyan }
+function Die ($m) { Write-Host "ERROR: $m" -ForegroundColor Red; exit 1 }
+function Git { & git @args; if ($LASTEXITCODE -ne 0) { Die ("git " + ($args -join " ") + " failed") } }
 
 # --- preflight ---
 & git rev-parse --is-inside-work-tree *> $null
@@ -52,22 +60,24 @@ $startBranch = (& git rev-parse --abbrev-ref HEAD).Trim()
 $prLinks = @()
 
 foreach ($s in $Sections) {
-  $branch = "actualize/crm-$s"
-  Say "=== crm/$s -> $branch ==="
-  Git checkout -B $branch upstream/main
+  $label = $s.Label
+  $path  = $s.Path
+  $slug  = "actualize/" + ($label -replace '/', '-')
+  Say "=== $label ($path) -> $slug ==="
+  Git checkout -B $slug upstream/main
   # Bring in ONLY this section's actualized content from the fork main.
-  Git checkout origin/main -- "api-reference/crm/$s"
-  Git add "api-reference/crm/$s"
+  Git checkout origin/main -- $path
+  Git add $path
   & git diff --cached --quiet
   if ($LASTEXITCODE -eq 0) {
-    Write-Host "  no diff vs upstream for crm/$s - skipping"
+    Write-Host "  no diff vs upstream for $label - skipping"
     Git checkout -q $startBranch; continue
   }
   $files = (& git diff --cached --name-only | Measure-Object -Line).Lines
-  Git commit -q -m "docs(crm/$s): actualize JS examples to TS + UMD (b24jssdk actions API)"
+  Git commit -q -m "docs($label): actualize JS examples to TS + UMD (b24jssdk actions API)"
   Write-Host "  committed $files file(s); pushing ..."
-  Git push -u origin $branch
-  $prLinks += "https://github.com/bitrix-tools/b24-rest-docs/compare/main...${ForkOwner}:${branch}?expand=1"
+  Git push -u origin $slug
+  $prLinks += "https://github.com/bitrix-tools/b24-rest-docs/compare/main...${ForkOwner}:${slug}?expand=1"
 }
 
 & git checkout -q $startBranch *> $null
