@@ -129,6 +129,9 @@ date	file	sha256	status	method
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-get.md	33bc392df1ea27753a21b9fac481ec843408a83ab062f44efd80b72678bf65c4	done	crm.status.get
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-list.md	a33083f4eec9a94467457957165feef92e4f9eb594d8995cbd0a7009b780fd39	done	crm.status.list
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-update.md	c381c05fbfa40ea47728ceb456d203092d1bb8785490188add0a686416d5b1a8	done	crm.status.update
+2026-06-08T15:44:42+00:00	api-reference/messageservice/messageservice-message-status-update.md	cee061dc0a5ba8a0b92792dd7828899667bfdac0d67be5b52d2945b7a6e27bf8	done	messageservice.message.status.update
+2026-06-08T15:44:43+00:00	api-reference/messageservice/messageservice-sender-add.md	b42640a6592f6c4a0f3b9ae70ecd55f78c9e67a6ee7922a22f1b6e2d6467b5d7	done	messageservice.sender.add
+2026-06-08T15:44:44+00:00	api-reference/messageservice/messageservice-sender-delete.md	258fcdb9296bc1a71967e4a2161d21a121c897537fc963357a7f6e42a872982b	done	messageservice.sender.delete
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-add.md	bc26c014c8d53caec236126c5c9a2e924ffbfcab5f8e05182d18409c1c854c42	done	task.checklistitem.add
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-complete.md	29b5e27d223eaa1e45b433a95bcba998ceac90a25f0f0df21ff234cbee071993	done	task.checklistitem.complete
 2026-06-03T13:58:09+00:00	api-reference/tasks/checklist-item/task-checklist-item-delete.md	bc0f576f4130ac0a2d939db4af19a7b51ff84d54a14b9934229f3ecd17371a4a	done	task.checklistitem.delete
