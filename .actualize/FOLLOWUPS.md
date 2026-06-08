@@ -207,18 +207,14 @@ for f in files:
                 print(f"{f}:{i+1}  {l.strip()[:60]}")
 ```
 
-## 9. [paused] crm/contacts (17 pages) — actualization on hold pending review
+## 9. [done] crm/contacts (17 pages) — actualized
 
-The four Tier-1 CRM core subsections are actualized and merged to `main`: status (8),
-deals (29), leads (23), companies (21) = **81 example pages** (see the review checklist,
-exported to a file while Issues are disabled). `crm/contacts` is the remaining Tier-1
-subsection: **17 pages still carry the legacy jsSDK** (`remaining.py api-reference/crm/contacts`
-reports 17, spread over the top level + `company/`, `custom-form/`, `events/`, `userfield/`).
-
-It is **intentionally paused** at the maintainer's request until the review of the
-already-merged sections finishes — so any review finding can adjust the approach before the
-next batch is produced. Resume with the same flow as #22–#26 (actualize on a fresh branch →
-`validate.py` PASS → one PR for the section). Nothing is staged for it yet.
+All five Tier-1 CRM subsections are now actualized and merged to `main`: status (8),
+deals (29), leads (23), companies (21) and **contacts (17)** = 98 example pages.
+`crm/contacts` was actualized in **PR #36** (branch `claude/crm-contacts-actualize`): all 17
+pages PASS `validate.py`, ledger 0 drift, only the `- JS` tab changed. **This completes
+Tier-1 CRM.** It has been added to the `SECTIONS` list in `contribute-to-upstream.sh`, so the
+next contribution run ships it upstream as the 7th section.
 
 ## Minor (minor/nit, as needed)
 

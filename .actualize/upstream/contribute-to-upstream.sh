@@ -33,6 +33,7 @@ SECTIONS=(
   "crm/deals=api-reference/crm/deals"
   "crm/leads=api-reference/crm/leads"
   "crm/companies=api-reference/crm/companies"
+  "crm/contacts=api-reference/crm/contacts"
   "crm/currency=api-reference/crm/currency"
   "calendar=api-reference/calendar"
 )
