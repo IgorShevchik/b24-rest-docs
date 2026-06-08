@@ -198,12 +198,19 @@ $(cat .actualize/PROMPT.md)
 Actualize ONLY the file at the path above following the prompt, then stop."
   model_args=()
   [ -n "${CLAUDE_MODEL:-}" ] && model_args=(--model "$CLAUDE_MODEL")
+  # `env -u CLAUDE_CODE_INCLUDE_PARTIAL_MESSAGES`: inside a Claude Code session (remote/web)
+  # that variable is set, which makes a nested `claude -p` demand --output-format=stream-json
+  # and exit immediately ("--include-partial-messages requires --print and
+  # --output-format=stream-json"), leaving every file "unchanged". Stripping it for the child
+  # lets `claude -p` run normally. No-op outside such a session (the var is simply unset).
   if command -v timeout >/dev/null 2>&1; then
     timeout "${EDIT_TIMEOUT:-600}" \
+      env -u CLAUDE_CODE_INCLUDE_PARTIAL_MESSAGES \
       "$CLAUDE_BIN" -p "$prompt" "${model_args[@]}" \
         --permission-mode acceptEdits --allowed-tools Read Edit Grep >"$log" 2>&1
   else
-    "$CLAUDE_BIN" -p "$prompt" "${model_args[@]}" \
+    env -u CLAUDE_CODE_INCLUDE_PARTIAL_MESSAGES \
+      "$CLAUDE_BIN" -p "$prompt" "${model_args[@]}" \
         --permission-mode acceptEdits --allowed-tools Read Edit Grep >"$log" 2>&1
   fi
 }
