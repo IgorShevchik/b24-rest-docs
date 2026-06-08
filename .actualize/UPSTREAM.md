@@ -103,11 +103,11 @@ git diff <section-pr-squash>^ <section-pr-squash> -- api-reference/<section>/ \
 
 ## Next sections
 
-- **`crm/contacts` (17 pages)** — the remaining Tier-1 CRM subsection, currently **paused**
-  (see FOLLOWUPS #9). Resume → actualize + `validate.py` → ship via the script.
+- **`crm/contacts` (17 pages)** — actualized (PR #36) and **added to the script's `SECTIONS`**;
+  the next `contribute-to-upstream.sh` run ships it as the 7th section. This completes Tier-1 CRM.
 - Then `disk`, `telephony`, … — same flow: actualize + validate in the fork → ship via the
   script → a maintainer opens the upstream PR.
 
-Already actualized in the fork and **shipped** (see above): crm core
-(status/deals/leads/companies), crm/currency, calendar. `tasks`/`user` are actualized upstream
-already, so they are not contributed from here.
+Already actualized in the fork: crm core (status/deals/leads/companies/**contacts**),
+crm/currency, calendar. The first six are merged upstream; `crm/contacts` is queued to ship.
+`tasks`/`user` are actualized upstream already, so they are not contributed from here.

@@ -32,6 +32,7 @@ $Sections = @(
   @{ Label = "crm/deals";     Path = "api-reference/crm/deals" },
   @{ Label = "crm/leads";     Path = "api-reference/crm/leads" },
   @{ Label = "crm/companies"; Path = "api-reference/crm/companies" },
+  @{ Label = "crm/contacts";  Path = "api-reference/crm/contacts" },
   @{ Label = "crm/currency";  Path = "api-reference/crm/currency" },
   @{ Label = "calendar";      Path = "api-reference/calendar" }
 )
