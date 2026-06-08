@@ -22,10 +22,10 @@ documentation repo. This runbook is the process for that hand-off.
 Patches under `.actualize/upstream/*.patch` are content-only by construction (scoped to
 `api-reference/**`), so applying one to the parent cannot leak fork tooling.
 
-## Shipped to upstream (awaiting review)
+## Merged into upstream ✅
 
-Submitted **2026-06-07** via `contribute-to-upstream.sh`, one PR per section
-(fork branch `actualize/<slug>` → `bitrix-tools:main`):
+Submitted via `contribute-to-upstream.sh` and **merged into `bitrix-tools/b24-rest-docs`**
+(2026-06-08), one PR per section:
 
 | Section | Fork branch | Pages |
 |---|---|---|
