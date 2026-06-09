@@ -246,6 +246,7 @@ date	file	sha256	status	method
 2026-06-09T07:10:58+00:00	api-reference/sonet-group/members/sonet-group-user-update.md	e26902f19d700c9da9a2943ed19150f73f48984a4d4bc4ed06a8dca9a106a90f	done	sonet_group.user.update
 2026-06-09T07:10:59+00:00	api-reference/sonet-group/scrum/backlog/tasks-api-scrum-backlog-add.md	3a61f6a18864f22c1fcf5611ff12763d928f75c41993b446400d81bb38bd422b	done	tasks.api.scrum.backlog.add
 2026-06-09T07:10:59+00:00	api-reference/sonet-group/scrum/backlog/tasks-api-scrum-backlog-delete.md	ea5e1c7a9c64f20c461a4ada16dde0b3a40674f135a25c310a21ac71af79314b	done	tasks.api.scrum.backlog.delete
+2026-06-09T07:22:04+00:00	api-reference/sonet-group/scrum/backlog/tasks-api-scrum-backlog-get-fields.md	836800e78e6e1978402a61ee4cb359b52e86da2047411a628bc9f81e8f1e0276	done	tasks.api.scrum.backlog.getFields
 2026-06-09T07:11:00+00:00	api-reference/sonet-group/scrum/backlog/tasks-api-scrum-backlog-get.md	0bc752d005cf736e83155d25a5d8bbb5f325bbf51522113f4a4e8952527316f1	done	tasks.api.scrum.backlog.get
 2026-06-09T07:11:01+00:00	api-reference/sonet-group/scrum/backlog/tasks-api-scrum-backlog-update.md	b4ca48c24aa6785a8401f28276c7049627516ad42b7ed96a6a090b294c3e251d	done	tasks.api.scrum.backlog.update
 2026-06-09T07:11:02+00:00	api-reference/sonet-group/scrum/epic/tasks-api-scrum-epic-add.md	988f618cdb6c714042167912ee6413f309eaf697a1c65ff3e9f4d257a73e820b	done	tasks.api.scrum.epic.add
@@ -268,10 +269,12 @@ date	file	sha256	status	method
 2026-06-09T07:11:13+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-get.md	b0aba346563a813cae87c6f04f82b18a61bc61d5bbf4858fe500bdd11a112584	done	tasks.api.scrum.sprint.get
 2026-06-09T07:11:14+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-list.md	1dc65e1d38b965bbd656e12352d120c40413c19ff0d25d158e76fee4b47743c1	done	tasks.api.scrum.sprint.list
 2026-06-09T07:11:14+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-start.md	e9ab6310be3644cf8d4dc87dee86e832b7277643995eff9a4920a876a8d80da7	done	tasks.api.scrum.sprint.start
+2026-06-09T07:22:05+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-update.md	c5240ad7e57006ab169c7a900fb55df63d0459791a2fd046778daff1a63da054	done	tasks.api.scrum.sprint.update
 2026-06-09T07:11:16+00:00	api-reference/sonet-group/scrum/task/tasks-api-scrum-task-get-fields.md	791c98443996d72265b6688059c95ed7ed59c3bedf75bc7a76b7be4f9badcc71	done	tasks.api.scrum.task.getFields
 2026-06-09T07:11:17+00:00	api-reference/sonet-group/scrum/task/tasks-api-scrum-task-get.md	6f7377e3e0dc8c5c4db612fc6c0ba9950f6e7d8fad890746b491f7db0d3766a1	done	tasks.api.scrum.task.get
 2026-06-09T07:11:17+00:00	api-reference/sonet-group/scrum/task/tasks-api-scrum-task-update.md	0c5441f9f9bb15fc23251e6d7b372c3218b487f479f8e626af86997a49027c25	done	tasks.api.scrum.task.update
 2026-06-09T07:11:18+00:00	api-reference/sonet-group/socialnetwork-api-workgroup-get.md	61aecd491b6a2af18d4377882216aec7ca53f4a940e61e92af610134407e0e39	done	socialnetwork.api.workgroup.get
+2026-06-09T07:22:05+00:00	api-reference/sonet-group/socialnetwork-api-workgroup-list.md	f60889d139682d3a8029b8e725297e189a7bd0692f931d4a1610524d105e7f55	done	socialnetwork.api.workgroup.list
 2026-06-09T07:11:19+00:00	api-reference/sonet-group/sonet-group-create.md	acd05bae2edc1fbd1bb697127133a25a513baf668ad18dc0e23ae6c41fbfe1e6	done	sonet_group.create
 2026-06-09T07:11:19+00:00	api-reference/sonet-group/sonet-group-delete.md	0807407d613188e287ac399628956f97798718c181533184487abb560fb56b73	done	sonet_group.delete
 2026-06-09T07:11:20+00:00	api-reference/sonet-group/sonet-group-feature-access.md	d3215c05906f785bfac25a45684ec7a9c745a36625226a20df017a51d9c2988a	done	sonet_group.feature.access
