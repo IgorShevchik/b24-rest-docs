@@ -159,6 +159,7 @@ date	file	sha256	status	method
 2026-06-09T14:29:29+00:00	api-reference/catalog/product/offer/catalog-product-offer-get-fields-by-filter.md	361967ccf66e2d208245857663c9d45eaeca6d3c0565e2852384339d73f0af46	done	catalog.product.offer.getFieldsByFilter
 2026-06-09T14:29:30+00:00	api-reference/catalog/product/offer/catalog-product-offer-get.md	d47b4abb8bf00bf55b404bcf2b3f04b28905720fd8e9aa92e52efbba179b1112	done	catalog.product.offer.get
 2026-06-09T14:59:55+00:00	api-reference/catalog/product/offer/catalog-product-offer-list.md	1b35e07c8620afabb4462d9d82f54e80a242c85883cacbb329a04b33dade015e	done	catalog.product.offer.list
+2026-06-09T15:31:17+00:00	api-reference/catalog/product/offer/catalog-product-offer-update.md	f1ac3d6e55eb2db092cdcbbcc388c3dbd170a1245e373de353352dccf9663486	done	catalog.product.offer.update
 2026-06-09T14:29:31+00:00	api-reference/catalog/product/service/catalog-product-service-add.md	978bba0923f04c19c20de8d958bcb55521d01e400097554510326642a45b1ca6	done	catalog.product.service.add
 2026-06-09T14:29:31+00:00	api-reference/catalog/product/service/catalog-product-service-delete.md	ea61a20fda4af2102910bbc23dffe026af95e1949dfa0788ad0065d47aff191d	done	catalog.product.service.delete
 2026-06-09T14:29:32+00:00	api-reference/catalog/product/service/catalog-product-service-download.md	8cfc930137046f0f2ef6ebf9578c916881a31ce2eecf3937e158a0c9b2ced7f7	done	catalog.product.service.download
