@@ -258,9 +258,12 @@ date	file	sha256	status	method
 2026-06-09T07:11:07+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-add-task.md	6a6adbe01a025ab21d8b86e91016c0a21e5e6dc7d15fa57601bb38daa7c1ee21	done	tasks.api.scrum.kanban.addTask
 2026-06-09T07:11:07+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-delete-stage.md	6561963c5b857835fd0d3375d4e88eebee632fb077a56e7be33957f584504f52	done	tasks.api.scrum.kanban.deleteStage
 2026-06-09T07:11:08+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-delete-task.md	fde06953c976cf396e4a7a1eb3bac301dbbe746aa8a5f785a06bdda7a26a5be2	done	tasks.api.scrum.kanban.deleteTask
+2026-06-09T07:19:29+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-get-fields.md	e4f27249968ed6376b38e7f5e5e3d371eeb3f3ed68bb6a8f42b4b0e76bd8ca0d	done	tasks.api.scrum.kanban.getFields
 2026-06-09T07:11:09+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-get-stages.md	4da68846479d7921c316d6555b91db13c6b9511d1997319a55a1ac1bc52b771e	done	tasks.api.scrum.kanban.getStages
 2026-06-09T07:11:09+00:00	api-reference/sonet-group/scrum/kanban/tasks-api-scrum-kanban-update-stage.md	961c77525be7158e820f1cd3f6a96b87d12450c8d2d467467590358e8c7d5781	done	tasks.api.scrum.kanban.updateStage
+2026-06-09T07:19:30+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-add.md	c7cf94dfe38bf357fbf892ac6115f11b733c345f5ee1fcbbef55d78be591f368	done	tasks.api.scrum.sprint.add
 2026-06-09T07:11:11+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-complete.md	0fe4a973e55dc6f0f7d786c270948a781ddb6abefc16fc5ff00603e315c19a6c	done	tasks.api.scrum.sprint.complete
+2026-06-09T07:19:31+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-delete.md	f263941eca9e716ab9e8ef09de4d01c3d187b60f0cd1b9a72a697f46644abcba	done	tasks.api.scrum.sprint.delete
 2026-06-09T07:11:12+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-get-fields.md	1880eababd0e462b4ec66070be705ddd141d1069e284f95f8fccb25b837274b3	done	tasks.api.scrum.sprint.getFields
 2026-06-09T07:11:13+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-get.md	b0aba346563a813cae87c6f04f82b18a61bc61d5bbf4858fe500bdd11a112584	done	tasks.api.scrum.sprint.get
 2026-06-09T07:11:14+00:00	api-reference/sonet-group/scrum/sprint/tasks-api-scrum-sprint-list.md	1dc65e1d38b965bbd656e12352d120c40413c19ff0d25d158e76fee4b47743c1	done	tasks.api.scrum.sprint.list
