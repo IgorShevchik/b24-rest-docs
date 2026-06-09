@@ -147,6 +147,7 @@ date	file	sha256	status	method
 2026-06-09T04:58:47+00:00	api-reference/disk/folder/disk-folder-delete-tree.md	2b81ca1f8e62b7cfaa744b2b9541c4dacc891a1bcd91bebafd4444acb029fb0c	done	disk.folder.deletetree
 2026-06-09T04:58:48+00:00	api-reference/disk/folder/disk-folder-get-children.md	d93a6812a26c89c19cae68ad9839cafcfc1ac670669fd46f62b2e03df5e741e1	done	disk.folder.getchildren
 2026-06-09T04:58:48+00:00	api-reference/disk/folder/disk-folder-get-external-link.md	b4de1715f257e211ac54e3e480d24d48b8ca7d1d49500828c8883745727fa69b	done	disk.folder.getexternallink
+2026-06-09T05:02:16+00:00	api-reference/disk/folder/disk-folder-get-fields.md	1277d5a1de18e711835ed649843a14f7d5a9e3916cc093e48db79304c0ca1271	done	disk.folder.getfields
 2026-06-09T04:58:49+00:00	api-reference/disk/folder/disk-folder-get.md	a4712c9748c2df513aefedc39475d3da56852a331720cbf2b496967b77f82143	done	disk.folder.get
 2026-06-09T04:58:50+00:00	api-reference/disk/folder/disk-folder-mark-deleted.md	ba1307e92551d468f19f38022d8b927a4ee211502b725714446d2daec9d528e2	done	disk.folder.markdeleted
 2026-06-09T04:58:50+00:00	api-reference/disk/folder/disk-folder-move-to.md	481087d6d3def280cbfe9e6fc99517eec20b5912910f6ae19ac4094472a33e80	done	disk.folder.moveto
