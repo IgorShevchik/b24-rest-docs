@@ -27,8 +27,11 @@ Proposal:
 ## 2. [v1 implemented] Batch-runner for bulk actualization
 
 **`.actualize/run-batch.sh`** — an orchestrator over the existing scripts (the
-`validate.py`/`record.py` contracts were not changed). ⚠️ EXPERIMENTAL: not yet exercised by a real
-`RUN=1` run. What it does:
+`validate.py`/`record.py` contracts were not changed). ✅ EXERCISED end-to-end (2026-06-08): a
+`RUN=1 N=3 PAR=1` batch on `api-reference/messageservice` edited + validated + committed 3 files
+(PASSED=3, ledger 0 drift, blast-radius clean). One environment fix was required: inside a Claude
+Code session the env var `CLAUDE_CODE_INCLUDE_PARTIAL_MESSAGES` made the nested `claude -p` abort on
+startup; `edit_one` now wraps it in `env -u …` (PR #38). What it does:
 - edits files with the agent (`claude -p` per `PROMPT.md`) **in parallel** (`xargs -0 -P`); the list
   comes from `remaining.py` (ledger-aware → resumable, a retry is just the next run);
 - **blast-radius check** — compares the actually-changed files against the batch plan; anything
