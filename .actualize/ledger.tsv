@@ -187,6 +187,7 @@ date	file	sha256	status	method
 2026-06-09T05:32:33+00:00	api-reference/document-generator/role/document-generator-role-delete.md	2263a7fa860f89a62ed727fea6d8912d8cf2da0c7937088745fc390ea8717d4f	done	documentgenerator.role.delete
 2026-06-09T05:32:34+00:00	api-reference/document-generator/role/document-generator-role-fill-accesses.md	1c038c74b67a4de34c8c6ee862610499b16e052691d9ec76bf88964052cbd7f4	done	documentgenerator.role.fillaccesses
 2026-06-09T05:32:35+00:00	api-reference/document-generator/role/document-generator-role-get.md	3c3fd2e1a14f333fe5b2ea4d2d881c3dae9fe99a999722457add559b371926d9	done	documentgenerator.role.get
+2026-06-09T05:36:48+00:00	api-reference/document-generator/role/document-generator-role-list.md	635511c84b48ba4dd243e431e210f065dd1d0da79423f62ce402ddc450c5d1c0	done	documentgenerator.role.list
 2026-06-09T05:32:36+00:00	api-reference/document-generator/role/document-generator-role-update.md	2ca1038b3412d613673320d023ac79c8da0c8f876a058eabedf1696d58add76a	done	documentgenerator.role.update
 2026-06-09T05:32:36+00:00	api-reference/document-generator/templates/document-generator-template-add.md	2761c7673d297ffe02beecf08f91d28427622e2a8607bba33ea1c152e0a3b92f	done	documentgenerator.template.add
 2026-06-09T05:32:37+00:00	api-reference/document-generator/templates/document-generator-template-delete.md	9e5c1d18915ed5ccb3ef12f71570ea40e7baefec6ec6174cabe7503b9da06071	done	documentgenerator.template.delete
