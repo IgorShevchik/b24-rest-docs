@@ -92,6 +92,18 @@ before a corpus run):
   tooling-hardening]** — the abort now removes the exact untracked escapees surgically (`rm` per path,
   skipping tracked ones), so gitignored loot is cleaned without nuking unrelated ignored files.
 
+**Auto-retry layer — `run-section.sh` [done]:** a thin wrapper OVER run-batch (it does NOT modify or
+bypass run-batch's clean-tree / blast-radius / secret-scan guards) that automates the "parallel for
+speed, then sequential to finish" pattern seen on every real section. Phase 1 repeats
+`run-batch ROOT N PAR` while it makes progress; phase 2 mops up stragglers with `run-batch ROOT 0 1`
+(PAR=1). Each phase stops on a PLATEAU (remaining count unchanged after a full pass), so it never
+spins on a deterministic FAIL — those end the run reported (exit 2), not looped. Motivation observed
+across real runs: ~3% of files miss under PAR>1 (a transient where the nested agent didn't apply the
+edit, then passes on a retry) and large list-methods choke in parallel but pass sequentially; this
+drains both without the manual `RUN=1 … N=1` retries we were doing by hand on disk/doc-gen/booking.
+Offline-tested in `tests/test_run_section.sh` (transient auto-docatch, stuck-termination without
+spin, hard-abort passthrough); wired into CI next to the run-batch suite.
+
 ## 3. [minor] Full bash test harness for run-batch.sh
 
 The key branches are covered (see §2), including the negative paths: `record.py` failure (revert),

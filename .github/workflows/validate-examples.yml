@@ -44,6 +44,9 @@ jobs:
       - name: run-batch.sh orchestration tests (offline, stubbed agent)
         run: bash .actualize/tests/test_run_batch.sh
 
+      - name: run-section.sh auto-retry tests (offline, stubbed agent)
+        run: bash .actualize/tests/test_run_section.sh
+
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
