@@ -4,6 +4,7 @@ date	file	sha256	status	method
 2026-06-09T06:16:03+00:00	api-reference/booking/booking/booking-v1-booking-createfromwaitlist.md	c193e38b5ec1128cb5f89230943ac3a9c7f22296298cafe96ceb7f2ce5b55ed5	done	booking.v1.booking.createfromwaitlist
 2026-06-09T06:16:03+00:00	api-reference/booking/booking/booking-v1-booking-delete.md	545208e3ebab6cfc5b48f5e68aafeb2df3508f04de75b433786fb987c52a919f	done	booking.v1.booking.delete
 2026-06-09T06:16:04+00:00	api-reference/booking/booking/booking-v1-booking-get.md	bb10115cd7520c4cd90aa30d5e249587403e2a8170a9f23b098997c8d6b46b42	done	booking.v1.booking.get
+2026-06-09T06:21:47+00:00	api-reference/booking/booking/booking-v1-booking-list.md	113e5d30b146899321a7a09a1b5f211ad3b52a22f27c8cfc95d41dee681be734	done	booking.v1.booking.list
 2026-06-09T06:16:05+00:00	api-reference/booking/booking/booking-v1-booking-update.md	4c084f46552debf43a2296b36c360d546a02153932c6b92aa6d6641db5d3e3c4	done	booking.v1.booking.update
 2026-06-09T06:16:06+00:00	api-reference/booking/booking/client/booking-v1-booking-client-list.md	59162ebafe52df2078ab8c5449c50bdb3a9ec5d25a111318f4ccc300e0d933e6	done	booking.v1.booking.client.list
 2026-06-09T06:16:06+00:00	api-reference/booking/booking/client/booking-v1-booking-client-set.md	4b9e768cab21deb5a6e208f2a142edd1b05a758abeb264aa15ff4e592c397400	done	booking.v1.booking.client.set
@@ -28,6 +29,7 @@ date	file	sha256	status	method
 2026-06-09T06:16:20+00:00	api-reference/booking/waitlist/booking-v1-waitlist-createfrombooking.md	22d319ed9b53523252dd0f951d5840eb38d29681c6c863ce360862c33fb6e8e1	done	booking.v1.waitlist.createfrombooking
 2026-06-09T06:16:20+00:00	api-reference/booking/waitlist/booking-v1-waitlist-delete.md	48d2322782aae95a6bfb01b3d19ee4e9fe6b9b2612e7c73a07d5e1137c529316	done	booking.v1.waitlist.delete
 2026-06-09T06:16:21+00:00	api-reference/booking/waitlist/booking-v1-waitlist-get.md	e6a053a72f7fb5fccf25902b59b73038441abe487bb5f21f9aef437619cc12c0	done	booking.v1.waitlist.get
+2026-06-09T06:21:48+00:00	api-reference/booking/waitlist/booking-v1-waitlist-list.md	cac21cfa4ca8d1c6bd05274f1b1f6fddb2089d3cc2068fdcec25fc078819922b	done	booking.v1.waitlist.list
 2026-06-09T06:16:22+00:00	api-reference/booking/waitlist/booking-v1-waitlist-update.md	9f881a11e4f0fb25a33b3555c8153e9257be7b904d79b0797613a8ab80d99418	done	booking.v1.waitlist.update
 2026-06-09T06:16:22+00:00	api-reference/booking/waitlist/client/booking-v1-waitlist-client-list.md	747b08437757bf590492e53eab0bf32b61c909e69326ef9be5bd5fad9bf07835	done	booking.v1.waitlist.client.list
 2026-06-09T06:16:23+00:00	api-reference/booking/waitlist/client/booking-v1-waitlist-client-set.md	c0ff31ab2fad1391dff83fbc90d1ae5f41679244c0e42218b5561c39783dbb33	done	booking.v1.waitlist.client.set
