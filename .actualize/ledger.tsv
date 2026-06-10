@@ -432,6 +432,9 @@ date	file	sha256	status	method
 2026-06-09T07:57:16+00:00	api-reference/imopenlines/openlines/sessions/imopenlines-session-mode-unpin-all.md	e6e7673ac52cc82d131a60a6e28de6859af7de3f169973ad4fadc86bebbc1068	done	imopenlines.session.mode.unpinAll
 2026-06-09T07:57:17+00:00	api-reference/imopenlines/openlines/sessions/imopenlines-session-open.md	e3b57aeb8382060cb577d0db2037fe135685908e2912de07dec0dd78c3a109b5	done	imopenlines.session.open
 2026-06-09T07:57:18+00:00	api-reference/imopenlines/openlines/sessions/imopenlines-session-start.md	7240ee0a5acd51042b13c1868abd71c9249c8c3a16a80ed2435df3eed7cf66c3	done	imopenlines.session.start
+2026-06-10T18:37:09+00:00	api-reference/landing/block/methods/landing-block-add-card.md	36408a068ef56b466fc2cba8311738bd7e35dbde59fccd751999792a00ee5cd6	done	landing.block.addcard
+2026-06-10T18:37:10+00:00	api-reference/landing/block/methods/landing-block-change-anchor.md	de3c82a5a9b888699787e4eea58bc1f55cb140589530f8fc2a0405fb6d415984	done	landing.block.changeAnchor
+2026-06-10T18:37:11+00:00	api-reference/landing/block/methods/landing-block-change-node-name.md	30eacff457cbbd85faadf97f096bb47b83ef886cbf44dc9ee6c3a9d3be2f7408	done	landing.block.changeNodeName
 2026-06-09T03:05:47+00:00	api-reference/messageservice/messageservice-message-status-update.md	cee061dc0a5ba8a0b92792dd7828899667bfdac0d67be5b52d2945b7a6e27bf8	done	messageservice.message.status.update
 2026-06-09T03:05:48+00:00	api-reference/messageservice/messageservice-sender-add.md	805e0075c442161e62044ad01b2e17efa78f17ef8046c6d0560cf6d6ea1d73a5	done	messageservice.sender.add
 2026-06-09T03:05:49+00:00	api-reference/messageservice/messageservice-sender-delete.md	258fcdb9296bc1a71967e4a2161d21a121c897537fc963357a7f6e42a872982b	done	messageservice.sender.delete
