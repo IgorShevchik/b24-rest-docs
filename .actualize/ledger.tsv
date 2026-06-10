@@ -452,6 +452,7 @@ date	file	sha256	status	method
 2026-06-10T19:07:51+00:00	api-reference/landing/block/methods/landing-block-upload-file.md	65120cd4010e081071f726eab5e4383d6d34dace68e34a91f951130557e889b2	done	landing.block.uploadfile
 2026-06-10T19:07:52+00:00	api-reference/landing/demos/landing-demos-get-list.md	d9f34a362202588dd8bfde19006ff032a4b0b00ce5d3727fc58fba98a9ee1190	done	landing.demos.getList
 2026-06-10T19:07:53+00:00	api-reference/landing/demos/landing-demos-get-page-list.md	c2465fa702eca63399668176de0eaf52c2b13e1d177365236298a64ad104e316	done	landing.demos.getPageList
+2026-06-10T19:51:04+00:00	api-reference/landing/demos/landing-demos-get-site-list.md	ded027626cc2278610285b2f0bfdea0ce3157125f972c1bc34e0eefd72d3a5fe	done	landing.demos.getSiteList
 2026-06-10T19:07:54+00:00	api-reference/landing/demos/landing-demos-register.md	c8418e3c8477823a8416cf8017576fb5befd55008859d447becee3d3e513b347	done	landing.demos.register
 2026-06-10T19:07:55+00:00	api-reference/landing/demos/landing-demos-unregister.md	c2378860175d56f3d48518866e205c1c6642ff63dda2f03b7a095c478359a0a4	done	landing.demos.unregister
 2026-06-10T19:07:57+00:00	api-reference/landing/embedding/block.md	227e863db590cadc239ac0be36e4e84b6159a86a745321baf58c74f9a7e0c6b7	done	landing.repo.bind
@@ -494,6 +495,7 @@ date	file	sha256	status	method
 2026-06-10T19:35:27+00:00	api-reference/landing/page/special-pages/landing-syspage-delete-for-landing.md	b494231e1ed93b4c7e988985286189b690997c5b2d23c45087ff8c93d284aaa2	done	landing.syspage.deleteForLanding
 2026-06-10T19:35:28+00:00	api-reference/landing/page/special-pages/landing-syspage-delete-for-site.md	9de6b1e764067a6d4a03b0b0c2598a9df67ed904e687d7b47ad0d3f79b657fac	done	landing.syspage.deleteForSite
 2026-06-10T19:35:28+00:00	api-reference/landing/page/special-pages/landing-syspage-get-special-page.md	3a8ab62b40bb472ab12443699a27a8132c945c55f23b27cc0f6f5e2fb8bcb833	done	landing.syspage.getSpecialPage
+2026-06-10T19:51:04+00:00	api-reference/landing/page/special-pages/landing-syspage-get.md	96f247651a640556e189f760b6e8bb34d170fc10159f5784064a1270fb452dcb	done	landing.syspage.get
 2026-06-10T19:35:29+00:00	api-reference/landing/page/special-pages/landing-syspage-set.md	fd22adcb271693b0ddbd3335ec7e5baed93d43e12eb3463bd6dde7b95d7e9d1a	done	landing.syspage.set
 2026-06-10T19:35:30+00:00	api-reference/landing/rights/extended-model/landing-site-get-rights.md	f1d3518849a658d26ef1cebb5d902ecfc3388a2bf8c869034f7bea8bc82121a6	done	landing.site.getRights
 2026-06-10T19:35:31+00:00	api-reference/landing/rights/extended-model/landing-site-set-rights.md	f273c5ea9b74ff98cecaf25a4c3049c7922fb3cb37f128aa5bf434790de430a6	done	landing.site.setRights
