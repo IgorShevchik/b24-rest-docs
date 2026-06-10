@@ -28,6 +28,10 @@ make_repo() {
      "$SRC_DIR/_tabs.py" "$REPO/.actualize/"
   printf 'prompt stub\n' > "$REPO/.actualize/PROMPT.md"
   printf 'date\tfile\tsha256\tstatus\tmethod\n' > "$REPO/.actualize/ledger.tsv"
+  # Mirror the real repo's .actualize/.gitignore: remaining.py imports _tabs.py and
+  # creates __pycache__/ on first use. run-batch's clean-tree gate would trip on that
+  # untracked cache (it is ignored in the real tree). Without this the RUN=1 tests fail.
+  printf '__pycache__/\n' > "$REPO/.actualize/.gitignore"
 
   # stub validate.py: FAIL iff the file contains FAILVALIDATE, else PASS
   cat > "$REPO/.actualize/validate.py" <<'PY'

@@ -784,6 +784,32 @@ class RemainingTests(unittest.TestCase):
         self.assertFalse(remaining.LEGACY.search("$b24.actions.v2.call.make()"))
         self.assertFalse(remaining.LEGACY.search("$b24.callMethodExtra()"))  # word boundary
 
+    def test_has_legacy_js_tab_only_inside_tabs(self):
+        # a prose "- JS" bullet must not count; only a tab label inside {% list tabs %}
+        self.assertFalse(remaining._has_legacy_js_tab("intro\n- JS\n- PHP\n\nprose\n"))
+        self.assertTrue(remaining._has_legacy_js_tab("{% list tabs %}\n- JS\n{% endlist %}\n"))
+        # the actualized labels are not the bare "- JS" tab
+        self.assertFalse(remaining._has_legacy_js_tab("{% list tabs %}\n- JS (TS)\n{% endlist %}\n"))
+
+    def test_is_legacy_catches_js_tab_the_regex_misses(self):
+        # The sale/business-value-person-domain-add blind spot: a legacy "- JS" tab built on
+        # B24.callMethod (no leading "$") — LEGACY does not match it, the tab signal must.
+        md = ("{% list tabs %}\n\n- JS\n\n    ```js\n    B24.callMethod('m', {})\n    ```\n\n"
+              "- PHP\n\n    ```php\n    x\n    ```\n\n{% endlist %}\n")
+        self.assertFalse(remaining.LEGACY.search(md))       # regex alone misses it
+        self.assertTrue(remaining._has_legacy_js_tab(md))   # the tab signal catches it
+        self.assertTrue(remaining.is_legacy(md))            # union => still "remaining"
+
+    def test_is_legacy_still_matches_deprecated_calls(self):
+        self.assertTrue(remaining.is_legacy("await $b24.callMethod('x')"))
+        self.assertTrue(remaining.is_legacy("$b24.fetchListMethod('x')"))
+
+    def test_is_legacy_false_for_actualized_page(self):
+        md = ("{% list tabs %}\n\n- JS (TS)\n\n    ```ts\n    $b24.actions.v2.call.make()\n    ```\n\n"
+              "- JS (UMD)\n\n    ```html\n    <script>$b24.actions.v2.call.make()</script>\n    ```\n\n"
+              "{% endlist %}\n")
+        self.assertFalse(remaining.is_legacy(md))
+
     def test_done_set(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(lambda: __import__("shutil").rmtree(tmp, ignore_errors=True))
