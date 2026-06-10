@@ -1,17 +1,10 @@
 # Upstream PR — title & body (one per section)
 
-The script ships 6 sections, each as its own branch/PR:
-
-| Label (commit scope) | Branch | Content |
-|---|---|---|
-| `crm/status` | `actualize/crm-status` | `api-reference/crm/status` |
-| `crm/deals` | `actualize/crm-deals` | `api-reference/crm/deals` |
-| `crm/leads` | `actualize/crm-leads` | `api-reference/crm/leads` |
-| `crm/companies` | `actualize/crm-companies` | `api-reference/crm/companies` |
-| `crm/currency` | `actualize/crm-currency` | `api-reference/crm/currency` |
-| `calendar` | `actualize/calendar` | `api-reference/calendar` |
-
----
+Use this for each upstream PR opened from a branch that
+`.actualize/upstream/contribute-to-upstream.sh` pushed. The script auto-selects which sections
+ship and prints a compare URL per section; the live shipped/in-review list lives in
+`.actualize/UPSTREAM.md`. Replace `<label>` below with the section (e.g. `crm/contacts`,
+`telephony`, `catalog`).
 
 ## Title
 
@@ -19,7 +12,7 @@ The script ships 6 sections, each as its own branch/PR:
 docs(<label>): actualize JS examples to TS + UMD (b24jssdk actions API)
 ```
 
-e.g. `docs(crm/deals): …`, `docs(crm/currency): …`, `docs(calendar): …`.
+e.g. `docs(crm/contacts): …`, `docs(telephony): …`, `docs(catalog): …`.
 
 ## Body
 
@@ -40,11 +33,11 @@ copy-paste UMD variant that runs inside a Bitrix24 frame.
 
 - **Only the `- JS` tab changes.** The cURL (Webhook/OAuth), PHP, BX24.js, PHP CRest and
   Python tabs, and all page prose / parameter tables / response sections, are unchanged.
-- List methods use `call.make` with `start` and link the `callList.make` / `fetchList.make`
-  helpers; `getTotal()` (removed in SDK 2.0) is replaced by `.length` + helpers.
-- Each example is verified: `tsc --strict` against `@bitrix24/b24jssdk@1`, `node --check`
-  on the UMD tab, and a method/field cross-check against the page's cURL endpoint and JSON
-  response.
+- List methods use `call.make` with `start`; `getTotal()` (removed in SDK 2.0) is replaced by
+  `.length` + the list helpers.
+- Each example was validated in the fork (`tsc` against `@bitrix24/b24jssdk`, plus a structural
+  `- JS (TS)` / `- JS (UMD)` check). The branch carries only this section's `api-reference/`
+  content — no tooling, no CI files.
 - One section per PR to keep review small.
 
 No breaking changes — documentation examples only.
@@ -54,7 +47,7 @@ No breaking changes — documentation examples only.
 
 ### Notes
 
-- `crm/tasks` and `user` are **not** shipped: upstream has already actualized those pages
-  itself (the fork kept its own variants during the sync). Shipping them would duplicate.
-- All six sections above are the fork's own actualization (originally PRs #17/#20–#26 in the
-  fork) and are still legacy upstream — i.e. genuinely new there.
+- The branch is built off **fresh `upstream/main`**, so its diff is exactly this section's
+  example changes — nothing to "un-revert" from newer upstream edits.
+- `user/` and `tasks/` are **not** shipped from here: upstream actualized those pages itself, so
+  the auto-detect rule skips them (no legacy left upstream → not selected).
