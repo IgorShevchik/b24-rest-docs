@@ -452,6 +452,7 @@ date	file	sha256	status	method
 2026-06-10T08:54:59+00:00	api-reference/sale/basket-properties/sale-basket-properties-get.md	25d2c120873056fc85aebfe1d0398e541099044709df193dde1674916f02a2db	done	sale.basketproperties.get
 2026-06-10T09:25:11+00:00	api-reference/sale/basket-properties/sale-basket-properties-list.md	426819effd2b7d5248335415474b492397c99e89d374b70af732eb5a04282586	done	sale.basketproperties.list
 2026-06-10T08:55:00+00:00	api-reference/sale/basket-properties/sale-basket-properties-update.md	6697da2aa75ae108386b45f728de0fed19a144d0ffb088810bae1668c568d1d8	done	sale.basketproperties.update
+2026-06-10T11:23:14+00:00	api-reference/sale/business-value-person-domain/sale-business-value-person-domain-add.md	67d44d08c694086c474fd956c458895157838814ee8c6cae5bc3b5e27126cf60	done	sale.businessValuePersonDomain.add
 2026-06-10T08:55:01+00:00	api-reference/sale/business-value-person-domain/sale-business-value-person-domain-delete-by-filter.md	a63204946eb11799061af34f9dc9560f7b6b02953b56cf7a72715f5bae26c39f	done	sale.businessValuePersonDomain.deleteByFilter
 2026-06-10T08:55:01+00:00	api-reference/sale/business-value-person-domain/sale-business-value-person-domain-get-fields.md	e1d6e0e983236bf15e975ad0d3df52e6cb0f09017307ddc1bb0f1dd43b099f71	done	sale.businessValuePersonDomain.getFields
 2026-06-10T08:55:02+00:00	api-reference/sale/business-value-person-domain/sale-business-value-person-domain-list.md	43ed832292223183a2bd2b3f8060a8fd95d419996692df4141374ee11bbd5ccf	done	sale.businessValuePersonDomain.list
@@ -508,6 +509,7 @@ date	file	sha256	status	method
 2026-06-10T09:50:00+00:00	api-reference/sale/person-type/sale-person-type-add.md	ac1836d3655c831b77d3d5a60f8571fc644d8fc3815d4f286591ebaa3abfccb9	done	sale.persontype.add
 2026-06-10T10:11:57+00:00	api-reference/sale/person-type/sale-person-type-delete.md	609a71ca95066e506642c27f59a3f85a5452c708cdced71dc992c712dfb938ef	done	sale.persontype.delete
 2026-06-10T10:11:58+00:00	api-reference/sale/person-type/sale-person-type-get-fields.md	bc77f28c9a5180a6057a6c381caab379851e5c220792b6ceec9ce6fd23b1ddf9	done	sale.persontype.getFields
+2026-06-10T11:19:24+00:00	api-reference/sale/person-type/sale-person-type-get.md	c983593e30a911d89768db6d7874c86b3193eaa6cec21c294cb7a57d5c1161b5	done	sale.persontype.get
 2026-06-10T10:12:00+00:00	api-reference/sale/person-type/sale-person-type-list.md	205b50c54b9933073f492c5242000bb5970072bda92d55330895e75a43fc1ccb	done	sale.persontype.list
 2026-06-10T10:12:00+00:00	api-reference/sale/person-type/sale-person-type-update.md	347105cc73b9c76981d0f3a7e773f002ccb2a53599e0af574713252e617fd97c	done	sale.persontype.update
 2026-06-10T10:12:01+00:00	api-reference/sale/property-group/sale-property-group-add.md	be485789023f5b71702d59cc46df7d8425dcfbd00dcc2e99058516c85660e0d0	done	sale.propertygroup.add
