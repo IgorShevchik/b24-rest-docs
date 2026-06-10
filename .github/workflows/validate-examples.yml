@@ -47,6 +47,9 @@ jobs:
       - name: run-section.sh auto-retry tests (offline, stubbed agent)
         run: bash .actualize/tests/test_run_section.sh
 
+      - name: contribute-to-upstream.sh hand-off tests (offline, local remotes)
+        run: bash .actualize/tests/test_contribute_upstream.sh
+
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20

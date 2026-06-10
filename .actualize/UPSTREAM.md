@@ -2,112 +2,117 @@
 
 This fork (`IgorShevchik/b24-rest-docs`) is where the b24jssdk example actualization is
 developed and validated. Finished sections are then contributed **upstream** to the parent
-documentation repo. This runbook is the process for that hand-off.
+docs repo `bitrix-tools/b24-rest-docs`. This runbook is that hand-off — and it is now encoded
+in `.actualize/upstream/contribute-to-upstream.sh`, so "do it the way that worked" means
+**run that script**.
 
 > The actualization agent's GitHub access is restricted to this fork, so it cannot open a PR
-> on the parent. A maintainer runs `contribute-to-upstream.sh` / `.ps1` (see below) from a fork
-> clone: it pushes one branch per section to the fork and prints a compare URL; the maintainer
-> clicks "Create pull request" on each.
+> on the parent. The script does everything up to that point — builds, verifies and pushes one
+> branch per section to the fork, and prints a compare URL per section. A human clicks
+> **"Create pull request"** on each (base = `bitrix-tools/b24-rest-docs : main`).
+
+## The flow (what the script does)
+
+```bash
+# from a CLEAN fork clone:
+.actualize/upstream/contribute-to-upstream.sh            # DRY: auto-detect + verify, push nothing
+PUSH=1 .actualize/upstream/contribute-to-upstream.sh     # push the verified branches + print URLs
+```
+
+1. **SYNC** — fetch fresh `origin/main` (fork) and `upstream/main` (parent). Every section is
+   branched off **fresh `upstream/main`**, never off fork `main`: the parent keeps moving (it
+   adds pages after our fork point), so branching off it keeps each PR's diff to *only* our
+   example changes and avoids "reverting" newer upstream edits.
+2. **SELECT** — a section ships **iff** `upstream/main` still has legacy jsSDK calls in it
+   **and** the fork has fully actualized it (0 legacy left, ≥1 `- JS (TS)` page). That rule
+   auto-skips sections the parent already modernised (no duplicates) and any half-finished
+   section. Pass section labels/paths as args to ship a specific set; with no args the set is
+   auto-detected. Granularity mirrors our PR policy: each `api-reference/crm/<sub>` is its own
+   section; every other `api-reference/<dir>` is one section.
+3. **BUILD** — one branch `actualize/<slug>` per section off `upstream/main`, copying in **only**
+   that section's `api-reference/<section>` content from the fork. No `.actualize/` tooling, no
+   `.github/` CI, no ledger — content only, by construction.
+4. **VERIFY** — the gate that makes the hand-off trustworthy. Each built branch must pass **all**:
+   - every page has **both** `- JS (TS)` and `- JS (UMD)` (count TS == count UMD > 0),
+   - **0** legacy calls (`$b24.callMethod` / `callListMethod` / `fetchListMethod`),
+   - **0** files touched outside `api-reference/<section>/`,
+   - **0** tooling/CI files (`.actualize/`, `.github/`).
+   If **any** selected section fails, the run aborts and **nothing is pushed** (fail-fast).
+5. **SHIP** — **dry by default**: print the manifest + compare URLs and remove the temp branches
+   (tree left exactly as found). `PUSH=1` pushes the verified branches to the fork (with retry)
+   and prints the URLs. The script never pushes to upstream.
+
+The offline test `.actualize/tests/test_contribute_upstream.sh` (run in CI) covers all of this:
+auto-detect selection, the verify gate rejecting a TS-only page, the `PUSH=1` path, and the
+"already upstream → nothing to ship" case.
+
+> **grep gotcha** (this bit us once, hence the note): `git grep` patterns that start with `-`
+> — like `- JS (TS)` — must be passed as `-F -e '<pattern>'`, and options (`--cached`, a `<rev>`)
+> must come **before** the pattern. Otherwise git reads the leading `-` as an unknown switch and
+> silently reports 0 matches.
 
 ## Scope — what goes upstream vs what stays in the fork
 
-**Goes upstream (content only):**
-- `api-reference/**` — the actualized `- JS (TS)` / `- JS (UMD)` examples (and nothing else on those pages;
-  prose, parameter tables, response sections are unchanged by actualization).
+**Goes upstream (content only):** `api-reference/**` — the actualized `- JS (TS)` / `- JS (UMD)`
+examples and nothing else on those pages (prose, parameter tables, response sections are
+untouched by actualization; other language tabs are byte-for-byte unchanged).
 
-**Stays in the fork (never sent upstream):**
-- `.actualize/**` — the process tooling (validate.py, record.py, run-batch.sh, PROMPT*, ledger…).
-- `.github/workflows/validate-examples.yml`, `.gitattributes` — our CI/merge infrastructure.
-
-Patches under `.actualize/upstream/*.patch` are content-only by construction (scoped to
-`api-reference/**`), so applying one to the parent cannot leak fork tooling.
+**Stays in the fork (never sent upstream):** `.actualize/**` (the tooling — validate.py,
+record.py, run-batch.sh, run-section.sh, contribute-to-upstream.sh, PROMPT*, ledger…) and
+`.github/workflows/**`, `.gitattributes` (our CI/merge infrastructure). The script enforces this
+by construction (it only copies the section path) and the verify gate re-checks it.
 
 ## Merged into upstream ✅
 
-Submitted via `contribute-to-upstream.sh` and **merged into `bitrix-tools/b24-rest-docs`**
-(2026-06-08), one PR per section:
+One PR per section, all passed `validate.py` in the fork, ledger 0 drift.
 
-| Section | Fork branch | Pages |
+| Batch | Sections | Date |
 |---|---|---|
-| `crm/status` | `actualize/crm-status` | 8 |
-| `crm/deals` | `actualize/crm-deals` | 29 |
-| `crm/leads` | `actualize/crm-leads` | 23 |
-| `crm/companies` | `actualize/crm-companies` | 21 |
-| `crm/currency` | `actualize/crm-currency` | 12 |
-| `calendar` | `actualize/calendar` | 20 |
+| Tier-1 CRM + calendar | `crm/status` (8), `crm/deals` (29), `crm/leads` (23), `crm/companies` (21), `crm/currency` (12), `calendar` (20) | 2026-06-08 |
 
-All passed `validate.py` in the fork; ledger 0 drift. To address a reviewer's request: fix in
-the fork's `main`, re-run the script, and force-update the section branch
-(`git push --force-with-lease origin actualize/<slug>`) — the open PR updates automatically.
+> `user/` and `tasks/` were **dropped from the hand-off**: upstream actualized those pages itself
+> (found during a fork↔upstream sync), so shipping them would duplicate. The auto-detect rule now
+> encodes that automatically (upstream has no legacy there → not selected).
 
-> `user/` and `tasks/` were **dropped from the hand-off**: upstream actualized those pages
-> itself (found during the fork↔upstream sync), so the earlier `user-section.patch` is
-> obsolete — shipping it would duplicate.
+## In review (pushed, PRs to open/awaiting) ⏳
 
-## Contribute with the script (preferred)
+Shipped via `contribute-to-upstream.sh` on 2026-06-10 — branches pushed to the fork, one upstream
+PR per section (base `bitrix-tools : main`). **398 files across 9 sections:**
 
-```bash
-# from a CLEAN clone of the FORK, already synced to upstream:
-bash .actualize/upstream/contribute-to-upstream.sh        # or .ps1 on Windows
-```
+| Section | Branch | Pages |
+|---|---|---|
+| `crm/contacts` | `actualize/crm-contacts` | 17 |
+| `messageservice` | `actualize/messageservice` | 5 |
+| `telephony` | `actualize/telephony` | 29 |
+| `disk` | `actualize/disk` | 37 |
+| `document-generator` | `actualize/document-generator` | 29 |
+| `booking` | `actualize/booking` | 38 |
+| `sonet-group` | `actualize/sonet-group` | 44 |
+| `imopenlines` | `actualize/imopenlines` | 50 |
+| `catalog` | `actualize/catalog` | 149 |
 
-It branches each section off fresh `upstream/main`, copies in only that section's content from
-the fork, pushes the branch to the fork, and prints a compare URL per section. Open each PR with
-the title/body from `.actualize/upstream/PR-TEMPLATE.md`. The shipped sections live in the
-`SECTIONS` array in the script — add/remove there.
-
-## Apply a section to the parent (manual / patch alternative)
-
-```bash
-# 1. fresh, up-to-date clone of the PARENT repo (not this fork)
-git clone <parent-repo-url> b24-docs-upstream
-cd b24-docs-upstream
-git checkout -b actualize/user-examples        # one branch per section
-
-# 2. apply the content patch (--3way resolves automatically if the parent drifted a little)
-git apply --3way /path/to/user-section.patch
-#   if it reports conflicts: the parent moved under those files — re-actualize the drifted
-#   file(s) in the fork, regenerate the patch, and retry (see "Drift" below)
-
-# 3. (optional) validate locally if you have the toolchain; the fork already validated these
-# 4. commit + push + open the upstream PR
-git add api-reference/user
-git commit -m "docs(user): actualize JS examples to TS + UMD (b24jssdk actions API)"
-git push origin actualize/user-examples
-```
+Compare URL per section: `https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:actualize/<slug>?expand=1`.
+Once a section is merged upstream, move its row up to **Merged**.
 
 ## Upstream PR conventions
 
-- **One section = one PR** — matches our internal policy and keeps upstream review small.
+- **One section = one PR** — keeps upstream review small.
 - **Title:** `docs(<section>): actualize JS examples to TS + UMD (b24jssdk actions API)`.
-- **Body, mention:** examples target `@bitrix24/b24jssdk@1` (the actions API); the old
-  `callMethod` / `callListMethod` / `fetchListMethod` are removed in SDK 2.0. Non-JS tabs
-  (`cURL`, `PHP`, `BX24.js`, `PHP CRest`) are intentionally unchanged. `user-get.md` carries
-  four independent examples.
+- **Body:** `.actualize/upstream/PR-TEMPLATE.md` (mention: examples target the actions API;
+  `callMethod` / `callListMethod` / `fetchListMethod` are removed in SDK 2.0; non-JS tabs and
+  page prose are intentionally unchanged; list methods use `call.make` with `start`).
 - Follow the parent's own contribution rules (CLA, commit style) if they differ.
 
-## Drift (parent moved since we forked)
+## Reviewer asked for a change?
 
-The patch is a snapshot. If `git apply --3way` reports conflicts on a file, the parent changed
-that page after our fork point. Resolve by re-actualizing the **current** upstream version of
-that file in the fork (run the agent + `validate.py`), regenerate the section patch, and retry.
-Validate in the fork **before** sending — never ship an example that has not passed `validate.py`.
+Fix it in the **fork's `main`** (re-actualize + `validate.py`), then re-run
+`PUSH=1 contribute-to-upstream.sh <section>`. The branch is rebuilt off fresh `upstream/main`
+and force-updated; the open PR refreshes automatically. Never ship an example that has not passed
+`validate.py` in the fork.
 
-## Regenerating a section patch (in this fork)
+## Drift (parent moved under a page we're shipping)
 
-```bash
-# diff of a merged section PR, scoped to its content (excludes ledger/.actualize):
-git diff <section-pr-squash>^ <section-pr-squash> -- api-reference/<section>/ \
-  > .actualize/upstream/<section>-section.patch
-```
-
-## Next sections
-
-- **`crm/contacts` (17 pages)** — actualized (PR #36) and **added to the script's `SECTIONS`**;
-  the next `contribute-to-upstream.sh` run ships it as the 7th section. This completes Tier-1 CRM.
-- Then `disk`, `telephony`, … — same flow: actualize + validate in the fork → ship via the
-  script → a maintainer opens the upstream PR.
-
-Already actualized in the fork: crm core (status/deals/leads/companies/**contacts**),
-crm/currency, calendar. The first six are merged upstream; `crm/contacts` is queued to ship.
-`tasks`/`user` are actualized upstream already, so they are not contributed from here.
+Because each branch is rebuilt off **fresh** `upstream/main` every run, routine upstream movement
+is absorbed automatically. If the parent edited the *same page* we actualized, the eventual PR
+merge may conflict: re-actualize the **current** upstream version of that page in the fork, re-run
+`validate.py`, and re-run the script for that section.
