@@ -570,6 +570,9 @@ date	file	sha256	status	method
 2026-06-10T10:57:38+00:00	api-reference/sale/status/sale-status-get.md	50c33c75b0307ebdf03d52a82d8ea18eacfd4bef7c1f3f698859906ebcfe656a	done	sale.status.get
 2026-06-10T10:57:39+00:00	api-reference/sale/status/sale-status-list.md	88044bbe191ede430fce46012aef3647c21e556baa9ab0f1440842c94923ad52	done	sale.status.list
 2026-06-10T10:57:40+00:00	api-reference/sale/status/sale-status-update.md	86a354ce370bba0d297a49d6cd78a473b07b80a25ee2cf6a24f012f72ac4dc93	done	sale.status.update
+2026-06-10T11:06:10+00:00	api-reference/sale/trade-binding/sale-trade-binding-get-fields.md	b91c3fb8e926a281a8e4cb306cb64110a6f7809c61abdeb8b5a29abb45ec8859	done	sale.tradeBinding.getFields
+2026-06-10T11:06:11+00:00	api-reference/sale/trade-binding/sale-trade-binding-list.md	5e8c7174783bb74efae966831a28f67808fe00fb7238036068fb810681981745	done	sale.tradeBinding.list
+2026-06-10T11:06:12+00:00	api-reference/sale/trade-platform/sale-trade-platform-get-fields.md	6814226e02c7f5be5617e071bb6aea8ed5f82c72584a36b949e5f5cfeee3a003	done	sale.tradePlatform.getFields
 2026-06-09T07:10:54+00:00	api-reference/sonet-group/members/sonet-group-user-add.md	e85d7d73e90639f63835e4e6ddfe3cbca249006ccae33a55dc770e9f87adcbff	done	sonet_group.user.add
 2026-06-09T07:10:55+00:00	api-reference/sonet-group/members/sonet-group-user-delete.md	8061e9729c506064ee80d8df4d7d18f1594938b3275ea2e6e0696f013ec75c10	done	sonet_group.user.delete
 2026-06-09T07:10:56+00:00	api-reference/sonet-group/members/sonet-group-user-get.md	f1800469ea3ad6481940a5f304b5a7a5dedbf463d8a3b534bb6f8da4b3b381fa	done	sonet_group.user.get
