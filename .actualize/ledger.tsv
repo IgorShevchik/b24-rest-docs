@@ -552,6 +552,7 @@ date	file	sha256	status	method
 2026-06-10T10:34:20+00:00	api-reference/sale/shipment-property/sale-shipment-property-delete.md	e7895c099c5c135fb7a1e5409c779324fb377569f0e091edffe9ea1fb64f5c65	done	sale.shipmentproperty.delete
 2026-06-10T10:57:24+00:00	api-reference/sale/shipment-property/sale-shipment-property-get-fields-by-type.md	570dba11f0e7224888773ebe437f9db3c70975d57d2be9ed20d31acf3803dddb	done	sale.shipmentproperty.getfieldsbytype
 2026-06-10T10:57:25+00:00	api-reference/sale/shipment-property/sale-shipment-property-get.md	91237ec9d96ec152ddc2700c90517df08c06ad7a8129ae82658066e897456739	done	sale.shipmentproperty.get
+2026-06-10T11:10:30+00:00	api-reference/sale/shipment-property/sale-shipment-property-list.md	b7fc095d2d8626e90077c465e94faef970f5ce26fc8abcb95da477cebedcb8a3	done	sale.shipmentproperty.list
 2026-06-10T10:57:26+00:00	api-reference/sale/shipment-property/sale-shipment-property-update.md	27c1d78a5b948515462f2877a132902b48eda740766cfc8660ae18a6a5b140c7	done	sale.shipmentproperty.update
 2026-06-10T10:57:26+00:00	api-reference/sale/shipment/sale-shipment-add.md	a787b61d91b9f91c3f84f1d997172ee3758230c54c63b0ed63d32807449071cb	done	sale.shipment.add
 2026-06-10T10:57:27+00:00	api-reference/sale/shipment/sale-shipment-delete.md	021e88e34b08dcc46405f948f43f1add93c7b261f36337c67412c957a76216f7	done	sale.shipment.delete
@@ -573,6 +574,7 @@ date	file	sha256	status	method
 2026-06-10T11:06:10+00:00	api-reference/sale/trade-binding/sale-trade-binding-get-fields.md	b91c3fb8e926a281a8e4cb306cb64110a6f7809c61abdeb8b5a29abb45ec8859	done	sale.tradeBinding.getFields
 2026-06-10T11:06:11+00:00	api-reference/sale/trade-binding/sale-trade-binding-list.md	5e8c7174783bb74efae966831a28f67808fe00fb7238036068fb810681981745	done	sale.tradeBinding.list
 2026-06-10T11:06:12+00:00	api-reference/sale/trade-platform/sale-trade-platform-get-fields.md	6814226e02c7f5be5617e071bb6aea8ed5f82c72584a36b949e5f5cfeee3a003	done	sale.tradePlatform.getFields
+2026-06-10T11:10:31+00:00	api-reference/sale/trade-platform/sale-trade-platform-list.md	ed79a2d08c16428be30a69a265d1e0402a6c777a0cdd08e85c241f6ef497a691	done	sale.tradePlatform.list
 2026-06-09T07:10:54+00:00	api-reference/sonet-group/members/sonet-group-user-add.md	e85d7d73e90639f63835e4e6ddfe3cbca249006ccae33a55dc770e9f87adcbff	done	sonet_group.user.add
 2026-06-09T07:10:55+00:00	api-reference/sonet-group/members/sonet-group-user-delete.md	8061e9729c506064ee80d8df4d7d18f1594938b3275ea2e6e0696f013ec75c10	done	sonet_group.user.delete
 2026-06-09T07:10:56+00:00	api-reference/sonet-group/members/sonet-group-user-get.md	f1800469ea3ad6481940a5f304b5a7a5dedbf463d8a3b534bb6f8da4b3b381fa	done	sonet_group.user.get
