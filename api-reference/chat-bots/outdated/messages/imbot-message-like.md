@@ -77,21 +77,77 @@
       https://**put_your_bitrix24_address**/rest/imbot.message.like
     ```
 
-- JS
+- JS (TS)
 
-    ```js
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
+    declare const $b24: B24Frame
+
     try {
-      const response = await $b24.callMethod('imbot.message.like', {
-        BOT_ID: 39,
-        MESSAGE_ID: 19880117,
-        ACTION: 'plus',
-      });
+      const response = await $b24.actions.v2.call.make<boolean>({
+        method: 'imbot.message.like',
+        params: {
+          BOT_ID: 39,
+          MESSAGE_ID: 19880117,
+          ACTION: 'plus',
+        },
+        requestId: Text.getUuidRfc4122()
+      })
 
-      const { result } = response.getData();
-      console.log('Статус «Мне нравится» изменен:', result);
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Like status changed:', result)
+      }
     } catch (error) {
-      console.error('Ошибка изменения статуса:', error);
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function likeMessage() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'imbot.message.like',
+            params: {
+              BOT_ID: 39,
+              MESSAGE_ID: 19880117,
+              ACTION: 'plus',
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Like status changed:', result)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', likeMessage)
+    </script>
     ```
 
 - PHP

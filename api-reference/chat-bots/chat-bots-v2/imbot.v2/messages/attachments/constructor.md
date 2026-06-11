@@ -39,96 +39,226 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Chat.Message.send
     ```
 
-- JS
+- JS (TS)
 
-    ```js
-    try {
-        const response = await $b24.callMethod(
-            'imbot.v2.Chat.Message.send',
-            {
-                botId: 456,
-                dialogId: 'chat20921',
-                fields: {
-                    message: 'Карточка задачи',
-                    attach: [
-                    {
-                        USER: {
-                            NAME: 'Уведомления Mantis',
-                            AVATAR: 'https://files.shelenkov.com/bitrix/images/mantis2.jpg',
-                            LINK: 'https://shelenkov.com/'
-                        }
-                    },
-                    {
-                        LINK: {
-                            NAME: 'Открыть Mantis из внешней сети',
-                            LINK: 'https://shelenkov.com/'
-                        }
-                    },
-                    {
-                        DELIMITER: {
-                            SIZE: 200,
-                            COLOR: '#c6c6c6'
-                        }
-                    },
-                    {
-                        GRID: [
-                            {
-                                NAME: 'Проект',
-                                VALUE: 'BUGS',
-                                DISPLAY: 'LINE',
-                                WIDTH: 100
-                            },
-                            {
-                                NAME: 'Категория',
-                                VALUE: 'im',
-                                DISPLAY: 'LINE',
-                                WIDTH: 100
-                            },
-                            {
-                                NAME: 'Сводка',
-                                VALUE: 'Требуется реализовать возможность добавлять структурированные сущности в сообщения и уведомления мессенджера.',
-                                DISPLAY: 'BLOCK'
-                            }
-                        ]
-                    },
-                    {
-                        DELIMITER: {
-                            SIZE: 200,
-                            COLOR: '#c6c6c6'
-                        }
-                    },
-                    {
-                        GRID: [
-                            {
-                                NAME: 'Новое обращение',
-                                VALUE: '',
-                                DISPLAY: 'ROW',
-                                WIDTH: 100
-                            },
-                            {
-                                NAME: 'Назначено',
-                                VALUE: 'Шеленков Евгений',
-                                DISPLAY: 'ROW',
-                                WIDTH: 100
-                            },
-                            {
-                                NAME: 'Дедлайн',
-                                VALUE: '04.11.2015 17:50:43',
-                                DISPLAY: 'ROW',
-                                WIDTH: 100
-                            }
-                        ]
-                    }
-                    ]
-                }
-            }
-        );
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-        const result = response.getData().result.id;
-        console.log('Created message ID:', result);
-    } catch (error) {
-        console.error(error);
+    declare const $b24: B24Frame
+
+    // Shape of the payload returned in result (match the "response handling" section of the page)
+    type SendMessageResult = {
+      id: number,
     }
+
+    try {
+      const response = await $b24.actions.v2.call.make<SendMessageResult>({
+        method: 'imbot.v2.Chat.Message.send',
+        params: {
+          botId: 456,
+          dialogId: 'chat20921',
+          fields: {
+            message: 'Task card',
+            attach: [
+              {
+                USER: {
+                  NAME: 'Mantis Notifications',
+                  AVATAR: 'https://files.shelenkov.com/bitrix/images/mantis2.jpg',
+                  LINK: 'https://shelenkov.com/',
+                },
+              },
+              {
+                LINK: {
+                  NAME: 'Open Mantis from external network',
+                  LINK: 'https://shelenkov.com/',
+                },
+              },
+              {
+                DELIMITER: {
+                  SIZE: 200,
+                  COLOR: '#c6c6c6',
+                },
+              },
+              {
+                GRID: [
+                  {
+                    NAME: 'Project',
+                    VALUE: 'BUGS',
+                    DISPLAY: 'LINE',
+                    WIDTH: 100,
+                  },
+                  {
+                    NAME: 'Category',
+                    VALUE: 'im',
+                    DISPLAY: 'LINE',
+                    WIDTH: 100,
+                  },
+                  {
+                    NAME: 'Summary',
+                    VALUE: 'Need to implement adding structured entities to messages and notifications in the messenger.',
+                    DISPLAY: 'BLOCK',
+                  },
+                ],
+              },
+              {
+                DELIMITER: {
+                  SIZE: 200,
+                  COLOR: '#c6c6c6',
+                },
+              },
+              {
+                GRID: [
+                  {
+                    NAME: 'New issue',
+                    VALUE: '',
+                    DISPLAY: 'ROW',
+                    WIDTH: 100,
+                  },
+                  {
+                    NAME: 'Assigned',
+                    VALUE: 'Evgeny Shelenkov',
+                    DISPLAY: 'ROW',
+                    WIDTH: 100,
+                  },
+                  {
+                    NAME: 'Deadline',
+                    VALUE: '04.11.2015 17:50:43',
+                    DISPLAY: 'ROW',
+                    WIDTH: 100,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Created message ID:', result.id)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
+    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function sendMessage() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'imbot.v2.Chat.Message.send',
+            params: {
+              botId: 456,
+              dialogId: 'chat20921',
+              fields: {
+                message: 'Task card',
+                attach: [
+                  {
+                    USER: {
+                      NAME: 'Mantis Notifications',
+                      AVATAR: 'https://files.shelenkov.com/bitrix/images/mantis2.jpg',
+                      LINK: 'https://shelenkov.com/',
+                    },
+                  },
+                  {
+                    LINK: {
+                      NAME: 'Open Mantis from external network',
+                      LINK: 'https://shelenkov.com/',
+                    },
+                  },
+                  {
+                    DELIMITER: {
+                      SIZE: 200,
+                      COLOR: '#c6c6c6',
+                    },
+                  },
+                  {
+                    GRID: [
+                      {
+                        NAME: 'Project',
+                        VALUE: 'BUGS',
+                        DISPLAY: 'LINE',
+                        WIDTH: 100,
+                      },
+                      {
+                        NAME: 'Category',
+                        VALUE: 'im',
+                        DISPLAY: 'LINE',
+                        WIDTH: 100,
+                      },
+                      {
+                        NAME: 'Summary',
+                        VALUE: 'Need to implement adding structured entities to messages and notifications in the messenger.',
+                        DISPLAY: 'BLOCK',
+                      },
+                    ],
+                  },
+                  {
+                    DELIMITER: {
+                      SIZE: 200,
+                      COLOR: '#c6c6c6',
+                    },
+                  },
+                  {
+                    GRID: [
+                      {
+                        NAME: 'New issue',
+                        VALUE: '',
+                        DISPLAY: 'ROW',
+                        WIDTH: 100,
+                      },
+                      {
+                        NAME: 'Assigned',
+                        VALUE: 'Evgeny Shelenkov',
+                        DISPLAY: 'ROW',
+                        WIDTH: 100,
+                      },
+                      {
+                        NAME: 'Deadline',
+                        VALUE: '04.11.2015 17:50:43',
+                        DISPLAY: 'ROW',
+                        WIDTH: 100,
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Created message ID:', result.id)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', sendMessage)
+    </script>
     ```
 
 - PHP
@@ -441,34 +571,102 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Chat.Message.send
     ```
 
-- JS
+- JS (TS)
 
-    ```js
-    try {
-        const response = await $b24.callMethod(
-            'imbot.v2.Chat.Message.send',
-            {
-                botId: 456,
-                dialogId: 'chat20921',
-                fields: {
-                    message: 'У вас новое уведомление',
-                    attach: {
-                        ID: 1,
-                        COLOR: '#29619b',
-                        BLOCKS: [
-                            { MESSAGE: 'Коллеги, обновление im 16.0.0 проверено и готово к выгрузке. Необходимо поставить тег. В обновление больше не подкладываем.' },
-                            { IMAGE: { LINK: 'https://files.shelenkov.com/bitrix/images/win.jpg' } }
-                        ]
-                    }
-                }
-            }
-        );
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-        const result = response.getData().result.id;
-        console.log('Created message ID:', result);
-    } catch (error) {
-        console.error(error);
+    declare const $b24: B24Frame
+
+    // Shape of the payload returned in result (match the "response handling" section of the page)
+    type SendMessageResult = {
+      id: number,
     }
+
+    try {
+      const response = await $b24.actions.v2.call.make<SendMessageResult>({
+        method: 'imbot.v2.Chat.Message.send',
+        params: {
+          botId: 456,
+          dialogId: 'chat20921',
+          fields: {
+            message: 'You have a new notification',
+            attach: {
+              ID: 1,
+              COLOR: '#29619b',
+              BLOCKS: [
+                { MESSAGE: 'Colleagues, im 16.0.0 update has been verified and is ready for release. A tag needs to be set. No more patches to this update.' },
+                { IMAGE: { LINK: 'https://files.shelenkov.com/bitrix/images/win.jpg' } },
+              ],
+            },
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Created message ID:', result.id)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
+    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function sendMessage() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'imbot.v2.Chat.Message.send',
+            params: {
+              botId: 456,
+              dialogId: 'chat20921',
+              fields: {
+                message: 'You have a new notification',
+                attach: {
+                  ID: 1,
+                  COLOR: '#29619b',
+                  BLOCKS: [
+                    { MESSAGE: 'Colleagues, im 16.0.0 update has been verified and is ready for release. A tag needs to be set. No more patches to this update.' },
+                    { IMAGE: { LINK: 'https://files.shelenkov.com/bitrix/images/win.jpg' } },
+                  ],
+                },
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Created message ID:', result.id)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', sendMessage)
+    </script>
     ```
 
 - PHP

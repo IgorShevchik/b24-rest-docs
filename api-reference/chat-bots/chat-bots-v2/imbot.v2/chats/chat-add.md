@@ -103,24 +103,108 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Chat.add
     ```
 
-- JS
+- JS (TS)
 
-    ```js
-    try {
-      const response = await $b24.callMethod('imbot.v2.Chat.add', {
-        botId: 456,
-        fields: {
-          title: 'Support Chat',
-          color: 'mint',
-          userIds: [1, 2],
-        },
-      });
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 
-      const { result } = response.getData();
-      console.log('result:', result);
-    } catch (error) {
-      console.error('Error:', error);
+    declare const $b24: B24Frame
+
+    // Shape of the payload returned in result (match the "response handling" section of the page)
+    type ChatAddResult = {
+      chat: {
+        id: number
+        dialogId: string
+        name: string
+        description: string
+        type: string
+        owner: number
+        color: string | null
+        avatar: string
+        role: string
+        dateCreate: ISODate | null
+        lastMessageId: number | null
+        muteList: number[]
+        managerList: number[]
+      }
+      users: Array<{
+        id: number
+        active: boolean
+        name: string
+        type: string
+      }>
     }
+
+    try {
+      const response = await $b24.actions.v2.call.make<ChatAddResult>({
+        method: 'imbot.v2.Chat.add',
+        params: {
+          botId: 456,
+          fields: {
+            title: 'Support Chat',
+            color: 'mint',
+            userIds: [1, 2],
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Created chat ID:', result.chat.id, 'Members:', result.users.length)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
+    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function addChat() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'imbot.v2.Chat.add',
+            params: {
+              botId: 456,
+              fields: {
+                title: 'Support Chat',
+                color: 'mint',
+                userIds: [1, 2],
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Created chat ID:', result.chat.id, 'Members:', result.users.length)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', addChat)
+    </script>
     ```
 
 - PHP
