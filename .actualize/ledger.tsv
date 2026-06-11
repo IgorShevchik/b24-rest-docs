@@ -268,6 +268,11 @@ date	file	sha256	status	method
 2026-06-11T05:53:03+00:00	api-reference/chat-bots/outdated/commands/imbot-command-unregister.md	e9d3711ab330cffbd4d6bfcb0ab4543cf1d18b3a77cbdc2c087e01cd05492a33	done	imbot.command.unregister
 2026-06-11T05:53:03+00:00	api-reference/chat-bots/outdated/commands/imbot-command-update.md	62904c6161db94c839b55a733cd8313e17dcaa39f9fadc60e910806a7a9fc161	done	imbot.command.update
 2026-06-11T05:53:04+00:00	api-reference/chat-bots/outdated/messages/imbot-message-add.md	8985aa335dd1f94d9de904f216e7fc94790e8335a8de9a6fe1e694f994a19325	done	imbot.message.add
+2026-06-11T06:06:26+00:00	api-reference/chat-bots/outdated/messages/imbot-message-delete.md	6e857bec57f5a840afea7c6470876d70f32f6d14cb02e75b3e63f7ea2235bbeb	done	imbot.message.delete
+2026-06-11T06:06:26+00:00	api-reference/chat-bots/outdated/messages/imbot-message-like.md	69319948100a0957b914908134e6997b998ac4cf902756fc3ca9443b63ccf100	done	imbot.message.like
+2026-06-11T06:06:27+00:00	api-reference/chat-bots/outdated/messages/imbot-message-update.md	01e1ca3e678039bafa47e6b7842f6a239d107dc419ab5772148c046ff85aee32	done	imbot.message.update
+2026-06-11T06:06:28+00:00	api-reference/chat-bots/outdated/send-command.md	cd2e1aff80b7c3f5f045c63fc0d18e0024b79b33c0d8547a8c3788a61abb6b52	done	imbot.message.add
+2026-06-11T06:06:28+00:00	api-reference/chat-bots/send-command.md	fb942292e824d1e9ff59702e5b595650ffd3047be1d0fb2f506b7f574d0b578e	done	imbot.v2.Chat.Message.send
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-add.md	6852f6b4c78c434ce1002002e395b94c09e46d94c0ea55825a48f9db7c9f37c7	done	crm.company.contact.add
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-delete.md	4a151a08c2516bd31a54d0c93dcde350d60737d4781e818c9b28e55350e77c36	done	crm.company.contact.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-fields.md	39c000ab2b800705d533aa3312e4f4de9e439ca90b1fe3dd9003350916ee4fe2	done	crm.company.contact.fields
