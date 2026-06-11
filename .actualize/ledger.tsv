@@ -1033,3 +1033,15 @@ date	file	sha256	status	method
 2026-06-11T10:38:24+00:00	api-reference/widgets/ui-interaction/call-card/call-card-entity-changed.md	892adbc705adc9435bd5df5e111ec34c80a6d23bfb55124b9b54be913550487e	done	placement.bindEvent
 2026-06-11T10:38:25+00:00	api-reference/widgets/ui-interaction/call-card/disable-auto-close.md	fa52151542e47457b6a37f8d165fbb7fa06af4fff5536c5fd2670a2343923962	done	placement.call
 2026-06-11T10:38:26+00:00	api-reference/widgets/ui-interaction/call-card/enable-auto-close.md	d0f225692803a9aa7d200be2cd12a377b651a91f8222e218bb7a7dd67011c6c7	done	placement.call
+2026-06-11T10:48:40+00:00	api-reference/widgets/ui-interaction/call-card/get-status.md	9454d1c5714278f1799b28160b2a021bd0c3f7c0b08da0a78c390ab395829772	done	placement.call
+2026-06-11T10:48:41+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-close.md	d40e24478dc944ed08d7d51a373d934260fc478e31e7a6b1e5c5da2d3900742e	done	placement.call
+2026-06-11T10:48:42+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-get-list-ui-states.md	cbb9a236ba399686cace7b6ad3a6494659ad2cfca82bab0ce691d8c80eb9e1d7	done	placement.call
+2026-06-11T10:48:43+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-set-card-title.md	4810be6949a6ef8287466670d0120c497ed0fda3246a4aa0a1ea479ad4d2b2d8	done	placement.call
+2026-06-11T10:48:44+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-set-hold.md	f5e4d4805884990ca8c1eb4588fc83f3073f59130201aa05022fb89cf9d74230	done	placement.call
+2026-06-11T10:48:44+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-set-mute.md	1bc50509d64a584131fc047accd3a33e5285eb28ed4ad972d013cf02d1017afe	done	placement.call
+2026-06-11T10:48:45+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-set-status-text.md	dafad520731ce9b7bd53d30cf305f0ce6802008c3972f5fd83cc568af3beea60	done	placement.call
+2026-06-11T10:48:46+00:00	api-reference/widgets/ui-interaction/page-background-worker/call-card-set-ui-state.md	56f38dded249d20dc9f8472c5940195b4b40f485a6656784733f12a94fcf5fc9	done	placement.call
+2026-06-11T10:48:47+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/add-comment-button-click.md	c1151ae1292a989de34a4a9cc7027dd0e8030163918ea4c527afb039932cc7c6	done	placement.bindEvent
+2026-06-11T10:48:48+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/answer-button-click.md	21bb9bafcf10652daa53143d654b91b7357c5bbacd8f704ac318bf57061813cf	done	placement.bindEvent
+2026-06-11T10:48:49+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/cancel-transfer-button-click.md	4bc9454d79dacc5f60d002881fed5d024230837cd609cf5edfeb3834c45762aa	done	placement.bindEvent
+2026-06-11T10:48:50+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/close-button-click.md	e74249c7d89284aac6be91f3a4efc2fb22e7fea30f6fdf6a9e82397d29cb6fc0	done	placement.bindEvent
