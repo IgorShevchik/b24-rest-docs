@@ -286,6 +286,7 @@ date	file	sha256	status	method
 2026-06-11T09:41:05+00:00	api-reference/chats/departments/im-department-colleagues-list.md	9e79d12361008fdc3ca55c9f18f4227d2f335b24cbed110343cb5f5c7b4db39d	done	im.department.colleagues.list
 2026-06-11T09:41:05+00:00	api-reference/chats/departments/im-department-employees-get.md	453013f270d269f5653b209880a9d7f55643aca91ce841b33d429fcd80138052	done	im.department.employees.get
 2026-06-11T09:51:43+00:00	api-reference/chats/departments/im-department-get.md	d44d035adb059a1e1626602d8a0dc5eec38c240fb27a367f407bcd91580ee47f	done	im.department.get
+2026-06-11T09:58:48+00:00	api-reference/chats/departments/im-department-managers-get.md	0995499cc9950e982bdd59ce7ca2b8715bb1de2bbed880ac255bad3cb1feae80	done	im.department.managers.get
 2026-06-11T09:51:44+00:00	api-reference/chats/files/im-disk-file-commit.md	f48607fe055a6da00ad65aed4b02cde83e0494e88083afe41df686d7dc239bcb	done	im.disk.file.commit
 2026-06-11T09:51:45+00:00	api-reference/chats/files/im-disk-file-delete.md	7c900df286f849a1e2a06fdc09f70594de0d58d4673b9d58d2c6611e16beca5a	done	im.disk.file.delete
 2026-06-11T09:51:46+00:00	api-reference/chats/files/im-disk-file-save.md	c2b6393ac295f8cfdc68f3fa750b9ef888325e56b718b86f2d59b4ed4484c7c0	done	im.disk.file.save
@@ -296,6 +297,17 @@ date	file	sha256	status	method
 2026-06-11T09:51:50+00:00	api-reference/chats/im-dialog-get.md	e98ea2b4395a24f7542ffd466e95b0d86409e19213bbc4df8c30982dd6328f77	done	im.dialog.get
 2026-06-11T09:51:51+00:00	api-reference/chats/im-recent-get.md	0544dcfc0ecbbc7b0c127463b78ac88f52c4645708c5a0f5680b26775fe6dbe1	done	im.recent.get
 2026-06-11T09:51:52+00:00	api-reference/chats/im-recent-list.md	81d9688ee510981da94dda6c54b10f2f4004bee37d20e06ba7d95ba0f44c3de5	done	im.recent.list
+2026-06-11T09:58:49+00:00	api-reference/chats/im-revision-get.md	26675d26b052223470352c2bd1505c12ef00d1c28bf4eb75d16d23b1503b421c	done	im.revision.get
+2026-06-11T09:58:50+00:00	api-reference/chats/messages/attachments.md	2cae6a7f2ccb762a004ddc0e85d39047aad463ad1965e78d6a7694b3dd9b4c9c	done	im.message.add
+2026-06-11T09:58:50+00:00	api-reference/chats/messages/formatting.md	01dac6ef800e9527f30d9b2883c5e960f7a9de19b2ba9e3f89f38c84997639f0	done	im.message.add
+2026-06-11T09:58:51+00:00	api-reference/chats/messages/im-dialog-messages-get.md	8d9052c5ebd299c7eca334ce27b48c024839fbaa4f06dc2bf3bf89d62bfce8fe	done	im.dialog.messages.get
+2026-06-11T09:58:52+00:00	api-reference/chats/messages/im-dialog-messages-search.md	f1ba7c20f5235fffeb3f1296c0230d0a4c08c610fddd9471c11d8850e70bfd7b	done	im.dialog.messages.search
+2026-06-11T09:58:53+00:00	api-reference/chats/messages/im-dialog-read.md	f6e12ce7d3b1c6eca130a76aab509e188fc7f0eb12ebae639627209bd759760e	done	im.dialog.read
+2026-06-11T09:58:54+00:00	api-reference/chats/messages/im-dialog-unread.md	abc31544d333604e1b07dc1d7aaeac3b168407281aa962fb8a7c4e7ef1804642	done	im.dialog.unread
+2026-06-11T09:58:55+00:00	api-reference/chats/messages/im-dialog-writing.md	ea15239383264f1f63a174616d535a89b1b092ab2aff5b3ee6209ab971e46876	done	im.dialog.writing
+2026-06-11T09:58:56+00:00	api-reference/chats/messages/im-message-add.md	404845e57195c3455ee8089fd668f4f7bd76bfca9cdce70da2f1a6d04541fad6	done	im.message.add
+2026-06-11T09:58:56+00:00	api-reference/chats/messages/im-message-command.md	3970e905586abefb099a0da2f60f8b0eee41676f7bc8fa420fcc214023b68402	done	im.message.command
+2026-06-11T09:58:57+00:00	api-reference/chats/messages/im-message-delete.md	b6bf8da218884cad19bde960a7e7eceffb98ef39d07bb27fb2d7fcdf8af57fe4	done	im.message.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-add.md	6852f6b4c78c434ce1002002e395b94c09e46d94c0ea55825a48f9db7c9f37c7	done	crm.company.contact.add
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-delete.md	4a151a08c2516bd31a54d0c93dcde350d60737d4781e818c9b28e55350e77c36	done	crm.company.contact.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-fields.md	39c000ab2b800705d533aa3312e4f4de9e439ca90b1fe3dd9003350916ee4fe2	done	crm.company.contact.fields
