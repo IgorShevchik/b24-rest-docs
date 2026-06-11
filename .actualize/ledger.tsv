@@ -1045,3 +1045,15 @@ date	file	sha256	status	method
 2026-06-11T10:48:48+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/answer-button-click.md	21bb9bafcf10652daa53143d654b91b7357c5bbacd8f704ac318bf57061813cf	done	placement.bindEvent
 2026-06-11T10:48:49+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/cancel-transfer-button-click.md	4bc9454d79dacc5f60d002881fed5d024230837cd609cf5edfeb3834c45762aa	done	placement.bindEvent
 2026-06-11T10:48:50+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/close-button-click.md	e74249c7d89284aac6be91f3a4efc2fb22e7fea30f6fdf6a9e82397d29cb6fc0	done	placement.bindEvent
+2026-06-11T10:57:23+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/complete-transfer-button-click.md	efffbc0f0bc9a414d2acf8e46eda9f4d09b8e5270330849d9af446f94d15159f	done	placement.bindEvent
+2026-06-11T10:57:24+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/dialpad-button-click.md	5bdf1ab368f607df33de27196817ad20b6871986eadb151ff7e3716bfee0a82d	done	placement.bindEvent
+2026-06-11T10:57:25+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/entity-changed.md	2d9be5dbf80ae8da740d022e739dacfba81c92017572d80d656363f079761bc3	done	placement.bindEvent
+2026-06-11T10:57:26+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/hang-up-button-click.md	b795d399cfd4b47362eb90117dc92d5744767bee95c36cf181ce46d89e3f9f64	done	placement.bindEvent
+2026-06-11T10:57:27+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/hold-button-click.md	5400814d413d8f2660b516076ec89dcd900ec683d1a3075f91fd25ee779316a4	done	placement.bindEvent
+2026-06-11T10:57:27+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/initialized.md	06b2ef2f95d4630c249842c03291958147499b52785056dc936ca5ff145160ad	done	placement.bindEvent
+2026-06-11T10:57:28+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/make-call-button-click.md	c749728e004357a7f194dbd59b45a4ab3e9036f7c5bcf023daee4dd93be50b35	done	placement.bindEvent
+2026-06-11T10:57:29+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/mute-button-click.md	0302721bdeb430a96674a52aa7a923ae419b3a51e89d3b18456a1f839ee4f8cd	done	placement.bindEvent
+2026-06-11T10:57:30+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/next-button-click.md	acfa9a1be8c0fb8184418ddbb88acc22dc17fecb526d3a4ef74d2e580d809537	done	placement.bindEvent
+2026-06-11T10:57:31+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/notify-admin-button-click.md	863baf5b7aedfa4b23a7c5b30633ea5900e2cc80966fb1007105ce188f96fec7	done	placement.bindEvent
+2026-06-11T10:57:32+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/quality-meter-click.md	05054a1ad02607adc50c13e8d75eccd4a8339a78db81127d9426d48ff34209fe	done	placement.bindEvent
+2026-06-11T10:57:33+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/skip-button-click.md	fa278054dbe37dd2564db24e90e16fe04714a919f32456c7deb6f9438aca17e5	done	placement.bindEvent
