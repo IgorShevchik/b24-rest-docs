@@ -1021,3 +1021,15 @@ date	file	sha256	status	method
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-delete.md	e1bb49a05df02365abb245f570fd5b475d0e33c93174ba274155a8c6a5c94526	done	user.userfield.delete
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-list.md	cbea4b2a3f8a12714c062a8f0eead1d2237527f6f0fd60c505f01acca9c95c42	done	user.userfield.list
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-update.md	aec7ee0b90125594773d91e2f190776141bc04ef40877905fd6fe25cfc3b3c2b	done	user.userfield.update
+2026-06-11T10:38:16+00:00	api-reference/widgets/im/context-menu.md	3149595062119291589ad02ff98ecb82952e2e73839aad70618b3cb0b905a2b1	done	placement.bind
+2026-06-11T10:38:17+00:00	api-reference/widgets/im/sidebar.md	b3e597551c326ff2859c18c1e2b1d0d3c61114afd241d75f2588bf769d34d9cc	done	placement.bind
+2026-06-11T10:38:18+00:00	api-reference/widgets/im/textarea.md	9f25222634447d0774ac3cd7be348a11e0b5ef93b48bfa0e987ac841f8a51493	done	placement.bind
+2026-06-11T10:38:19+00:00	api-reference/widgets/placement-bind.md	725226400d056b1a67038c10722a19cf6fcee1fa2c925c960bbad231c24421b9	done	placement.bind
+2026-06-11T10:38:20+00:00	api-reference/widgets/placement-get.md	5deee39a4df8eeb85ebc21cd458fbb9fec951fd54d463e1f1b362d60b71b56b4	done	placement.get
+2026-06-11T10:38:21+00:00	api-reference/widgets/placement-list.md	424e526637eb774bd40232d1bf1773a24b334feddf5e1fe2488bafbf8e9075ee	done	placement.list
+2026-06-11T10:38:21+00:00	api-reference/widgets/placement-unbind.md	671739eccb6afe9c725a8d029b62921a4c7aa9b2e688eb34becfc7e09ac3eaf6	done	placement.unbind
+2026-06-11T10:38:22+00:00	api-reference/widgets/ui-interaction/call-card/call-card-before-close.md	7ca3b5715d722807f89fb9683a6cc351ac0e69ecc462b14310c1eda2daad17b6	done	placement.bindEvent
+2026-06-11T10:38:23+00:00	api-reference/widgets/ui-interaction/call-card/call-card-call-state-changed.md	2cc389e58f2f5e46e895ef7622e6970d6c2f955057bedffb5a4fe297aad9d601	done	placement.bindEvent
+2026-06-11T10:38:24+00:00	api-reference/widgets/ui-interaction/call-card/call-card-entity-changed.md	892adbc705adc9435bd5df5e111ec34c80a6d23bfb55124b9b54be913550487e	done	placement.bindEvent
+2026-06-11T10:38:25+00:00	api-reference/widgets/ui-interaction/call-card/disable-auto-close.md	fa52151542e47457b6a37f8d165fbb7fa06af4fff5536c5fd2670a2343923962	done	placement.call
+2026-06-11T10:38:26+00:00	api-reference/widgets/ui-interaction/call-card/enable-auto-close.md	d0f225692803a9aa7d200be2cd12a377b651a91f8222e218bb7a7dd67011c6c7	done	placement.call
