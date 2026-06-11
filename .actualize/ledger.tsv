@@ -1057,3 +1057,9 @@ date	file	sha256	status	method
 2026-06-11T10:57:31+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/notify-admin-button-click.md	863baf5b7aedfa4b23a7c5b30633ea5900e2cc80966fb1007105ce188f96fec7	done	placement.bindEvent
 2026-06-11T10:57:32+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/quality-meter-click.md	05054a1ad02607adc50c13e8d75eccd4a8339a78db81127d9426d48ff34209fe	done	placement.bindEvent
 2026-06-11T10:57:33+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/skip-button-click.md	fa278054dbe37dd2564db24e90e16fe04714a919f32456c7deb6f9438aca17e5	done	placement.bindEvent
+2026-06-11T11:01:29+00:00	api-reference/widgets/ui-interaction/page-background-worker/events/transfer-button-click.md	aaf332ed8b360eb7db722b2da2ad6b392ee9d39592cf3487d46917b472c57cf1	done	placement.bindEvent
+2026-06-11T11:01:30+00:00	api-reference/widgets/universal/background-worker.md	82768a03f25b78133a3418227028706182f4ba04f23aa6c88d2721248195255a	done	placement.bind
+2026-06-11T11:01:30+00:00	api-reference/widgets/user-field/userfieldtype-add.md	fbdf49ad2485655449f9021e7362bcfdbb7838add0cf7b455faf574e07052af7	done	userfieldtype.add
+2026-06-11T11:01:31+00:00	api-reference/widgets/user-field/userfieldtype-delete.md	bf9fcd3cde605a67d1d8dd1fe2ed01bda9172b9576b3069f06d2d00fc84e40d2	done	userfieldtype.delete
+2026-06-11T11:01:32+00:00	api-reference/widgets/user-field/userfieldtype-list.md	79f31da771a9dfc55978e0313e842c263ea56e9d9cdc4952d710d9dc427ae122	done	userfieldtype.list
+2026-06-11T11:01:33+00:00	api-reference/widgets/user-field/userfieldtype-update.md	da28abcd56085e348d582dc214f46f318c76f289fde9dca2091c0f9917bdc053	done	userfieldtype.update
