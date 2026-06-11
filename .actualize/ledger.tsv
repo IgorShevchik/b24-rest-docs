@@ -247,6 +247,7 @@ date	file	sha256	status	method
 2026-06-11T05:52:48+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/revision-get.md	4f72260ebda8d927273c810dd6b83451358e3c97a8046c4af7e56f02e7e2cc1d	done	imbot.v2.Revision.get
 2026-06-11T05:52:48+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/ui/chat-input-action-notify.md	ef4c0b68f5e637b5301b4b36ce467b6beda512b1df5de7a0e4f4676c916809c0	done	imbot.v2.Chat.InputAction.notify
 2026-06-11T05:52:49+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/ui/chat-text-field-enabled.md	60ced3c8ccc49a78175d5bc11c8844c78fb421aeafbf172b552a4352e6f491af	done	imbot.v2.Chat.TextField.enabled
+2026-06-11T06:15:35+00:00	api-reference/chat-bots/outdated/bots/imbot-bot-list.md	9105792dea035b198543486ae0e80651b184932bba6a99255bf3c4eb186b6dc4	done	imbot.bot.list
 2026-06-11T05:52:50+00:00	api-reference/chat-bots/outdated/bots/imbot-register.md	0b01d356552dbd762685519248f4907a2ac71f11cc7b7d0e7f20c08a793aa527	done	imbot.register
 2026-06-11T05:52:51+00:00	api-reference/chat-bots/outdated/bots/imbot-unregister.md	2e60f4df76173d4987b7895c537406075da6ae6c2b755b47e43792a4563a19bd	done	imbot.unregister
 2026-06-11T05:52:51+00:00	api-reference/chat-bots/outdated/bots/imbot-update.md	d53699a8c4470b71a11d0697f6708447bde468ce5eb8cc012e7f2ab6f88b7f77	done	imbot.update
