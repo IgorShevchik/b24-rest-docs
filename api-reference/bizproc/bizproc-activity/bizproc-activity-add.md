@@ -291,70 +291,161 @@
     https://**put_your_bitrix24_address**/rest/bizproc.activity.add
     ```
 
-- JS
+- JS (TS)
 
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    ```js
-    try
-    {
-    	const response = await $b24.callMethod(
-    		'bizproc.activity.add',
-    		{
-    			'CODE': 'md5_action',
-    			'HANDLER': 'https://your_domain/ping.php',
-    			'AUTH_USER_ID': 1,
-    			'USE_SUBSCRIPTION': 'Y',
-    			'NAME': {
-    				'ru': 'MD5 генератор',
-    				'en': 'MD5 generator'
-    			},
-    			'DESCRIPTION': {
-    				'ru': 'Действие возвращает MD5 хеш от входящего параметра',
-    				'en': 'Activity returns MD5 hash of input parameter'
-    			},
-    			'PROPERTIES': {
-    				'inputString': {
-    					'Name': {
-    						'ru': 'Входящая строка',
-    						'en': 'Input string'
-    					},
-    					'Description': {
-    						'ru': 'Введите строку, которую вы хотите хешировать',
-    						'en': 'Input string for hashing'
-    					},
-    					'Type': 'string',
-    					'Required': 'Y',
-    					'Multiple': 'N',
-    					'Default': '{=Document:NAME}'
-    				}
-    			},
-    			'RETURN_PROPERTIES': {
-    				'outputString': {
-    					'Name': {
-    						'ru': 'MD5',
-    						'en': 'MD5'
-    					},
-    					'Type': 'string',
-    					'Multiple': 'N',
-    					'Default': null
-    				}
-    			},
-    			'DOCUMENT_TYPE': ['lists', 'BizprocDocument', 'iblock_164'],
-    			'FILTER': {
-    				INCLUDE: [
-    					['lists']
-    				]
-    			}
-    		}
-    	);
-    	
-    	const result = response.getData().result;
-    	alert("Success: " + result);
+    declare const $b24: B24Frame
+
+    try {
+      const response = await $b24.actions.v2.call.make<boolean>({
+        method: 'bizproc.activity.add',
+        params: {
+          CODE: 'md5_action',
+          HANDLER: 'https://your_domain/ping.php',
+          AUTH_USER_ID: 1,
+          USE_SUBSCRIPTION: 'Y',
+          NAME: {
+            ru: 'MD5 генератор',
+            en: 'MD5 generator',
+          },
+          DESCRIPTION: {
+            ru: 'Действие возвращает MD5 хеш от входящего параметра',
+            en: 'Activity returns MD5 hash of input parameter',
+          },
+          PROPERTIES: {
+            inputString: {
+              Name: {
+                ru: 'Входящая строка',
+                en: 'Input string',
+              },
+              Description: {
+                ru: 'Введите строку, которую вы хотите хешировать',
+                en: 'Input string for hashing',
+              },
+              Type: 'string',
+              Required: 'Y',
+              Multiple: 'N',
+              Default: '{=Document:NAME}',
+            },
+          },
+          RETURN_PROPERTIES: {
+            outputString: {
+              Name: {
+                ru: 'MD5',
+                en: 'MD5',
+              },
+              Type: 'string',
+              Multiple: 'N',
+              Default: null,
+            },
+          },
+          DOCUMENT_TYPE: ['lists', 'BizprocDocument', 'iblock_164'],
+          FILTER: {
+            INCLUDE: [
+              ['lists'],
+            ],
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Activity added successfully:', result)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
     }
-    catch( error )
-    {
-    	alert("Error: " + error);
-    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function addBizprocActivity() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'bizproc.activity.add',
+            params: {
+              CODE: 'md5_action',
+              HANDLER: 'https://your_domain/ping.php',
+              AUTH_USER_ID: 1,
+              USE_SUBSCRIPTION: 'Y',
+              NAME: {
+                ru: 'MD5 генератор',
+                en: 'MD5 generator',
+              },
+              DESCRIPTION: {
+                ru: 'Действие возвращает MD5 хеш от входящего параметра',
+                en: 'Activity returns MD5 hash of input parameter',
+              },
+              PROPERTIES: {
+                inputString: {
+                  Name: {
+                    ru: 'Входящая строка',
+                    en: 'Input string',
+                  },
+                  Description: {
+                    ru: 'Введите строку, которую вы хотите хешировать',
+                    en: 'Input string for hashing',
+                  },
+                  Type: 'string',
+                  Required: 'Y',
+                  Multiple: 'N',
+                  Default: '{=Document:NAME}',
+                },
+              },
+              RETURN_PROPERTIES: {
+                outputString: {
+                  Name: {
+                    ru: 'MD5',
+                    en: 'MD5',
+                  },
+                  Type: 'string',
+                  Multiple: 'N',
+                  Default: null,
+                },
+              },
+              DOCUMENT_TYPE: ['lists', 'BizprocDocument', 'iblock_164'],
+              FILTER: {
+                INCLUDE: [
+                  ['lists'],
+                ],
+              },
+            },
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Activity added successfully:', result)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', addBizprocActivity)
+    </script>
     ```
 
 - PHP
