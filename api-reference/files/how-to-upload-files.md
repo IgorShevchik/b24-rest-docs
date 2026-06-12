@@ -59,19 +59,86 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
-    
-        ```JavaScript
-        BX24.callMethod(
-            'documentgenerator.template.add',
-            {
-                fields: {
-                    name: "Пример шаблона",
-                    file: "base64_encoded_content_here", // Контент файла, закодированный в base64
-                    code: "example_template_code"
-                }
+    - JS (TS)
+
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        // Shape of the payload returned in result (match the "response handling" section of the page)
+        type DocumentGeneratorTemplateAddResult = {
+          id: number
+        }
+
+        try {
+          const response = await $b24.actions.v2.call.make<DocumentGeneratorTemplateAddResult>({
+            method: 'documentgenerator.template.add',
+            params: {
+              fields: {
+                name: 'Sample template',
+                file: 'base64_encoded_content_here', // File content encoded in base64
+                code: 'example_template_code',
+              },
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created template ID:', result.id)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addDocumentGeneratorTemplate() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'documentgenerator.template.add',
+                params: {
+                  fields: {
+                    name: 'Sample template',
+                    file: 'base64_encoded_content_here', // File content encoded in base64
+                    code: 'example_template_code',
+                  },
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created template ID:', result.id)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addDocumentGeneratorTemplate)
+        </script>
         ```
 
     - PHP
@@ -132,21 +199,85 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
-    
-        ```JavaScript
-        BX24.callMethod(
-            'bizproc.workflow.template.add',
-            {
-                DOCUMENT_TYPE: ['lists', 'BizprocDocument', 'iblock_164'],
-                NAME: 'App template', 
-                // Контент файла с шаблоном бизнес-процесса
-                TEMPLATE_DATA: [   
-                    "bp-379.bpt", // Первый элемент массива - имя файла
-                    "base64_encoded_content_here" // Второй элемент массива - контент файла, закодированный в base64
-                ]
+    - JS (TS)
+
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        try {
+          const response = await $b24.actions.v2.call.make<number>({
+            method: 'bizproc.workflow.template.add',
+            params: {
+              DOCUMENT_TYPE: ['lists', 'BizprocDocument', 'iblock_164'],
+              NAME: 'App template',
+              // Business process template file content
+              TEMPLATE_DATA: [
+                'bp-379.bpt', // First array element — file name
+                'base64_encoded_content_here', // Second array element — file content encoded in base64
+              ],
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created template ID:', result)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addBizprocTemplate() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'bizproc.workflow.template.add',
+                params: {
+                  DOCUMENT_TYPE: ['lists', 'BizprocDocument', 'iblock_164'],
+                  NAME: 'App template',
+                  // Business process template file content
+                  TEMPLATE_DATA: [
+                    'bp-379.bpt', // First array element — file name
+                    'base64_encoded_content_here', // Second array element — file content encoded in base64
+                  ],
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created template ID:', result)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addBizprocTemplate)
+        </script>
         ```
 
     - PHP
@@ -204,25 +335,102 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
-    
-        ```JavaScript
-        BX24.callMethod(
-            "catalog.product.add",
-            {
-                fields: {
-                    iblockId: '24', 
-                    name: "Пример товара",
-                    // Превью изображение товара, fileData - массив, где первый элемент - имя файла, второй - контент файла в формате base64
+    - JS (TS)
+
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        // Shape of the payload returned in result (match the "response handling" section of the page)
+        type CatalogProductAddResult = {
+          item: {
+            id: number
+            name: string
+            iblockId: number
+          }
+        }
+
+        try {
+          const response = await $b24.actions.v2.call.make<CatalogProductAddResult>({
+            method: 'catalog.product.add',
+            params: {
+              fields: {
+                iblockId: '24',
+                name: 'Sample product',
+                // Preview image; fileData is an array: first element is the file name, second is the base64 content
+                previewPicture: {
+                  fileData: [
+                    'example.jpg', // Image file name
+                    'base64_encoded_content_here', // Image content encoded in base64
+                  ],
+                },
+              },
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created product ID:', result.item.id, 'Name:', result.item.name)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addCatalogProduct() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'catalog.product.add',
+                params: {
+                  fields: {
+                    iblockId: '24',
+                    name: 'Sample product',
+                    // Preview image; fileData is an array: first element is the file name, second is the base64 content
                     previewPicture: {
-                        fileData: [
-                            "example.jpg", // Имя файла изображения
-                            "base64_encoded_content_here" // Контент изображения в формате base64
-                        ]
-                    }
-                }
+                      fileData: [
+                        'example.jpg', // Image file name
+                        'base64_encoded_content_here', // Image content encoded in base64
+                      ],
+                    },
+                  },
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created product ID:', result.item.id, 'Name:', result.item.name)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addCatalogProduct)
+        </script>
         ```
 
     - PHP
@@ -284,20 +492,91 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
-    
-        ```JavaScript
-        BX24.callMethod(
-            "disk.file.uploadversion",
-            {    
-                id: 4, // Идентификатор файла, для которого загружается новая версия
-                // Содержимое файла, который загружается как новая версия
-                fileContent: [
-                    '1.gif', // Первый элемент массива - имя файла
-                    'base64_encoded_content_here' // Второй элемент массива - контент файла в формате base64
-                ]
+    - JS (TS)
+
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        // Shape of the payload returned in result (match the "response handling" section of the page)
+        type DiskFileUploadVersionResult = {
+          file: {
+            id: number
+            name: string
+          }
+        }
+
+        try {
+          const response = await $b24.actions.v2.call.make<DiskFileUploadVersionResult>({
+            method: 'disk.file.uploadversion',
+            params: {
+              id: 4, // ID of the file to upload a new version for
+              // Content of the file being uploaded as a new version
+              fileContent: [
+                '1.gif', // First array element — file name
+                'base64_encoded_content_here', // Second array element — file content encoded in base64
+              ],
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Uploaded file version ID:', result.file.id, 'Name:', result.file.name)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function uploadFileVersion() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'disk.file.uploadversion',
+                params: {
+                  id: 4, // ID of the file to upload a new version for
+                  // Content of the file being uploaded as a new version
+                  fileContent: [
+                    '1.gif', // First array element — file name
+                    'base64_encoded_content_here', // Second array element — file content encoded in base64
+                  ],
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Uploaded file version ID:', result.file.id, 'Name:', result.file.name)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', uploadFileVersion)
+        </script>
         ```
 
     - PHP
@@ -355,33 +634,118 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
-    
-        ```JavaScript
-        BX24.callMethod(
-            'crm.item.add',
-            {
-                entityTypeId: 2, 
-                fields: {
-                    title: "Новая сделка (специально для примера REST методов)", 
-                    // Множественное поле с массивом файлов
-                    ufCrm_123456: [ 
-                        [
-                            "green_pixel.png", // Имя файла №1
-                            "base64_encoded_content_here" // Base64-контент первого файла
-                        ],
-                        [
-                            "blue_pixel.png", // Имя файла №2
-                            "base64_encoded_content_here" // Base64-контент второго файла
-                        ],
-                        [
-                            "red_pixel.png", // Имя файла №3
-                            "base64_encoded_content_here" // Base64-контент третьего файла
-                        ]
-                    ]
-                }
+    - JS (TS)
+
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        // Shape of the payload returned in result (match the "response handling" section of the page)
+        type CrmItemAddResult = {
+          item: {
+            id: number
+            title: string
+            entityTypeId: number
+          }
+        }
+
+        try {
+          const response = await $b24.actions.v2.call.make<CrmItemAddResult>({
+            method: 'crm.item.add',
+            params: {
+              entityTypeId: 2,
+              fields: {
+                title: 'New deal (example for REST method)',
+                // Multiple file field with an array of files
+                ufCrm_123456: [
+                  [
+                    'green_pixel.png', // File name #1
+                    'base64_encoded_content_here', // Base64 content of the first file
+                  ],
+                  [
+                    'blue_pixel.png', // File name #2
+                    'base64_encoded_content_here', // Base64 content of the second file
+                  ],
+                  [
+                    'red_pixel.png', // File name #3
+                    'base64_encoded_content_here', // Base64 content of the third file
+                  ],
+                ],
+              },
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created item ID:', result.item.id, 'Title:', result.item.title)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addCrmItem() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'crm.item.add',
+                params: {
+                  entityTypeId: 2,
+                  fields: {
+                    title: 'New deal (example for REST method)',
+                    // Multiple file field with an array of files
+                    ufCrm_123456: [
+                      [
+                        'green_pixel.png', // File name #1
+                        'base64_encoded_content_here', // Base64 content of the first file
+                      ],
+                      [
+                        'blue_pixel.png', // File name #2
+                        'base64_encoded_content_here', // Base64 content of the second file
+                      ],
+                      [
+                        'red_pixel.png', // File name #3
+                        'base64_encoded_content_here', // Base64 content of the third file
+                      ],
+                    ],
+                  },
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created item ID:', result.item.id, 'Title:', result.item.title)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addCrmItem)
+        </script>
         ```
 
     - PHP
@@ -443,36 +807,124 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
+    - JS (TS)
 
-        ```js
-        BX24.callMethod(
-            'catalog.product.add',
-            {
-                fields: {
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        // Shape of the payload returned in result (match the "response handling" section of the page)
+        type CatalogProductAddResult = {
+          item: {
+            id: number
+            name: string
+            iblockId: number
+          }
+        }
+
+        try {
+          const response = await $b24.actions.v2.call.make<CatalogProductAddResult>({
+            method: 'catalog.product.add',
+            params: {
+              fields: {
+                iblockId: 1,
+                name: 'Sample product',
+                PROPERTY_1077: [
+                  {
+                    value: {
+                      fileData: [
+                        'blue_pixel.txt', // File name
+                        'YmFzZSDRgtC10YHRgg==', // Base64 content
+                      ],
+                    },
+                  },
+                  {
+                    value: {
+                      fileData: [
+                        'red_pixel.txt', // File name
+                        'YmFzZSDRgtC10YHRgg==', // Base64 content
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created product ID:', result.item.id, 'Name:', result.item.name)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addCatalogProductWithFiles() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'catalog.product.add',
+                params: {
+                  fields: {
                     iblockId: 1,
-                    name: "Пример товара",
+                    name: 'Sample product',
                     PROPERTY_1077: [
-                        {
-                            value: {
-                                fileData: [
-                                    "blue_pixel.txt", // Имя файла
-                                    "YmFzZSDRgtC10YHRgg==" // Base64-контент
-                                ]
-                            }
+                      {
+                        value: {
+                          fileData: [
+                            'blue_pixel.txt', // File name
+                            'YmFzZSDRgtC10YHRgg==', // Base64 content
+                          ],
                         },
-                        {
-                            value: {
-                                fileData: [
-                                    "red_pixel.txt", // Имя файла
-                                    "YmFzZSDRgtC10YHRgg==" // Base64-контент
-                                ]
-                            }
-                        }
-                    ]
-                }
+                      },
+                      {
+                        value: {
+                          fileData: [
+                            'red_pixel.txt', // File name
+                            'YmFzZSDRgtC10YHRgg==', // Base64 content
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created product ID:', result.item.id, 'Name:', result.item.name)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addCatalogProductWithFiles)
+        </script>
         ```
 
     - PHP
@@ -539,37 +991,117 @@ $base64 = base64_encode($fileData); // Кодируем в base64
 
     {% list tabs %}
 
-    - JS
+    - JS (TS)
 
-        ```JavaScript
-        BX24.callMethod(
-            'crm.lead.add',
-            {
-                fields: {
-                    TITLE: "Пример лида",
+        ```ts
+        // This snippet is an ES module: top-level await requires type="module" or a bundler.
+        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+        import { Text } from '@bitrix24/b24jssdk'
+        import type { B24Frame } from '@bitrix24/b24jssdk'
+
+        declare const $b24: B24Frame
+
+        try {
+          const response = await $b24.actions.v2.call.make<number>({
+            method: 'crm.lead.add',
+            params: {
+              fields: {
+                TITLE: 'Sample lead',
+                UF_CRM_1711610801: [
+                  {
+                    fileData: [
+                      'file1.png', // File name
+                      'base64_1', // Base64 content
+                    ],
+                  },
+                  {
+                    fileData: [
+                      'file2.png', // File name
+                      'base64_2', // Base64 content
+                    ],
+                  },
+                  {
+                    fileData: [
+                      'file3.png', // File name
+                      'base64_3', // Base64 content
+                    ],
+                  },
+                ],
+              },
+            },
+            requestId: Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+          } else {
+            const result = response.getData()!.result
+            console.info('Created lead ID:', result)
+          }
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+        ```
+
+    - JS (UMD)
+
+        ```html
+        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+        <script>
+          async function addLead() {
+            try {
+              // Initialize the SDK inside a Bitrix24 frame
+              const $b24 = await B24Js.initializeB24Frame()
+
+              const response = await $b24.actions.v2.call.make({
+                method: 'crm.lead.add',
+                params: {
+                  fields: {
+                    TITLE: 'Sample lead',
                     UF_CRM_1711610801: [
-                        {
-                            fileData: [
-                                "file1.png", // Имя файла
-                                "base64_1" // Base64-контент
-                            ]
-                        },
-                        {
-                            fileData: [
-                                "file2.png", // Имя файла
-                                "base64_2" // Base64-контент
-                            ]
-                        },
-                        {
-                            fileData: [
-                                "file3.png", // Имя файла
-                                "base64_3" // Base64-контент
-                            ]
-                        }
-                    ]
-                }
+                      {
+                        fileData: [
+                          'file1.png', // File name
+                          'base64_1', // Base64 content
+                        ],
+                      },
+                      {
+                        fileData: [
+                          'file2.png', // File name
+                          'base64_2', // Base64 content
+                        ],
+                      },
+                      {
+                        fileData: [
+                          'file3.png', // File name
+                          'base64_3', // Base64 content
+                        ],
+                      },
+                    ],
+                  },
+                },
+                requestId: B24Js.Text.getUuidRfc4122()
+              })
+
+              // The payload is available only on a successful response
+              if (!response.isSuccess) {
+                console.error(response.getErrorMessages().join('; '))
+                return
+              }
+
+              const result = response.getData().result
+              console.info('Created lead ID:', result)
+            } catch (error) {
+              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+              console.error(error)
             }
-        );
+          }
+
+          document.addEventListener('DOMContentLoaded', addLead)
+        </script>
         ```
 
     - PHP
