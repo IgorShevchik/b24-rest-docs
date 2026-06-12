@@ -457,6 +457,10 @@ date	file	sha256	status	method
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-get.md	33bc392df1ea27753a21b9fac481ec843408a83ab062f44efd80b72678bf65c4	done	crm.status.get
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-list.md	a33083f4eec9a94467457957165feef92e4f9eb594d8995cbd0a7009b780fd39	done	crm.status.list
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-update.md	c381c05fbfa40ea47728ceb456d203092d1bb8785490188add0a686416d5b1a8	done	crm.status.update
+2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
+2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
+2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
+2026-06-12T09:17:42+00:00	api-reference/departments/department-update.md	7c3be7adecc70ccc493148910d1fac77788a536cf9d66b1519f94c2ba288147f	done	department.update
 2026-06-09T04:58:36+00:00	api-reference/disk/attached-object/disk-attached-object-get.md	36abdcd71fe9d0e309a6289de8747a3a6a303ed986c71a97a103528d4bd610ae	done	disk.attachedObject.get
 2026-06-09T04:58:37+00:00	api-reference/disk/file/disk-file-copy-to.md	0dc8c2c81a943441f1d1030ec39c5eca7f5e1e982dbff4ab37a732f6dd115357	done	disk.file.copyto
 2026-06-09T04:58:38+00:00	api-reference/disk/file/disk-file-delete.md	e6141df56cf66b56e62a7819c06a067ded6c7a8bf9498984d568a1d0bdbc67fa	done	disk.file.delete
