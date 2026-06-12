@@ -1024,6 +1024,10 @@ date	file	sha256	status	method
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-delete.md	e1bb49a05df02365abb245f570fd5b475d0e33c93174ba274155a8c6a5c94526	done	user.userfield.delete
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-list.md	cbea4b2a3f8a12714c062a8f0eead1d2237527f6f0fd60c505f01acca9c95c42	done	user.userfield.list
 2026-06-04T09:34:23+00:00	api-reference/user/userfields/user-userfield-update.md	aec7ee0b90125594773d91e2f190776141bc04ef40877905fd6fe25cfc3b3c2b	done	user.userfield.update
+2026-06-12T09:11:58+00:00	api-reference/vibe/landing-repowidget-debug.md	b9aefd5ac859893778ed1f946d202f5d68793e325fc4f56afb26b085a63773cf	done	landing.repowidget.debug
+2026-06-12T09:11:59+00:00	api-reference/vibe/landing-repowidget-get-list.md	0bdfd638e95c44f003f809f6909b5a681ad1bcba64645519d3b46c4e2ce92e49	done	landing.repowidget.getlist
+2026-06-12T09:12:00+00:00	api-reference/vibe/landing-repowidget-register.md	6aeb2cef683a8134289977434565c22d4c8218a834348572dfcc35eb719d91ac	done	landing.repowidget.register
+2026-06-12T09:12:00+00:00	api-reference/vibe/landing-repowidget-unregister.md	179bdc1be501c08b3937627a3455df21e668ae69907c40dbacac8e92d5c5ba1e	done	landing.repowidget.unregister
 2026-06-11T10:38:16+00:00	api-reference/widgets/im/context-menu.md	3149595062119291589ad02ff98ecb82952e2e73839aad70618b3cb0b905a2b1	done	placement.bind
 2026-06-11T10:38:17+00:00	api-reference/widgets/im/sidebar.md	b3e597551c326ff2859c18c1e2b1d0d3c61114afd241d75f2588bf769d34d9cc	done	placement.bind
 2026-06-11T10:38:18+00:00	api-reference/widgets/im/textarea.md	9f25222634447d0774ac3cd7be348a11e0b5ef93b48bfa0e987ac841f8a51493	done	placement.bind
