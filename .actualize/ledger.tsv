@@ -433,10 +433,14 @@ date	file	sha256	status	method
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/crm-contact-list.md	63c396516517d90eea5301c2f7b6fea514f14ceb060573fe0b60afd723c6fe16	done	crm.contact.list
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/crm-contact-update.md	055bb6257484164eefb2baefeccbdff657258bd8d65a34a3f06d53edc36989d5	done	crm.contact.update
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/custom-form/crm-contact-details-configuration-force-common-scope-for-all.md	bdc2537248544b08540b5c11b8ce6af57a225dcc2493f572a3ce2ae2b3338735	done	crm.contact.details.configuration.forceCommonScopeForAll
+2026-06-12T14:16:44+00:00	api-reference/crm/contacts/custom-form/crm-contact-details-configuration-get.md	aeb4cd2cc233ee0f9734787092b4f068b842765d868c71c004d77ff8d00894ae	done	crm.contact.details.configuration.get
+2026-06-12T14:16:46+00:00	api-reference/crm/contacts/custom-form/crm-contact-details-configuration-reset.md	072f2b2da2b79deeea74dda215df1e804352d029c6191b2cc83af0eda700a898	done	crm.contact.details.configuration.reset
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/custom-form/crm-contact-details-configuration-set.md	0037ef0fabacba1f83e4359908fd6f673cde7241e658e908265506133aa61db4	done	crm.contact.details.configuration.set
+2026-06-12T14:16:47+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-add.md	a6268fd3c69da787cd0085bae9a44afb3cc7aa45ecef68324f61bce66080c67a	done	crm.contact.userfield.add
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-delete.md	3db99ed6bbc941a6f657a3f23c9c0b52555c581f5d3e88298a8a1a6320a3e84b	done	crm.contact.userfield.delete
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-get.md	ac3b6c319aaeaf8768bb9783c413255f228d17ad18f3f54f4d66293ed4ed417a	done	crm.contact.userfield.get
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-list.md	7dceda35acba630043511d11b3da1f38f41420589cd853f2c0d0c41a9b8320fb	done	crm.contact.userfield.list
+2026-06-12T14:16:49+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-update.md	5570b9a2d3f5fd79a2fa805053425713d50ef4f4ecd5c88c722de238100e46a6	done	crm.contact.userfield.update
 2026-06-05T12:53:53+00:00	api-reference/crm/currency/crm-currency-add.md	eee78caae39e03f3f2b84c0bdea1a7a5e366bd6f6c2d6fb621e971f03c5b7c91	done	crm.currency.add
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-base-get.md	3c473942e14baab369612d45084f9ea5188b9369b30f8ec1a81698b7010d2aa4	done	crm.currency.base.get
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-base-set.md	852910654e3240e101ce688fba4d6f1e95438f41b991740b0f7c62fd79bdc08f	done	crm.currency.base.set
