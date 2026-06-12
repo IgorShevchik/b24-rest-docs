@@ -489,6 +489,12 @@ date	file	sha256	status	method
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-get.md	1314b14f10bb32e80afec164aac5cd4d20e06e8e3acf9aef80c6a147434bf940	done	crm.deal.userfield.get
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.md	ca41e8c61802335cfc430dc91878cb00913a3c5fc4150b0dd20401fcd5b9cae2	done	crm.deal.userfield.list
 2026-06-12T14:06:15+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-update.md	75f78864d459bde0f2aaaa6fc7638c16c928498f7fd6a56409bc9d158ae9765a	done	crm.deal.userfield.update
+2026-06-12T14:35:28+00:00	api-reference/crm/duplicates/crm-duplicate-find-by-comm.md	6e775edb46d9c95424bb070a2312a2c7d830670f495448f4a367e9eb7f67f5c0	done	crm.duplicate.findbycomm
+2026-06-12T14:35:29+00:00	api-reference/crm/duplicates/crm-entity-merge-batch.md	1e95496de1fa6d530604c17a97a04110356668b8f633807830e111391c7ce4a9	done	crm.entity.mergeBatch
+2026-06-12T14:35:30+00:00	api-reference/crm/duplicates/volatile-type/crm-duplicate-volatile-type-fields.md	23e94e410a8deb6904078bfa52811e4c28c0bf787b033d93c730cddb3b27b751	done	crm.duplicate.volatileType.fields
+2026-06-12T14:35:31+00:00	api-reference/crm/duplicates/volatile-type/crm-duplicate-volatile-type-list.md	f170ded35e6f6bc42dd4c5790a47ffb68693aa4407115d5ef087110a0bf5f440	done	crm.duplicate.volatileType.list
+2026-06-12T14:35:32+00:00	api-reference/crm/duplicates/volatile-type/crm-duplicate-volatile-type-register.md	564bf7e0f1e8e7e3bd4a5377ccbe197f124a624f96db33e53e5f2f5f15722083	done	crm.duplicate.volatileType.register
+2026-06-12T14:35:33+00:00	api-reference/crm/duplicates/volatile-type/crm-duplicate-volatile-type-unregister.md	a0c042d10e28f21966d3c7ddb121c6c154c6e071cd7238e35e868be7f0fad199	done	crm.duplicate.volatileType.unregister
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-add.md	9d98f536e86634f4799cbf05992cbade6af677e8351a49998dee1acc72b5fc16	done	crm.lead.add
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-delete.md	30daf5da4e8415c2c815733bb5e22ddcdb598826876cc621ffc8e44dc2119e4a	done	crm.lead.delete
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-fields.md	c93779f5b64669f131aca68b957139ed0c48d4c526363c30e0b5cdb8ba951848	done	crm.lead.fields
