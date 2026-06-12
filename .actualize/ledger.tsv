@@ -1075,6 +1075,9 @@ date	file	sha256	status	method
 2026-06-12T11:39:48+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-report-add.md	1f9b7c14abfa0a17b9d8c9909ceac7694e8ed6deae1739a3c4ea9e395ea5bbda	done	timeman.timecontrol.report.add
 2026-06-12T11:39:48+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-reports-get.md	6e0d8212e66e0037310982fd0f00ab60f57a7f568e5b9d1f11419eab4126e15a	done	timeman.timecontrol.reports.get
 2026-06-12T11:39:49+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-reports-settings-get.md	c51716cf08a9c70d095697e45821ade7be9816e52a1fee32df17eace45feaabd	done	timeman.timecontrol.reports.settings.get
+2026-06-12T11:42:01+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-reports-users-get.md	0460b8856d486499b1df062c1d71782d2c304564e40c20048e2fdd2182145b1d	done	timeman.timecontrol.reports.users.get
+2026-06-12T11:42:01+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-settings-get.md	9c5f1b4bc22be73dfd422b370c0a39b4cd7a8b80b0b7ada33cd662f53cad7936	done	timeman.timecontrol.settings.get
+2026-06-12T11:42:02+00:00	api-reference/timeman/timecontrol/timeman-timecontrol-settings-set.md	5fda2a76d8cd360e10e3fb8e704b02e33ba541b58aa72d0d98a1af5668754a6c	done	timeman.timecontrol.settings.set
 2026-06-12T09:04:22+00:00	api-reference/user-consent/user-consent-agreement-list.md	c1ce28b26146e318c54ee38e0f53d03a88cc98b5021d17e5a0c6f29605780204	done	userconsent.agreement.list
 2026-06-12T09:04:23+00:00	api-reference/user-consent/user-consent-agreement-text.md	ccded8a8223b9f889088163599d3ca394f6a67dc4f0ce9f8ab08ecaa82844af1	done	userconsent.agreement.text
 2026-06-12T09:04:23+00:00	api-reference/user-consent/user-consent-consent-add.md	f9066c0aca0b0a15aab19b69bd98dd67f05be804472d78ee132c251d2390dd0f	done	userconsent.consent.add
