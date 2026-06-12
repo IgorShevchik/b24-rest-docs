@@ -820,6 +820,11 @@ date	file	sha256	status	method
 2026-06-10T11:06:11+00:00	api-reference/sale/trade-binding/sale-trade-binding-list.md	5e8c7174783bb74efae966831a28f67808fe00fb7238036068fb810681981745	done	sale.tradeBinding.list
 2026-06-10T11:06:12+00:00	api-reference/sale/trade-platform/sale-trade-platform-get-fields.md	6814226e02c7f5be5617e071bb6aea8ed5f82c72584a36b949e5f5cfeee3a003	done	sale.tradePlatform.getFields
 2026-06-10T11:10:31+00:00	api-reference/sale/trade-platform/sale-trade-platform-list.md	ed79a2d08c16428be30a69a265d1e0402a6c777a0cdd08e85c241f6ef497a691	done	sale.tradePlatform.list
+2026-06-12T09:31:45+00:00	api-reference/sign/sign-b2e-company-provider-list.md	d48507e3a1420cc531be23422fc61fd8db07b78c7afd2f75826bd22fcc482d9d	done	sign.b2e.company.provider.list
+2026-06-12T09:31:46+00:00	api-reference/sign/sign-b2e-document-get.md	6961d86ee0f531f1f005a8ebd864c2de6a0575583e8007fbabc426a6663714ae	done	sign.b2e.document.get
+2026-06-12T09:31:46+00:00	api-reference/sign/sign-b2e-document-send.md	f4f6828f49e499fdefc50651c84e7a7422d0375a06722d245f2fa73a9688e1f5	done	sign.b2e.document.send
+2026-06-12T09:31:47+00:00	api-reference/sign/sign-b2e-mysafe-tail.md	68e51a8e866968933c9cd44565580677be3c1b8f7731de1bba3e23ac3a336fa3	done	sign.b2e.mysafe.tail
+2026-06-12T09:31:48+00:00	api-reference/sign/sign-b2e-personal-tail.md	af4ea6e85d9758c4825627d41b07ae2a5888082a490d0e2c83dd66378cf64ae6	done	sign.b2e.personal.tail
 2026-06-09T07:10:54+00:00	api-reference/sonet-group/members/sonet-group-user-add.md	e85d7d73e90639f63835e4e6ddfe3cbca249006ccae33a55dc770e9f87adcbff	done	sonet_group.user.add
 2026-06-09T07:10:55+00:00	api-reference/sonet-group/members/sonet-group-user-delete.md	8061e9729c506064ee80d8df4d7d18f1594938b3275ea2e6e0696f013ec75c10	done	sonet_group.user.delete
 2026-06-09T07:10:56+00:00	api-reference/sonet-group/members/sonet-group-user-get.md	f1800469ea3ad6481940a5f304b5a7a5dedbf463d8a3b534bb6f8da4b3b381fa	done	sonet_group.user.get
