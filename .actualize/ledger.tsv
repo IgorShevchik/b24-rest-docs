@@ -1038,6 +1038,15 @@ date	file	sha256	status	method
 2026-06-12T09:11:59+00:00	api-reference/vibe/landing-repowidget-get-list.md	0bdfd638e95c44f003f809f6909b5a681ad1bcba64645519d3b46c4e2ce92e49	done	landing.repowidget.getlist
 2026-06-12T09:12:00+00:00	api-reference/vibe/landing-repowidget-register.md	6aeb2cef683a8134289977434565c22d4c8218a834348572dfcc35eb719d91ac	done	landing.repowidget.register
 2026-06-12T09:12:00+00:00	api-reference/vibe/landing-repowidget-unregister.md	179bdc1be501c08b3937627a3455df21e668ae69907c40dbacac8e92d5c5ba1e	done	landing.repowidget.unregister
+2026-06-12T09:50:28+00:00	api-reference/vote/vote.attachedvote.get.md	eeb75b807d30d53e0dbc5f5bfede009aa661c2d986deb7596d723ab490615ba1	done	vote.AttachedVote.get
+2026-06-12T09:50:29+00:00	api-reference/vote/vote.attachedvote.getAnswerVoted.md	cdfac00f881735dc8d8cbd809812d21f3c47cc6c3d50035e67e0d1dd1edadb15	done	vote.AttachedVote.getAnswerVoted
+2026-06-12T09:50:29+00:00	api-reference/vote/vote.attachedvote.getMany.md	1dfe3d3a21298ef440d03cdf2bba9885c44b3c2e8b48f11bc5840c868e3f1f2d	done	vote.AttachedVote.getMany
+2026-06-12T09:50:30+00:00	api-reference/vote/vote.attachedvote.getWithVoted.md	e1b5215995bef7bd6e139c06d457efc3538e8609f0435303ea92f6675c337ebc	done	vote.AttachedVote.getWithVoted
+2026-06-12T09:50:31+00:00	api-reference/vote/vote.attachedvote.recall.md	b15c8e3007ae6235e32e6f728a4ef1126dfcd1001eb0e979740f07abecc5a675	done	vote.AttachedVote.recall
+2026-06-12T09:50:31+00:00	api-reference/vote/vote.attachedvote.resume.md	edbe46bbf9be5521606ebba9bb2184fe917f9476cb0004a3867dc4a89fb6f88c	done	vote.AttachedVote.resume
+2026-06-12T09:50:32+00:00	api-reference/vote/vote.attachedvote.stop.md	340d891f0464ce8ad778066c795815782cc627afd83aae4d6127c2439e363bcb	done	vote.AttachedVote.stop
+2026-06-12T09:50:33+00:00	api-reference/vote/vote.attachedvote.vote.md	bda09a383bf74c2b5074ade8b341efaedb4b171c4b435397a574fb28a99e75e1	done	vote.AttachedVote.vote
+2026-06-12T09:50:33+00:00	api-reference/vote/vote.integration.im.send.md	91968a5f2c8ded4d316ecede6320994e4576da259d464f06ede3aa3d96861fde	done	vote.Integration.Im.send
 2026-06-11T10:38:16+00:00	api-reference/widgets/im/context-menu.md	3149595062119291589ad02ff98ecb82952e2e73839aad70618b3cb0b905a2b1	done	placement.bind
 2026-06-11T10:38:17+00:00	api-reference/widgets/im/sidebar.md	b3e597551c326ff2859c18c1e2b1d0d3c61114afd241d75f2588bf769d34d9cc	done	placement.bind
 2026-06-11T10:38:18+00:00	api-reference/widgets/im/textarea.md	9f25222634447d0774ac3cd7be348a11e0b5ef93b48bfa0e987ac841f8a51493	done	placement.bind
