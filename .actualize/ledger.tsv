@@ -567,6 +567,16 @@ date	file	sha256	status	method
 2026-06-12T16:43:01+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-add.md	2aadca113ef72544ba3a0ae986eb32e8f5d185558aff9086cc07b058e8c7bee6	done	crm.activity.binding.add
 2026-06-12T16:43:02+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-delete.md	d63ce41d12e58de426cb28b4ef373614fa9d9d18b2cd8156ce79df99da18f7d7	done	crm.activity.binding.delete
 2026-06-12T16:43:03+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-list.md	5279d1bcb8923a7de6cc6dabc0e47c6e7a85bad9494b11f458dc6215666be42e	done	crm.activity.binding.list
+2026-06-12T16:59:33+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-move.md	9c6d4ef3af2bd8b1d0f785ff943210c7cf92627b6214a3dde28ed774700f2905	done	crm.activity.binding.move
+2026-06-12T16:59:34+00:00	api-reference/crm/timeline/activities/configurable/badges/crm-activity-badge-add.md	29eddd788f4ccdcb5b856dabc0c072d793533e627d2029237de9194c797ce7a4	done	crm.activity.badge.add
+2026-06-12T16:59:34+00:00	api-reference/crm/timeline/activities/configurable/badges/crm-activity-badge-delete.md	521afe9a11f15730fca0bd8cefaea0e541b537c422156ffba53f16d0494b0533	done	crm.activity.badge.delete
+2026-06-12T16:59:35+00:00	api-reference/crm/timeline/activities/configurable/badges/crm-activity-badge-get.md	6892153fa63929682b254301da547671c9f627d8c98e498e2289196dabf976ab	done	crm.activity.badge.get
+2026-06-12T16:59:36+00:00	api-reference/crm/timeline/activities/configurable/crm-activity-configurable-add.md	161647b33c2705de28dac8be8c1b67acc5b2164b92e328bef4f0bc6e1087a192	done	crm.activity.configurable.add
+2026-06-12T16:59:37+00:00	api-reference/crm/timeline/activities/configurable/crm-activity-configurable-get.md	5c568c85a65329dee7d9905b50f34f3c60c74cbb77e4c86ccdf25df8a494912d	done	crm.activity.configurable.get
+2026-06-12T16:59:38+00:00	api-reference/crm/timeline/activities/configurable/crm-activity-configurable-update.md	c20f581ce585c5b0717991ce977333be58d3b411274f54857cb6beffb87d9422	done	crm.activity.configurable.update
+2026-06-12T16:59:39+00:00	api-reference/crm/timeline/activities/layout-blocks/crm-activity-layout-blocks-delete.md	3198d3e2ea91432fcf0593398a0745ab6e36f2b7610bcca52ec7aefa61b3e0f8	done	crm.activity.layout.blocks.delete
+2026-06-12T16:59:40+00:00	api-reference/crm/timeline/activities/layout-blocks/crm-activity-layout-blocks-get.md	2362f08bfdd76bddb1bde1585a893c8bb9a04f8c5e217eba939986b14098b88e	done	crm.activity.layout.blocks.get
+2026-06-12T16:59:40+00:00	api-reference/crm/timeline/activities/layout-blocks/crm-activity-layout-blocks-set.md	54f6fe03ad276c3a566825212708e0688dadd5eefa51b0dcd02acbc7885ca68c	done	crm.activity.layout.blocks.set
 2026-06-12T14:08:40+00:00	api-reference/crm/tracking/crm-tracking-trace-add.md	99f7d4681a00e901639e60be4dce26c793a9321cce0b46cb7fb53c28fb788fc6	done	crm.tracking.trace.add
 2026-06-12T14:08:41+00:00	api-reference/crm/tracking/crm-tracking-trace-delete.md	85baf354b293118118eae843b2e34997da14dc7aed101b1a5fba77838ed27f8c	done	crm.tracking.trace.delete
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
