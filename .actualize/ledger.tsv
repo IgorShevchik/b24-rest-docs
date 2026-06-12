@@ -679,6 +679,15 @@ date	file	sha256	status	method
 2026-06-10T19:48:52+00:00	api-reference/landing/user-blocks/landing-repo-get-list.md	5f4c402774ec0f5093eca0248eab8ca374d955dd61858da0e348abcc8bc4199c	done	landing.repo.getList
 2026-06-10T19:48:52+00:00	api-reference/landing/user-blocks/landing-repo-register.md	d3008f8127f42f9a4a5e0490837a5e39f8b586dbac579291cc29f2a9d2f71d7a	done	landing.repo.register
 2026-06-10T19:48:53+00:00	api-reference/landing/user-blocks/landing-repo-unregister.md	521b5182196197b2d5e345da19da0ed02b7a14f6019ec5899d86232b45bb5332	done	landing.repo.unregister
+2026-06-12T10:23:54+00:00	api-reference/log/blogcomment/log-blogcomment-add.md	c6333bbd165563e50f652b24d68335bd8ea3f121d4fdd2995951a8195de170fd	done	log.blogcomment.add
+2026-06-12T10:23:54+00:00	api-reference/log/blogcomment/log-blogcomment-delete.md	84caccd210a6d850bd5e3f930e3dd3fde225aaadf26fffa961bd63908af3ab76	done	log.blogcomment.delete
+2026-06-12T10:23:54+00:00	api-reference/log/blogcomment/log-blogcomment-user-get.md	201090cdd6e93c4a94665779027f521f95b3688c823da7595973bf425d90e5d2	done	log.blogcomment.user.get
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-add.md	c197ed6c16a33a61e2c33bbcd7ed877a88e83454fb49d2e6b8ed7b92ad96fd89	done	log.blogpost.add
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-delete.md	bef6be1261e0bda08faa589a434d4f73a8bee29dec0054837ce9e6ede91f6564	done	log.blogpost.delete
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-get.md	7b22364241c74052f22c6b9180596b3c13de4b4f471ee75212b9fde2abfa4adf	done	log.blogpost.get
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-getusers-important.md	a3070d601bc353aa93d51ce1ec424bf0fc3dda9d229dbc63057dc3c7bc09e049	done	log.blogpost.getusers.important
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-share.md	f61f27299e161b53f1e70db47ec83ecd49a1c083da012850bb09c63d79ab4da3	done	log.blogpost.share
+2026-06-12T10:23:55+00:00	api-reference/log/log-blogpost-update.md	7274e8e24c108201bd7fb7c55bf9bdc03ed5b2ced3dea9d29977dd32b9e3f373	done	log.blogpost.update
 2026-06-12T09:35:09+00:00	api-reference/mailservice/mailservice-add.md	fd70f88eeaf033f4c2db33ebef0bff82c2929c1e9f39ef3e99e5799b54c755cd	done	mailservice.add
 2026-06-12T09:35:10+00:00	api-reference/mailservice/mailservice-delete.md	50efde5a2000d07cf527c8c2c7438bc5f37b0d7cbe1c5f66b20a3cc561817756	done	mailservice.delete
 2026-06-12T09:35:10+00:00	api-reference/mailservice/mailservice-fields.md	d918fba2cc2a46bd1f50e45669722c1e32a554e1f80ec2ddba456089beba08eb	done	mailservice.fields
