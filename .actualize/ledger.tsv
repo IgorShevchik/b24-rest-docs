@@ -14,6 +14,13 @@ date	file	sha256	status	method
 2026-06-12T12:23:39+00:00	api-reference/biconnector/dataset/biconnector-dataset-fields.md	36f9783be222fff4bf8e2c9b91215fe3b5e234517eb0f10ebca81f35fc10c7d3	done	biconnector.dataset.fields
 2026-06-12T12:23:40+00:00	api-reference/biconnector/dataset/biconnector-dataset-get.md	a2c2029caf3d3bcdcfd9885e4e83d31f80a2eb93c4b4387c61baecbaaf491a35	done	biconnector.dataset.get
 2026-06-12T12:23:40+00:00	api-reference/biconnector/dataset/biconnector-dataset-list.md	5e205f3397acc976e483936318a107a3096419fa0fd5eac787083f9735d97c8b	done	biconnector.dataset.list
+2026-06-12T12:29:34+00:00	api-reference/biconnector/dataset/biconnector-dataset-update.md	dba224fccc51a1d7a5d34721f67e611056b7bf2e374413c4c2529b28cafef0f8	done	biconnector.dataset.update
+2026-06-12T12:29:34+00:00	api-reference/biconnector/source/biconnector-source-add.md	507417cf9e454d52a8f46e37ed65d9c3b34957a79de5e0803ac3612e759de7e1	done	biconnector.source.add
+2026-06-12T12:29:35+00:00	api-reference/biconnector/source/biconnector-source-delete.md	51a5fa8900559d434e78164d100f634f253776f36430030156e4e7bff00fdee5	done	biconnector.source.delete
+2026-06-12T12:29:36+00:00	api-reference/biconnector/source/biconnector-source-fields.md	113f86c1577276614b37bd519c998bc762c88af4fcafc262881b473054cd8d00	done	biconnector.source.fields
+2026-06-12T12:29:36+00:00	api-reference/biconnector/source/biconnector-source-get.md	c1e3e1ada6f7a41a47a36bcf9fbb34e0de51e92c66820e312480385514ebe528	done	biconnector.source.get
+2026-06-12T12:29:37+00:00	api-reference/biconnector/source/biconnector-source-list.md	6c4292d085702ccb3438a6b0711b349dcd893cfb6ef461543d0ebfcb7079f055	done	biconnector.source.list
+2026-06-12T12:29:38+00:00	api-reference/biconnector/source/biconnector-source-update.md	6194391841d27ac4d7e802d34f369f71c3ded490f7254cd8294e3a03700827bf	done	biconnector.source.update
 2026-06-09T06:16:01+00:00	api-reference/booking/booking-v1-clienttype-list.md	4f4e1665033199ad83592c67dd181f8a4c1aff7cec206ca0717893de01c6865e	done	booking.v1.clienttype.list
 2026-06-09T06:16:02+00:00	api-reference/booking/booking/booking-v1-booking-add.md	fda05b5bbc3672d704860e97cb23482c07277ae083c444045f3c4861058cfd46	done	booking.v1.booking.add
 2026-06-09T06:16:03+00:00	api-reference/booking/booking/booking-v1-booking-createfromwaitlist.md	c193e38b5ec1128cb5f89230943ac3a9c7f22296298cafe96ceb7f2ce5b55ed5	done	booking.v1.booking.createfromwaitlist
