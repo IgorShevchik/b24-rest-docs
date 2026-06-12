@@ -563,6 +563,7 @@ date	file	sha256	status	method
 2026-06-12T16:42:58+00:00	api-reference/crm/timeline/activities/activity-base/crm-activity-delete.md	e3cd48bd87e338b47fd5a866c7295b4be8e4626cce248f5b4d5f562e7642793d	done	crm.activity.delete
 2026-06-12T16:42:59+00:00	api-reference/crm/timeline/activities/activity-base/crm-activity-fields.md	e60ba8c9107d5e05ab95c5b219ce3d274e3430bb6ebb393d68d8b28c98b7a5bf	done	crm.activity.fields
 2026-06-12T16:42:59+00:00	api-reference/crm/timeline/activities/activity-base/crm-activity-get.md	5e80ee6ab43414096ebf4f994ef34a7b5e9b39271e286ff271568fe5f026b303	done	crm.activity.get
+2026-06-12T17:21:15+00:00	api-reference/crm/timeline/activities/activity-base/crm-activity-list.md	ac1709597291c3a799fa04a6aec40e929a8abe2b9aa9e8d4a5c97584e07df1b3	done	crm.activity.list
 2026-06-12T16:43:00+00:00	api-reference/crm/timeline/activities/activity-base/crm-activity-update.md	5d0c645e7b0ed4bb6096448a401d376fdf18c1d5f8f5d276cf3f9631bb6866ec	done	crm.activity.update
 2026-06-12T16:43:01+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-add.md	2aadca113ef72544ba3a0ae986eb32e8f5d185558aff9086cc07b058e8c7bee6	done	crm.activity.binding.add
 2026-06-12T16:43:02+00:00	api-reference/crm/timeline/activities/binding/crm-activity-binding-delete.md	d63ce41d12e58de426cb28b4ef373614fa9d9d18b2cd8156ce79df99da18f7d7	done	crm.activity.binding.delete
@@ -588,6 +589,14 @@ date	file	sha256	status	method
 2026-06-12T17:11:28+00:00	api-reference/crm/timeline/activities/types/crm-activity-type-delete.md	c9302c7d3d12fec383f6833ffa4fbdc87561ce38bf6b1923f3030fd4d6181916	done	crm.activity.type.delete
 2026-06-12T17:11:29+00:00	api-reference/crm/timeline/activities/types/crm-activity-type-list.md	61a75c6590683b46a6ac47263746539e5405ebfd174c496447bbf92cdea75851	done	crm.activity.type.list
 2026-06-12T17:11:30+00:00	api-reference/crm/timeline/bindings/crm-timeline-bindings-bind.md	0b6f9ecfb5d6582ca5f3a693afd037d8a29ab8f13b29134095150e4ca780e5d8	done	crm.timeline.bindings.bind
+2026-06-12T17:21:16+00:00	api-reference/crm/timeline/bindings/crm-timeline-bindings-fields.md	b5697480e131d12f96c4a0c8bd8c0598d97ff9cacdce71d9eb275531d34a3707	done	crm.timeline.bindings.fields
+2026-06-12T17:21:17+00:00	api-reference/crm/timeline/bindings/crm-timeline-bindings-list.md	bdcc855b8dfc4f174ba361ec78fcab914ca2091eabdaec457a74b53b6059548a	done	crm.timeline.bindings.list
+2026-06-12T17:21:17+00:00	api-reference/crm/timeline/bindings/crm-timeline-bindings-unbind.md	bd65a238ee9ccae1bb9280407837a4f3780403fe0d9f24b2f013b99f047e2bdb	done	crm.timeline.bindings.unbind
+2026-06-12T17:21:18+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-add.md	470046c5308bc2994f5313d2a956135665346be2634e8e781345294666d989ba	done	crm.timeline.comment.add
+2026-06-12T17:21:19+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-delete.md	463b6aba2faa8fcc59da6c2bfaa4c5fc028bd9fad0542ddc03719330d59c9056	done	crm.timeline.comment.delete
+2026-06-12T17:21:20+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-fields.md	25816db2509186c1a27f8bf32937737dba5615755b8455a2496d04f20695f7bb	done	crm.timeline.comment.fields
+2026-06-12T17:21:21+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-get.md	31f61fe7f147dd1ebdee8e1feb4d186838da01aea7ccb6850b2fc1d1ffad4e65	done	crm.timeline.comment.get
+2026-06-12T17:21:22+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-list.md	ac7897cc88c7b17187147f8d54a6ff4ac190df37bd5ea2266354ae3d56609a51	done	crm.timeline.comment.list
 2026-06-12T14:08:40+00:00	api-reference/crm/tracking/crm-tracking-trace-add.md	99f7d4681a00e901639e60be4dce26c793a9321cce0b46cb7fb53c28fb788fc6	done	crm.tracking.trace.add
 2026-06-12T14:08:41+00:00	api-reference/crm/tracking/crm-tracking-trace-delete.md	85baf354b293118118eae843b2e34997da14dc7aed101b1a5fba77838ed27f8c	done	crm.tracking.trace.delete
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
