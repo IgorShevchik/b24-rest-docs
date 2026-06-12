@@ -552,6 +552,11 @@ date	file	sha256	status	method
 2026-06-12T12:09:39+00:00	api-reference/entity/items/properties/entity-item-property-add.md	d3174fcb0fbcea5a10e07d5a1e74743719dbecc0582f67541427eacd2f6283f6	done	entity.item.property.add
 2026-06-12T12:09:40+00:00	api-reference/entity/items/properties/entity-item-property-delete.md	06be0c3e06441f6ffa4f5b1b6ff3a563b518a41350afe82051f3daaf03910a69	done	entity.item.property.delete
 2026-06-12T12:09:41+00:00	api-reference/entity/items/properties/entity-item-property-get.md	01947c5ecb713a9c338275b30f6a594bfa99adf12d3c0d204448d751aa6aea9f	done	entity.item.property.get
+2026-06-12T12:13:22+00:00	api-reference/entity/items/properties/entity-item-property-update.md	59fee9250061838116a85dd002b066ae98e9388f4106749ac5bbc7c03247de80	done	entity.item.property.update
+2026-06-12T12:13:22+00:00	api-reference/entity/sections/entity-section-add.md	19cbd8356a3a64f60f2da37316dc5206be1a46d6ddb33310757dba6fae8960c8	done	entity.section.add
+2026-06-12T12:13:23+00:00	api-reference/entity/sections/entity-section-delete.md	a7e723bf93703fe72ab926c69b682afa160a237666359bcf1398da49666db4a2	done	entity.section.delete
+2026-06-12T12:13:24+00:00	api-reference/entity/sections/entity-section-get.md	c3ddd7120f352f0b1f84150f0f6a548a4f028270caeefe0e6e275b1a13f0da37	done	entity.section.get
+2026-06-12T12:13:25+00:00	api-reference/entity/sections/entity-section-update.md	d206518484e34f794cc0b7a249e50af17ae702da37e9df3b489b65040e427365	done	entity.section.update
 2026-06-12T10:06:15+00:00	api-reference/events/event-bind.md	8844790e6b826bd168cef0b6f95514e80e6bf7f9ffd71ad8f607078125a9d5c7	done	event.bind
 2026-06-12T10:06:16+00:00	api-reference/events/event-get.md	360ba27c7c6f715a6c7379ae5924dc0fe58565eaf80116fc89879ba6f6b43a8a	done	event.get
 2026-06-12T10:06:17+00:00	api-reference/events/event-offline-clear.md	0c7c8f03bbb4cb9c19053e4b72ad2e68b8efb935212d18b1c9d69c4a3644d24c	done	event.offline.clear
