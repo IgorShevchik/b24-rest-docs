@@ -404,6 +404,13 @@ date	file	sha256	status	method
 2026-06-12T14:21:48+00:00	api-reference/crm/automation/triggers/crm-automation-trigger-delete.md	78d7995f1ecbed3cebf7f6632d21fd6591a0436a7dca7b8ef721691f044f7910	done	crm.automation.trigger.delete
 2026-06-12T14:21:49+00:00	api-reference/crm/automation/triggers/crm-automation-trigger-execute.md	f8df5be5500505e639e5ad47679282acf1213f2259542bdd57b45f591a9e7a61	done	crm.automation.trigger.execute
 2026-06-12T14:21:50+00:00	api-reference/crm/automation/triggers/crm-automation-trigger-list.md	6a9956409f24564435b30aa57bfe462d1778316bf50249ab30b4a2c6daee06a0	done	crm.automation.trigger.list
+2026-06-12T14:49:41+00:00	api-reference/crm/call-list/crm-calllist-add.md	d51efb2bceb04dda76f5a43636360268b0cdd0291dfd5af53d550eddbc9613a8	done	crm.calllist.add
+2026-06-12T14:49:41+00:00	api-reference/crm/call-list/crm-calllist-get.md	771b56dfb35b00d6341dd185c218dbc43ca01515ccd11eb5464a8bf9686c5937	done	crm.calllist.get
+2026-06-12T14:49:42+00:00	api-reference/crm/call-list/crm-calllist-items-get.md	53ab04f71c4d9db731128aad953eed8b43d25f698205c0eccfb379ebdf5e1cda	done	crm.calllist.items.get
+2026-06-12T14:49:43+00:00	api-reference/crm/call-list/crm-calllist-list.md	48d918698710f55b496030d07ae173938f10c9f2402f74278882238187cffa17	done	crm.calllist.list
+2026-06-12T14:49:44+00:00	api-reference/crm/call-list/crm-calllist-statuslist.md	e7db995cd263372dff8af59217d536a872187a5fd1734e07a39bc2ed3f5aed76	done	crm.calllist.statuslist
+2026-06-12T14:49:45+00:00	api-reference/crm/call-list/crm-calllist-update.md	32af2f091402fdb8898b1dc3549c3247b883ab04b7ecb5dbf8d8cb3208fa5024	done	crm.calllist.update
+2026-06-12T14:49:46+00:00	api-reference/crm/call-list/index.md	6aa0e9a7c78619274a6d601639ab6898a3f447d2909c2c6c94dddc59fd5b2aaf	done	crm.activity.list
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-add.md	6852f6b4c78c434ce1002002e395b94c09e46d94c0ea55825a48f9db7c9f37c7	done	crm.company.contact.add
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-delete.md	4a151a08c2516bd31a54d0c93dcde350d60737d4781e818c9b28e55350e77c36	done	crm.company.contact.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-fields.md	39c000ab2b800705d533aa3312e4f4de9e439ca90b1fe3dd9003350916ee4fe2	done	crm.company.contact.fields
