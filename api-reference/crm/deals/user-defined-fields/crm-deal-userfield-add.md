@@ -460,55 +460,141 @@
     https://**put_your_bitrix24_address**/rest/crm.deal.userfield.add
     ```
 
-- JS
+- JS (TS)
 
-    ```js
-    BX24.callMethod(
-        'crm.deal.userfield.add',
-        {
-            fields: {
-                LABEL: "Поле 'Привет, мир!'",
-                USER_TYPE_ID: "string",
-                FIELD_NAME: "HELLO_WORLD",
-                MULTIPLE: "Y",
-                MANDATORY: "Y",
-                SHOW_FILTER: "Y",
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
+    declare const $b24: B24Frame
+
+    try {
+      const response = await $b24.actions.v2.call.make<number>({
+        method: 'crm.deal.userfield.add',
+        params: {
+          fields: {
+            LABEL: "Field 'Hello, World!'",
+            USER_TYPE_ID: 'string',
+            FIELD_NAME: 'HELLO_WORLD',
+            MULTIPLE: 'Y',
+            MANDATORY: 'Y',
+            SHOW_FILTER: 'Y',
+            SETTINGS: {
+              DEFAULT_VALUE: 'Hello, World! Default value',
+              ROWS: 3,
+            },
+            SORT: 1000,
+            EDIT_IN_LIST: 'Y',
+            LIST_FILTER_LABEL: 'Hello, World! Filter',
+            LIST_COLUMN_LABEL: {
+              en: 'Hello, World! Column',
+              ru: 'Hello, World! Column',
+              de: 'Hello, World! Column',
+            },
+            EDIT_FORM_LABEL: {
+              en: 'Hello, World! Edit',
+              ru: 'Hello, World! Edit',
+              de: 'Hello, World! Edit',
+            },
+            ERROR_MESSAGE: {
+              en: 'Hello, World! Error',
+              ru: 'Hello, World! Error',
+              de: 'Hello, World! Error',
+            },
+            HELP_MESSAGE: {
+              en: 'Hello, World! Help',
+              ru: 'Hello, World! Help',
+              de: 'Hello, World! Help',
+            },
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Created user field ID:', result)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
+    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function addDealStringUserfield() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'crm.deal.userfield.add',
+            params: {
+              fields: {
+                LABEL: "Field 'Hello, World!'",
+                USER_TYPE_ID: 'string',
+                FIELD_NAME: 'HELLO_WORLD',
+                MULTIPLE: 'Y',
+                MANDATORY: 'Y',
+                SHOW_FILTER: 'Y',
                 SETTINGS: {
-                    DEFAULT_VALUE: "Привет, мир! Значение по умолчанию",
-                    ROWS: 3,
+                  DEFAULT_VALUE: 'Hello, World! Default value',
+                  ROWS: 3,
                 },
                 SORT: 1000,
-                EDIT_IN_LIST: "Y",
-                LIST_FILTER_LABEL: "Привет, мир! Фильтр",
+                EDIT_IN_LIST: 'Y',
+                LIST_FILTER_LABEL: 'Hello, World! Filter',
                 LIST_COLUMN_LABEL: {
-                    "en": "Hello, World! Column",
-                    "ru": "Привет, мир! Колонка",
-                    "de": "Hallo, Welt! Spalte"
+                  en: 'Hello, World! Column',
+                  ru: 'Hello, World! Column',
+                  de: 'Hello, World! Column',
                 },
                 EDIT_FORM_LABEL: {
-                    "en": "Hello, World! Edit",
-                    "ru": "Привет, мир! Редактировать",
-                    "de": "Hallo, Welt! Bearbeiten"
+                  en: 'Hello, World! Edit',
+                  ru: 'Hello, World! Edit',
+                  de: 'Hello, World! Edit',
                 },
                 ERROR_MESSAGE: {
-                    "en": "Hello, World! Error",
-                    "ru": "Привет, мир! Ошибка",
-                    "de": "Hallo, Welt! Fehler"
+                  en: 'Hello, World! Error',
+                  ru: 'Hello, World! Error',
+                  de: 'Hello, World! Error',
                 },
                 HELP_MESSAGE: {
-                    "en": "Hello, World! Help",
-                    "ru": "Привет, мир! Помощь",
-                    "de": "Hallo, Welt! Hilfe"
+                  en: 'Hello, World! Help',
+                  ru: 'Hello, World! Help',
+                  de: 'Hello, World! Help',
                 },
+              },
             },
-        },
-        (result) => {
-            result.error()
-                ? console.error(result.error())
-                : console.info(result.data())
-            ;
-        },
-    );
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Created user field ID:', result)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', addDealStringUserfield)
+    </script>
     ```
 
 - PHP
@@ -623,56 +709,143 @@
     https://**put_your_bitrix24_address**/rest/crm.deal.userfield.add
     ```
 
-- JS
+- JS (TS)
 
-    ```js
-    BX.rest.callMethod(
-        'crm.deal.userfield.add',
-        {
-            fields: {
-                LABEL: "Пользовательское поле (список)",
-                USER_TYPE_ID: "enumeration",
-                FIELD_NAME: "ENUMERATION_EXAMPLE",
-                MULTIPLE: "N",
-                MANDATORY: "N",
-                SHOW_FILTER: "Y",
+    ```ts
+    // This snippet is an ES module: top-level await requires type="module" or a bundler.
+    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
+    import { Text } from '@bitrix24/b24jssdk'
+    import type { B24Frame } from '@bitrix24/b24jssdk'
+
+    declare const $b24: B24Frame
+
+    try {
+      const response = await $b24.actions.v2.call.make<number>({
+        method: 'crm.deal.userfield.add',
+        params: {
+          fields: {
+            LABEL: 'Custom field (list)',
+            USER_TYPE_ID: 'enumeration',
+            FIELD_NAME: 'ENUMERATION_EXAMPLE',
+            MULTIPLE: 'N',
+            MANDATORY: 'N',
+            SHOW_FILTER: 'Y',
+            LIST: [
+              {
+                VALUE: 'List item #1',
+                DEF: 'Y',
+                XML_ID: 'XML_ID_1',
+                SORT: 100,
+              },
+              {
+                VALUE: 'List item #2',
+                XML_ID: 'XML_ID_2',
+                SORT: 200,
+              },
+              {
+                VALUE: 'List item #3',
+                XML_ID: 'XML_ID_3',
+                SORT: 300,
+              },
+              {
+                VALUE: 'List item #4',
+                XML_ID: 'XML_ID_4',
+                SORT: 400,
+              },
+            ],
+            SETTINGS: {
+              DISPLAY: 'UI',
+              LIST_HEIGHT: 2,
+            },
+            SORT: 2000,
+          },
+        },
+        requestId: Text.getUuidRfc4122()
+      })
+
+      // The payload is available only on a successful response
+      if (!response.isSuccess) {
+        console.error(response.getErrorMessages().join('; '))
+      } else {
+        const result = response.getData()!.result
+        console.info('Created user field ID:', result)
+      }
+    } catch (error) {
+      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+      console.error(error)
+    }
+    ```
+
+- JS (UMD)
+
+    ```html
+    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
+    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
+    <script>
+      async function addDealEnumerationUserfield() {
+        try {
+          // Initialize the SDK inside a Bitrix24 frame
+          const $b24 = await B24Js.initializeB24Frame()
+
+          const response = await $b24.actions.v2.call.make({
+            method: 'crm.deal.userfield.add',
+            params: {
+              fields: {
+                LABEL: 'Custom field (list)',
+                USER_TYPE_ID: 'enumeration',
+                FIELD_NAME: 'ENUMERATION_EXAMPLE',
+                MULTIPLE: 'N',
+                MANDATORY: 'N',
+                SHOW_FILTER: 'Y',
                 LIST: [
-                    {
-                        VALUE: "Элемент списка #1",
-                        DEF: "Y",
-                        XML_ID: "XML_ID_1",
-                        SORT: 100,
-                    },
-                    {
-                        VALUE: "Элемент списка #2",
-                        XML_ID: "XML_ID_2",
-                        SORT: 200,
-                    },
-                    {
-                        VALUE: "Элемент списка #3",
-                        XML_ID: "XML_ID_3",
-                        SORT: 300,
-                    },
-                    {
-                        VALUE: "Элемент списка #4",
-                        XML_ID: "XML_ID_4",
-                        SORT: 400,
-                    },
+                  {
+                    VALUE: 'List item #1',
+                    DEF: 'Y',
+                    XML_ID: 'XML_ID_1',
+                    SORT: 100,
+                  },
+                  {
+                    VALUE: 'List item #2',
+                    XML_ID: 'XML_ID_2',
+                    SORT: 200,
+                  },
+                  {
+                    VALUE: 'List item #3',
+                    XML_ID: 'XML_ID_3',
+                    SORT: 300,
+                  },
+                  {
+                    VALUE: 'List item #4',
+                    XML_ID: 'XML_ID_4',
+                    SORT: 400,
+                  },
                 ],
                 SETTINGS: {
-                    DISPLAY: "UI",
-                    LIST_HEIGHT: 2,
+                  DISPLAY: 'UI',
+                  LIST_HEIGHT: 2,
                 },
                 SORT: 2000,
+              },
             },
-        },
-        (result) => {
-            result.error()
-                ? console.error(result.error())
-                : console.info(result.data())
-            ;
-        },
-    );
+            requestId: B24Js.Text.getUuidRfc4122()
+          })
+
+          // The payload is available only on a successful response
+          if (!response.isSuccess) {
+            console.error(response.getErrorMessages().join('; '))
+            return
+          }
+
+          const result = response.getData().result
+          console.info('Created user field ID:', result)
+        } catch (error) {
+          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
+          console.error(error)
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', addDealEnumerationUserfield)
+    </script>
     ```
 
 - PHP
