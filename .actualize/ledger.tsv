@@ -357,6 +357,8 @@ date	file	sha256	status	method
 2026-06-12T10:48:12+00:00	api-reference/common/system/scope.md	3308efa116981be4549a2122f9de297e93538c2d268accb53fbaaf1ca0b7cc3a	done	scope
 2026-06-12T10:48:12+00:00	api-reference/common/system/server-time.md	bafab7c8192678118dc33421fd4e3d4fa4148fbf5ab84c49ae1730dfb27062f2	done	server.time
 2026-06-12T10:48:13+00:00	api-reference/common/users/profile.md	78e6165cd4c96fbcc29812997009c3a9951697fa825c9059175ac3a1da72dd87	done	profile
+2026-06-12T10:52:31+00:00	api-reference/common/users/user-access.md	7c516bb33f31bd56ef3950e6de5c81502ac0028b26e712bee9d8ca5d04483185	done	user.access
+2026-06-12T10:52:31+00:00	api-reference/common/users/user-admin.md	e55e94a24bb6371215708f10efe41f80559c729eb8a53fdfe984caf17e18506d	done	user.admin
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-add.md	6852f6b4c78c434ce1002002e395b94c09e46d94c0ea55825a48f9db7c9f37c7	done	crm.company.contact.add
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-delete.md	4a151a08c2516bd31a54d0c93dcde350d60737d4781e818c9b28e55350e77c36	done	crm.company.contact.delete
 2026-06-05T17:34:38+00:00	api-reference/crm/companies/contacts/crm-company-contact-fields.md	39c000ab2b800705d533aa3312e4f4de9e439ca90b1fe3dd9003350916ee4fe2	done	crm.company.contact.fields
