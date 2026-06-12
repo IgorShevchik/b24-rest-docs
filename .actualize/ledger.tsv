@@ -719,6 +719,9 @@ date	file	sha256	status	method
 2026-06-12T11:20:04+00:00	api-reference/pay-system/sale-pay-system-list.md	c7078c15048437abc834efc9d20772cd73552cdb8231d0f5c68308ed98d43102	done	sale.paysystem.list
 2026-06-12T11:20:05+00:00	api-reference/pay-system/sale-pay-system-pay-payment.md	ee92cf0c0d192ad5f2413a814868ad768496c4f585a8a54bccd9a3ad6adc5f66	done	sale.paysystem.pay.payment
 2026-06-12T11:20:05+00:00	api-reference/pay-system/sale-pay-system-settings-get.md	d9c16608a42a49fc8cf17f04843d1e504c9b5b201b18dad88786697f3ab71c1c	done	sale.paysystem.settings.get
+2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-payment-get.md	521e05d0a782570d1198dc56245df1c703e532db3501279ed70d5cdf39d9f48c	done	sale.paysystem.settings.payment.get
+2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-update.md	b8568f59881ef8deda3a7e9ac56f45c72542dcb7a5ff241304570640489f3b5f	done	sale.paysystem.settings.update
+2026-06-12T11:28:24+00:00	api-reference/pay-system/sale-pay-system-update.md	5fa6e157a7c57969c610fc37f82e7217fbb76aec93c1ac525fb9ef3c3e6dc122	done	sale.paysystem.update
 2026-06-10T08:54:51+00:00	api-reference/sale/basket-item/sale-basket-item-add-catalog-product.md	e53aae2063dbee38f0ce78b1bf9409fe182e20dd81e9da7811033a2b7212915e	done	sale.basketitem.addCatalogProduct
 2026-06-10T08:54:52+00:00	api-reference/sale/basket-item/sale-basket-item-add.md	cb42eb2df235ba19647c56cc50df7cde7286efea9d1e34aea7e829c1846f5e00	done	sale.basketitem.add
 2026-06-10T08:54:53+00:00	api-reference/sale/basket-item/sale-basket-item-delete.md	d0fd39311eb8775662885da16ee4ba462fdad8732930cec96df40bd73c4cadfd	done	sale.basketitem.delete
