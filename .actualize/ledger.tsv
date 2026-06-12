@@ -537,6 +537,7 @@ date	file	sha256	status	method
 2026-06-12T15:20:03+00:00	api-reference/crm/quote/user-field/crm-quote-user-field-delete.md	ad32ba85a18042fcfc9c7143b366ceeebcb5c4fce66d30ccf5842235db0dbb8f	done	crm.quote.userfield.delete
 2026-06-12T15:20:04+00:00	api-reference/crm/quote/user-field/crm-quote-user-field-get.md	5bb46f54fa8f081d10f04ba5f08ea90d2170dc944d62a9721dbfeb7ab46d4d08	done	crm.quote.userfield.get
 2026-06-12T15:20:05+00:00	api-reference/crm/quote/user-field/crm-quote-user-field-list.md	fab47e7d370a2a7dae929cc9ba6cc7b3d2cbd57388030bd68a00f72613d92969	done	crm.quote.userfield.list
+2026-06-12T15:22:57+00:00	api-reference/crm/quote/user-field/crm-quote-user-field-update.md	8cb9c36fa62e39d7708484fa99dfa90a7b9540d690265cfef5e80fa661f49fa4	done	crm.quote.userfield.update
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-add.md	6a48ef3959cfd1e097885cb5095d9f6e91ac03889b7548a4377f69203d717890	done	crm.status.add
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-delete.md	4c00e89d71556774de8544fcc371a8f0d477c829996d08ded506d6a128cb5d3c	done	crm.status.delete
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-entity-items.md	ed215e1c07221bc980deb322bc506312ea76347a09dfca74d4d2dc0e3167e35a	done	crm.status.entity.items
