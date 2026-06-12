@@ -475,9 +475,11 @@ date	file	sha256	status	method
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-get.md	4d1b718111581f520252b4c20e9215a0f054b1b277e63212a043c5ff990f6e70	done	crm.deal.recurring.get
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-list.md	c461f129076ab60a5ed5305206c4e719ac347a88d7f450d332cc6aac62314cab	done	crm.deal.recurring.list
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/recurring-deals/crm-deal-recurring-update.md	611e99dcfc23adf45f8e92b4ea4a735b50aec41606f2918857864e8cbbb3255b	done	crm.deal.recurring.update
+2026-06-12T14:06:14+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-add.md	474c7f4f3f79c2a8c27b452160acacf50a76afcb5467fc7124fa9bb72d86e93e	done	crm.deal.userfield.add
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-delete.md	3c2ebb6fbc468dcc32cfac9b2f77912e4ca43557c39636f11be3fad77f77d4e4	done	crm.deal.userfield.delete
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-get.md	1314b14f10bb32e80afec164aac5cd4d20e06e8e3acf9aef80c6a147434bf940	done	crm.deal.userfield.get
 2026-06-06T07:07:58+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-list.md	ca41e8c61802335cfc430dc91878cb00913a3c5fc4150b0dd20401fcd5b9cae2	done	crm.deal.userfield.list
+2026-06-12T14:06:15+00:00	api-reference/crm/deals/user-defined-fields/crm-deal-userfield-update.md	75f78864d459bde0f2aaaa6fc7638c16c928498f7fd6a56409bc9d158ae9765a	done	crm.deal.userfield.update
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-add.md	9d98f536e86634f4799cbf05992cbade6af677e8351a49998dee1acc72b5fc16	done	crm.lead.add
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-delete.md	30daf5da4e8415c2c815733bb5e22ddcdb598826876cc621ffc8e44dc2119e4a	done	crm.lead.delete
 2026-06-06T07:07:58+00:00	api-reference/crm/leads/crm-lead-fields.md	c93779f5b64669f131aca68b957139ed0c48d4c526363c30e0b5cdb8ba951848	done	crm.lead.fields
