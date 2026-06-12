@@ -527,6 +527,15 @@ date	file	sha256	status	method
 2026-06-09T05:32:38+00:00	api-reference/document-generator/templates/document-generator-template-get.md	a91e24ddcae61d5349325252d19ec8bbe909d682731ffcf2aac2c4aa20d45b72	done	documentgenerator.template.get
 2026-06-09T05:32:39+00:00	api-reference/document-generator/templates/document-generator-template-list.md	ddda5ba4c012b10f4edfd741d1fa75cce3a9850156b99739aba9d5ec518804c9	done	documentgenerator.template.list
 2026-06-09T05:32:40+00:00	api-reference/document-generator/templates/document-generator-template-update.md	8ad4d5684b41514bb06dae3ddc26fbc7a0f5b8920b104b87145b670bdfeec108	done	documentgenerator.template.update
+2026-06-12T10:06:15+00:00	api-reference/events/event-bind.md	8844790e6b826bd168cef0b6f95514e80e6bf7f9ffd71ad8f607078125a9d5c7	done	event.bind
+2026-06-12T10:06:16+00:00	api-reference/events/event-get.md	360ba27c7c6f715a6c7379ae5924dc0fe58565eaf80116fc89879ba6f6b43a8a	done	event.get
+2026-06-12T10:06:17+00:00	api-reference/events/event-offline-clear.md	0c7c8f03bbb4cb9c19053e4b72ad2e68b8efb935212d18b1c9d69c4a3644d24c	done	event.offline.clear
+2026-06-12T10:06:17+00:00	api-reference/events/event-offline-error.md	7c9e53718d4ad202d3a56257ada2a032e4e749342394e22d131235c3a600d4b5	done	event.offline.error
+2026-06-12T10:06:18+00:00	api-reference/events/event-offline-get.md	6f705b976819ec2996428d2d40921fcdab2d197df1fe47dd9261f74d1b2edd1d	done	event.offline.get
+2026-06-12T10:06:19+00:00	api-reference/events/event-offline-list.md	bed21be4ecd87db8ff984011d4560f18d3d7ee72c6ce1bb1abbc1c3c8a16c2e9	done	event.offline.list
+2026-06-12T10:06:19+00:00	api-reference/events/event-unbind.md	65c17fc8effc9e98a32a1468a20222cfadac6b063501ccec6a22f3294d7ef7a1	done	event.unbind
+2026-06-12T10:12:40+00:00	api-reference/events/offline-events.md	8ca034d73f9c4ef3b2931e30b265e1e8c19a181966a56411f5042e80cff23779	done	feature.get
+2026-06-12T10:06:21+00:00	api-reference/events/test-handler.md	fd2830c95246720f361621ad1fb659cc1814d18e310c212a320aa87c86ae4b82	done	event.bind
 2026-06-12T08:46:39+00:00	api-reference/files/how-to-upload-files.md	9b1ab581e6dfd11346f441ae07e60b7c16cb417e83e0d3acd621f7ec38119075	done	documentgenerator.template.add
 2026-06-09T07:56:44+00:00	api-reference/imopenlines/imconnector/imconnector-activate.md	ccbf7091079b2e1417110d56c633781b584532532f925787546a882bccc81ac7	done	imconnector.activate
 2026-06-09T07:56:45+00:00	api-reference/imopenlines/imconnector/imconnector-chat-name-set.md	4b3da1413943c6b63c06e57454fa6cb13c4cb443fec0544088f21893c235f7dd	done	imconnector.chat.name.set
