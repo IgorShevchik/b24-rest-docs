@@ -348,6 +348,7 @@ date	file	sha256	status	method
 2026-06-11T10:24:28+00:00	api-reference/chats/users/im-user-status-idle-start.md	3f5c6862930e443b5d74d240660a4f69f3b42ca3dd0edefb5f7fb5ed95e3dedc	done	im.user.status.idle.start
 2026-06-11T10:24:29+00:00	api-reference/chats/users/im-user-status-set.md	0323ad55df774e94f1b1a2162d6be0e88448d839d74c7380fffede5c739e161a	done	im.user.status.set
 2026-06-12T10:48:07+00:00	api-reference/common/settings/app-option-set.md	7a8afbce7b46f67fbee3355e01b6389acfc670d009f30e475d0969b02d73c102	done	app.option.set
+2026-06-12T10:57:15+00:00	api-reference/common/settings/user-option-get.md	d88b95ede9782110725ce9374bc7cced7adf56245bbc61ad5ea30550b0310c21	done	user.option.get
 2026-06-12T10:48:08+00:00	api-reference/common/settings/user-option-set.md	f10378fd2e6680eed3a713781b89d08ea4d6b15de4c784549f3e4de27e30d2ae	done	user.option.set
 2026-06-12T10:48:08+00:00	api-reference/common/system/access-name.md	490fb8ef01a87c0ad143890c21d13b036d18bb8abe3caa559aeee61ba2be3f65	done	access.name
 2026-06-12T10:48:09+00:00	api-reference/common/system/app-info.md	6e54f75eddee43d8c57ede61abad4bdd110938b659eafd3950780f3493dcdae1	done	app.info
