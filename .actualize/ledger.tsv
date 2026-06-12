@@ -41,6 +41,8 @@ date	file	sha256	status	method
 2026-06-04T14:08:35+00:00	api-reference/calendar/calendar-event/calendar-event-add.md	efa97f93434cd9988cb46bcd431ed10d96be3e4fb32863569306a2903d5c53e5	done	calendar.event.add
 2026-06-04T14:08:36+00:00	api-reference/calendar/calendar-event/calendar-event-delete.md	19d96fbf6cc6f2e5dc88d7085529209f6d758e85e8e45236f284e9d8c046fb40	done	calendar.event.delete
 2026-06-04T15:25:36+00:00	api-reference/calendar/calendar-event/calendar-event-get-by-id.md	47b1343ba8c20c1ed43abdb994629ed5338bd437dac17b7fe1aea298b05e736e	done	calendar.event.getbyid
+2026-06-12T08:13:44+00:00	api-reference/calendar/calendar-event/calendar-event-get-nearest.md	7579f47988daca1f41600f304a51fe9f8feb694e0c852f5e175d05092687a20b	done	calendar.event.get.nearest
+2026-06-12T08:13:45+00:00	api-reference/calendar/calendar-event/calendar-event-get.md	cf785ee203a01a19c29077524b83c226d873366d2762f201bcce51a8dddc0cfe	done	calendar.event.get
 2026-06-04T14:08:37+00:00	api-reference/calendar/calendar-event/calendar-event-update.md	3baaa312a3331911a3c367c8c02b7c10d11bd72beb27920a4c9e58e201eb6389	done	calendar.event.update
 2026-06-04T14:08:38+00:00	api-reference/calendar/calendar-event/calendar-meeting-status-get.md	a4fe40598274ff65642acf91f52ac22c150b5e6b082cd39a849cd63b998d1250	done	calendar.meeting.status.get
 2026-06-04T14:08:39+00:00	api-reference/calendar/calendar-event/calendar-meeting-status-set.md	e02dab8e01baebf827351252b775638201893a04cb5738a01a14748be0ca0e9f	done	calendar.meeting.status.set
