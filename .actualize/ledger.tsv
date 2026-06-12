@@ -509,6 +509,8 @@ date	file	sha256	status	method
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-get.md	33bc392df1ea27753a21b9fac481ec843408a83ab062f44efd80b72678bf65c4	done	crm.status.get
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-list.md	a33083f4eec9a94467457957165feef92e4f9eb594d8995cbd0a7009b780fd39	done	crm.status.list
 2026-06-05T15:37:47+00:00	api-reference/crm/status/crm-status-update.md	c381c05fbfa40ea47728ceb456d203092d1bb8785490188add0a686416d5b1a8	done	crm.status.update
+2026-06-12T14:08:40+00:00	api-reference/crm/tracking/crm-tracking-trace-add.md	99f7d4681a00e901639e60be4dce26c793a9321cce0b46cb7fb53c28fb788fc6	done	crm.tracking.trace.add
+2026-06-12T14:08:41+00:00	api-reference/crm/tracking/crm-tracking-trace-delete.md	85baf354b293118118eae843b2e34997da14dc7aed101b1a5fba77838ed27f8c	done	crm.tracking.trace.delete
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
