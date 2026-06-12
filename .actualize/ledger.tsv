@@ -1,4 +1,7 @@
 date	file	sha256	status	method
+2026-06-12T09:00:52+00:00	api-reference/ai/ai-engine-list.md	fccb195c0a9ec1ca303179efb57f0f32fe0e4b25ebe07abfaee1dd72f951b088	done	ai.engine.list
+2026-06-12T09:00:52+00:00	api-reference/ai/ai-engine-register.md	b1da955013e862c0564f86b23d8db0be6a9643f109f45a700cd5cf7d0f8973a9	done	ai.engine.register
+2026-06-12T09:00:53+00:00	api-reference/ai/ai-engine-unregister.md	42ddfbf7411cc3b9d59e1aac69a0c09803a85d53f4d9972f9f4f7bba55a51bbc	done	ai.engine.unregister
 2026-06-09T06:16:01+00:00	api-reference/booking/booking-v1-clienttype-list.md	4f4e1665033199ad83592c67dd181f8a4c1aff7cec206ca0717893de01c6865e	done	booking.v1.clienttype.list
 2026-06-09T06:16:02+00:00	api-reference/booking/booking/booking-v1-booking-add.md	fda05b5bbc3672d704860e97cb23482c07277ae083c444045f3c4861058cfd46	done	booking.v1.booking.add
 2026-06-09T06:16:03+00:00	api-reference/booking/booking/booking-v1-booking-createfromwaitlist.md	c193e38b5ec1128cb5f89230943ac3a9c7f22296298cafe96ceb7f2ce5b55ed5	done	booking.v1.booking.createfromwaitlist
