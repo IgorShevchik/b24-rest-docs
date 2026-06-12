@@ -679,6 +679,12 @@ date	file	sha256	status	method
 2026-06-10T19:48:52+00:00	api-reference/landing/user-blocks/landing-repo-get-list.md	5f4c402774ec0f5093eca0248eab8ca374d955dd61858da0e348abcc8bc4199c	done	landing.repo.getList
 2026-06-10T19:48:52+00:00	api-reference/landing/user-blocks/landing-repo-register.md	d3008f8127f42f9a4a5e0490837a5e39f8b586dbac579291cc29f2a9d2f71d7a	done	landing.repo.register
 2026-06-10T19:48:53+00:00	api-reference/landing/user-blocks/landing-repo-unregister.md	521b5182196197b2d5e345da19da0ed02b7a14f6019ec5899d86232b45bb5332	done	landing.repo.unregister
+2026-06-12T09:35:09+00:00	api-reference/mailservice/mailservice-add.md	fd70f88eeaf033f4c2db33ebef0bff82c2929c1e9f39ef3e99e5799b54c755cd	done	mailservice.add
+2026-06-12T09:35:10+00:00	api-reference/mailservice/mailservice-delete.md	50efde5a2000d07cf527c8c2c7438bc5f37b0d7cbe1c5f66b20a3cc561817756	done	mailservice.delete
+2026-06-12T09:35:10+00:00	api-reference/mailservice/mailservice-fields.md	d918fba2cc2a46bd1f50e45669722c1e32a554e1f80ec2ddba456089beba08eb	done	mailservice.fields
+2026-06-12T09:35:11+00:00	api-reference/mailservice/mailservice-get.md	3fbf5df0977af6f16d30e671daa8caf9d8ca503286de126f0dd88f5b4b70495a	done	mailservice.get
+2026-06-12T09:35:12+00:00	api-reference/mailservice/mailservice-list.md	9b76059b1306d6ad6ee48b7d2b46d71c95a67c8db8384e9a9ca9fb411e8242b0	done	mailservice.list
+2026-06-12T09:35:12+00:00	api-reference/mailservice/mailservice-update.md	2c1905581e7d7b9e292deb294256480766e1050e0cd4e1fea440699a72da5d20	done	mailservice.update
 2026-06-09T03:05:47+00:00	api-reference/messageservice/messageservice-message-status-update.md	cee061dc0a5ba8a0b92792dd7828899667bfdac0d67be5b52d2945b7a6e27bf8	done	messageservice.message.status.update
 2026-06-09T03:05:48+00:00	api-reference/messageservice/messageservice-sender-add.md	805e0075c442161e62044ad01b2e17efa78f17ef8046c6d0560cf6d6ea1d73a5	done	messageservice.sender.add
 2026-06-09T03:05:49+00:00	api-reference/messageservice/messageservice-sender-delete.md	258fcdb9296bc1a71967e4a2161d21a121c897537fc963357a7f6e42a872982b	done	messageservice.sender.delete
