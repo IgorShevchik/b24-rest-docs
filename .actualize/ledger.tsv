@@ -534,6 +534,7 @@ date	file	sha256	status	method
 2026-06-12T10:06:18+00:00	api-reference/events/event-offline-get.md	6f705b976819ec2996428d2d40921fcdab2d197df1fe47dd9261f74d1b2edd1d	done	event.offline.get
 2026-06-12T10:06:19+00:00	api-reference/events/event-offline-list.md	bed21be4ecd87db8ff984011d4560f18d3d7ee72c6ce1bb1abbc1c3c8a16c2e9	done	event.offline.list
 2026-06-12T10:06:19+00:00	api-reference/events/event-unbind.md	65c17fc8effc9e98a32a1468a20222cfadac6b063501ccec6a22f3294d7ef7a1	done	event.unbind
+2026-06-12T10:12:40+00:00	api-reference/events/offline-events.md	8ca034d73f9c4ef3b2931e30b265e1e8c19a181966a56411f5042e80cff23779	done	feature.get
 2026-06-12T10:06:21+00:00	api-reference/events/test-handler.md	fd2830c95246720f361621ad1fb659cc1814d18e310c212a320aa87c86ae4b82	done	event.bind
 2026-06-12T08:46:39+00:00	api-reference/files/how-to-upload-files.md	9b1ab581e6dfd11346f441ae07e60b7c16cb417e83e0d3acd621f7ec38119075	done	documentgenerator.template.add
 2026-06-09T07:56:44+00:00	api-reference/imopenlines/imconnector/imconnector-activate.md	ccbf7091079b2e1417110d56c633781b584532532f925787546a882bccc81ac7	done	imconnector.activate
