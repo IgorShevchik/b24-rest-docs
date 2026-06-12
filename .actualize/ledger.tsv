@@ -520,6 +520,7 @@ date	file	sha256	status	method
 2026-06-09T05:32:38+00:00	api-reference/document-generator/templates/document-generator-template-get.md	a91e24ddcae61d5349325252d19ec8bbe909d682731ffcf2aac2c4aa20d45b72	done	documentgenerator.template.get
 2026-06-09T05:32:39+00:00	api-reference/document-generator/templates/document-generator-template-list.md	ddda5ba4c012b10f4edfd741d1fa75cce3a9850156b99739aba9d5ec518804c9	done	documentgenerator.template.list
 2026-06-09T05:32:40+00:00	api-reference/document-generator/templates/document-generator-template-update.md	8ad4d5684b41514bb06dae3ddc26fbc7a0f5b8920b104b87145b670bdfeec108	done	documentgenerator.template.update
+2026-06-12T08:46:39+00:00	api-reference/files/how-to-upload-files.md	9b1ab581e6dfd11346f441ae07e60b7c16cb417e83e0d3acd621f7ec38119075	done	documentgenerator.template.add
 2026-06-09T07:56:44+00:00	api-reference/imopenlines/imconnector/imconnector-activate.md	ccbf7091079b2e1417110d56c633781b584532532f925787546a882bccc81ac7	done	imconnector.activate
 2026-06-09T07:56:45+00:00	api-reference/imopenlines/imconnector/imconnector-chat-name-set.md	4b3da1413943c6b63c06e57454fa6cb13c4cb443fec0544088f21893c235f7dd	done	imconnector.chat.name.set
 2026-06-09T07:56:46+00:00	api-reference/imopenlines/imconnector/imconnector-connector-data-set.md	dee526b5d692f98a153282e0647d09ae82573530a90107f133ef520b0c165ef3	done	imconnector.connector.data.set
