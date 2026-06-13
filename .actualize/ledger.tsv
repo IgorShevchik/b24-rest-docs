@@ -685,6 +685,14 @@ date	file	sha256	status	method
 2026-06-13T04:19:22+00:00	api-reference/crm/universal/item-details-configuration/crm-item-details-configuration-set.md	7b4760aac92be4d8e28477f35171126b87ea24d8951041e37088eb66a0f6f2db	done	crm.item.details.configuration.set
 2026-06-13T04:19:23+00:00	api-reference/crm/universal/order-entity/crm-order-entity-add.md	255491278228f2637cc731b2a59f43fe3c87ba6870644b63256aea4f594fa2e5	done	crm.orderentity.add
 2026-06-13T04:19:24+00:00	api-reference/crm/universal/order-entity/crm-order-entity-delete-by-filter.md	4c4e515f70f9550e9ed4019351e491c028e83b1cdf836eb32b793ca06cdcccc9	done	crm.orderentity.deletebyfilter
+2026-06-13T04:32:31+00:00	api-reference/crm/universal/order-entity/crm-order-entity-list.md	18d05090dec839bff7477db980795a62060d7b1a9415bf8e7bcb8fb308e4d8a9	done	crm.orderentity.list
+2026-06-13T04:32:32+00:00	api-reference/crm/universal/payment/crm-item-payment-add.md	b453799880ef9fe9a99f77afaea982a02800e2b1b19e1b15c329515c43fa7971	done	crm.item.payment.add
+2026-06-13T04:32:33+00:00	api-reference/crm/universal/payment/crm-item-payment-delete.md	3e0336447f27ded937fecb66673b2d182c526d23ac76c39492b73cbf8d5a27b0	done	crm.item.payment.delete
+2026-06-13T04:32:34+00:00	api-reference/crm/universal/payment/crm-item-payment-get.md	e63ac6c866f8090419ada1b3f06c53201b63e4d7eeef6a573c5efdf80634a509	done	crm.item.payment.get
+2026-06-13T04:32:35+00:00	api-reference/crm/universal/payment/crm-item-payment-list.md	5daceaaa100074c1d38f975ae05d9ea4d8b0e562f6eeb473320220468f99c051	done	crm.item.payment.list
+2026-06-13T04:32:35+00:00	api-reference/crm/universal/payment/crm-item-payment-pay.md	633ec69188b3ca79143f4791f1c4e0db7b480a7ebe2390c0d64ddefac11d9ac1	done	crm.item.payment.pay
+2026-06-13T04:32:36+00:00	api-reference/crm/universal/payment/crm-item-payment-unpay.md	2f9e06a6414cdae654e8ab806a1b74603c076e4f18196d0aba7ed6fcb97f9c1e	done	crm.item.payment.unpay
+2026-06-13T04:32:37+00:00	api-reference/crm/universal/payment/crm-item-payment-update.md	e4af970f11db6aa797a680c084c4ebc34d2deb9372c9e60667029b264bd6f344	done	crm.item.payment.update
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
