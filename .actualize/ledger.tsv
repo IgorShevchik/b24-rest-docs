@@ -676,6 +676,7 @@ date	file	sha256	status	method
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-delete.md	1e608f28f2d27dea7771b52532b6bb5008dee7884d23704e3eba6b7695f9dd71	done	crm.item.delete
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-fields.md	0c17bdf8060fed73349bd1529bff1e98843304f054d661d3ad336bd8e71962cf	done	crm.item.fields
 2026-06-13T04:04:16+00:00	api-reference/crm/universal/crm-item-get.md	5477e1b69e98270e5b5d344dcf3cf7f9334edafaf9690b4b3378c6a229f1ff44	done	crm.item.get
+2026-06-13T05:51:10+00:00	api-reference/crm/universal/crm-item-list.md	290ac7a8036585d604ac5d3dd85c1fc30e70aca38ed246234e80c21a33cb2049	done	crm.item.list
 2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-get.md	14fac49f55578db4fafb5e9d2ccdd3f7c0c799d1447157e419c0b97fc1181eed	done	crm.item.delivery.get
 2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-list.md	c6d8f87f6960e97f4f5697a35993c2b0b21bc9f35bd91771bbd80a3b018d2e9a	done	crm.item.delivery.list
 2026-06-13T04:19:18+00:00	api-reference/crm/universal/import/crm-item-batch-import.md	b3511a100086262cba30a97a8cb74077efeb44846a950906254324ec81b0d93a	done	crm.item.batchImport
@@ -720,6 +721,7 @@ date	file	sha256	status	method
 2026-06-13T05:20:39+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-fields.md	4481c6764e4079145cf2dbbf9389f147b00f60d4cc5e38878fa9e27872f5745d	done	crm.type.fields
 2026-06-13T05:20:40+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get-by-entity-type-id.md	e54c8e6417dd0a57046e0d1dd1e827df295b071f97ca37f0b65f88aa5c502209	done	crm.type.getByEntityTypeId
 2026-06-13T05:20:41+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get.md	951b4800eb22ff88a820f0e4a9f0d64bde09efa58ddea1759a09a01f7310c4fa	done	crm.type.get
+2026-06-13T05:51:12+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-list.md	a95534b2f663dd1dd509c971d7e3babe22ca30ca9ca441db33dc723156e9543f	done	crm.type.list
 2026-06-13T05:38:39+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-add.md	5b5d526c2caadc1ff21446bff79f1bce3c28f62eb2ec23adb03d11ca641ed4e5	done	userfieldconfig.add
 2026-06-13T05:38:40+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-delete.md	0b072bf5ac42c789db509cb2dd1afe7ce97983a76da44993cfdf2e7f16ea2258	done	userfieldconfig.delete
 2026-06-13T05:38:41+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-get-types.md	d75cf773cedb071be781f0cb70df05fa96f006b13c875593323d211f77e85167	done	userfieldconfig.getTypes
