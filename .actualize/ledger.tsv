@@ -702,6 +702,15 @@ date	file	sha256	status	method
 2026-06-13T04:46:38+00:00	api-reference/crm/universal/payment/products-in-payment/crm-item-payment-product-delete.md	f6e6bbf06c6a4fd09df3c4f345fd06b44f951606f3d56e7e704d0f4d0435b977	done	crm.item.payment.product.delete
 2026-06-13T04:46:39+00:00	api-reference/crm/universal/payment/products-in-payment/crm-item-payment-product-list.md	4605f26691c790b809889488ca28f860eed9a9bebaf2e7d7f941f0b880b2e903	done	crm.item.payment.product.list
 2026-06-13T04:46:40+00:00	api-reference/crm/universal/payment/products-in-payment/crm-item-payment-product-set-quantity.md	156e18c7be368f0d99e94965ff30fc80a61f68f3c5a936fe72362fd6c3dadd2d	done	crm.item.payment.product.setQuantity
+2026-06-13T05:05:07+00:00	api-reference/crm/universal/payment/salescenter-payment-get-public-url.md	36adb16c8bead8eb2eaeae3744eb00f31542cbf00a6d37be01672f5002956cbb	done	salescenter.payment.getPublicUrl
+2026-06-13T05:05:08+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-add.md	dfdbed03030c7086ca96ec11d1ec52694beed823dcff9d97925b475dcf583f39	done	crm.item.productrow.add
+2026-06-13T05:05:09+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-delete.md	a245e26f941a4dbe2de9550da2a2def05e0908da96b9f607bf4e7174879965e1	done	crm.item.productrow.delete
+2026-06-13T05:05:10+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-fields.md	daadb6f862d19b294ac2bc91a031e5cfe156679482a50f68caa7b8a52feabfa3	done	crm.item.productrow.fields
+2026-06-13T05:05:11+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-get-available-for-payment.md	b8e39322dc34cb6e132d8c1e9dda5355b87391e55ac1adff670deff4819e1fb8	done	crm.item.productrow.getAvailableForPayment
+2026-06-13T05:05:12+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-get.md	dc23b4339be95e4d5b993f6ef3d19f5d19cd2d161e95aba7f7d94f4bbcf48aac	done	crm.item.productrow.get
+2026-06-13T05:05:13+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-list.md	12da7f559b77595096da1aa23d653feed3c3ddd3f18b1ce71de297edb3c82cb8	done	crm.item.productrow.list
+2026-06-13T05:05:14+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-set.md	ae2eebaa85d11985b0ad98625a9ef455963d914775482b40f407cb9e063cc093	done	crm.item.productrow.set
+2026-06-13T05:05:15+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-update.md	a1e4934c1205896f25e90c3e882fd1e7438e2ccbef9183419983355f3bccc891	done	crm.item.productrow.update
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
