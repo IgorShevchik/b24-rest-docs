@@ -667,6 +667,15 @@ date	file	sha256	status	method
 2026-06-12T17:21:22+00:00	api-reference/crm/timeline/comments/crm-timeline-comment-list.md	ac7897cc88c7b17187147f8d54a6ff4ac190df37bd5ea2266354ae3d56609a51	done	crm.timeline.comment.list
 2026-06-12T14:08:40+00:00	api-reference/crm/tracking/crm-tracking-trace-add.md	99f7d4681a00e901639e60be4dce26c793a9321cce0b46cb7fb53c28fb788fc6	done	crm.tracking.trace.add
 2026-06-12T14:08:41+00:00	api-reference/crm/tracking/crm-tracking-trace-delete.md	85baf354b293118118eae843b2e34997da14dc7aed101b1a5fba77838ed27f8c	done	crm.tracking.trace.delete
+2026-06-13T04:04:09+00:00	api-reference/crm/universal/category/crm-category-add.md	0c49a9a1a79832f867e4473d6c037fb2e9d861e55cfc7e53ed9f3de1d770cd57	done	crm.category.add
+2026-06-13T04:04:10+00:00	api-reference/crm/universal/category/crm-category-delete.md	8af763b6784d904e3bf7ee7321970d1212673806bf238329f0180f3fcced9241	done	crm.category.delete
+2026-06-13T04:04:11+00:00	api-reference/crm/universal/category/crm-category-fields.md	5295e215352bd73eaec702aecfbb6c626b3778577daed807a434f8f7d8cdaaf3	done	crm.category.fields
+2026-06-13T04:04:12+00:00	api-reference/crm/universal/category/crm-category-get.md	12ab638b9d277301a88912a1fce8f968801ee86843d48355d6771e4c97c8d163	done	crm.category.get
+2026-06-13T04:04:13+00:00	api-reference/crm/universal/category/crm-category-list.md	b28a7371e7799b42f0ff2b74147fc15646426dc7437af360b110114e61149c6a	done	crm.category.list
+2026-06-13T04:04:14+00:00	api-reference/crm/universal/category/crm-category-update.md	6e8e5652b0983f08db7f4e8e033e475693c4fee6ba2ad3cf6fd13b89658eebd7	done	crm.category.update
+2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-delete.md	1e608f28f2d27dea7771b52532b6bb5008dee7884d23704e3eba6b7695f9dd71	done	crm.item.delete
+2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-fields.md	0c17bdf8060fed73349bd1529bff1e98843304f054d661d3ad336bd8e71962cf	done	crm.item.fields
+2026-06-13T04:04:16+00:00	api-reference/crm/universal/crm-item-get.md	5477e1b69e98270e5b5d344dcf3cf7f9334edafaf9690b4b3378c6a229f1ff44	done	crm.item.get
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
