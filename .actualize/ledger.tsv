@@ -711,6 +711,14 @@ date	file	sha256	status	method
 2026-06-13T05:05:13+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-list.md	12da7f559b77595096da1aa23d653feed3c3ddd3f18b1ce71de297edb3c82cb8	done	crm.item.productrow.list
 2026-06-13T05:05:14+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-set.md	ae2eebaa85d11985b0ad98625a9ef455963d914775482b40f407cb9e063cc093	done	crm.item.productrow.set
 2026-06-13T05:05:15+00:00	api-reference/crm/universal/product-rows/crm-item-productrow-update.md	a1e4934c1205896f25e90c3e882fd1e7438e2ccbef9183419983355f3bccc891	done	crm.item.productrow.update
+2026-06-13T05:20:35+00:00	api-reference/crm/universal/user-defined-fields/crm-userfield-enumeration-fields.md	3542455cc2a8b073f578c14c5e1056d0de8fd8f1b2b4a6ae102d69fa25dbc270	done	crm.userfield.enumeration.fields
+2026-06-13T05:20:35+00:00	api-reference/crm/universal/user-defined-fields/crm-userfield-fields.md	cc028bb2d384a8ae2d76d1966cceb213d288e80d9f74b21a1df4530d5df23cb8	done	crm.userfield.fields
+2026-06-13T05:20:36+00:00	api-reference/crm/universal/user-defined-fields/crm-userfield-types.md	a5b24439b0782e075a84218d052e5f63e065c84f6db8da6291982cd6d035fd95	done	crm.userfield.types
+2026-06-13T05:20:37+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-add.md	bb9efa972bba1d5b5b21dfa4aab70522c46516bb8b5f7eaa756672f476521fa3	done	crm.type.add
+2026-06-13T05:20:38+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-delete.md	00ef1362e75f68f5832d2171fbd58ea63340fe7b837641d824784c6ef9cd61d5	done	crm.type.delete
+2026-06-13T05:20:39+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-fields.md	4481c6764e4079145cf2dbbf9389f147b00f60d4cc5e38878fa9e27872f5745d	done	crm.type.fields
+2026-06-13T05:20:40+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get-by-entity-type-id.md	e54c8e6417dd0a57046e0d1dd1e827df295b071f97ca37f0b65f88aa5c502209	done	crm.type.getByEntityTypeId
+2026-06-13T05:20:41+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get.md	951b4800eb22ff88a820f0e4a9f0d64bde09efa58ddea1759a09a01f7310c4fa	done	crm.type.get
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
