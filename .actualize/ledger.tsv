@@ -676,6 +676,15 @@ date	file	sha256	status	method
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-delete.md	1e608f28f2d27dea7771b52532b6bb5008dee7884d23704e3eba6b7695f9dd71	done	crm.item.delete
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-fields.md	0c17bdf8060fed73349bd1529bff1e98843304f054d661d3ad336bd8e71962cf	done	crm.item.fields
 2026-06-13T04:04:16+00:00	api-reference/crm/universal/crm-item-get.md	5477e1b69e98270e5b5d344dcf3cf7f9334edafaf9690b4b3378c6a229f1ff44	done	crm.item.get
+2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-get.md	14fac49f55578db4fafb5e9d2ccdd3f7c0c799d1447157e419c0b97fc1181eed	done	crm.item.delivery.get
+2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-list.md	c6d8f87f6960e97f4f5697a35993c2b0b21bc9f35bd91771bbd80a3b018d2e9a	done	crm.item.delivery.list
+2026-06-13T04:19:18+00:00	api-reference/crm/universal/import/crm-item-batch-import.md	b3511a100086262cba30a97a8cb74077efeb44846a950906254324ec81b0d93a	done	crm.item.batchImport
+2026-06-13T04:19:19+00:00	api-reference/crm/universal/item-details-configuration/crm-item-details-configuration-forceCommonScopeForAll.md	fc9f404e7cb28913318a540863835f98927450c11092b19d076e980952482beb	done	crm.item.details.configuration.forceCommonScopeForAll
+2026-06-13T04:19:21+00:00	api-reference/crm/universal/item-details-configuration/crm-item-details-configuration-get.md	48019be9d59da6cbd4505c065bd482fe2a5c0c00c815666322d4c530a6f7fc42	done	crm.item.details.configuration.get
+2026-06-13T04:19:22+00:00	api-reference/crm/universal/item-details-configuration/crm-item-details-configuration-reset.md	db96550d6c2186ce0a0646e70380865fe8d24bceb9be7d14568fb5cf5d80050e	done	crm.item.details.configuration.reset
+2026-06-13T04:19:22+00:00	api-reference/crm/universal/item-details-configuration/crm-item-details-configuration-set.md	7b4760aac92be4d8e28477f35171126b87ea24d8951041e37088eb66a0f6f2db	done	crm.item.details.configuration.set
+2026-06-13T04:19:23+00:00	api-reference/crm/universal/order-entity/crm-order-entity-add.md	255491278228f2637cc731b2a59f43fe3c87ba6870644b63256aea4f594fa2e5	done	crm.orderentity.add
+2026-06-13T04:19:24+00:00	api-reference/crm/universal/order-entity/crm-order-entity-delete-by-filter.md	4c4e515f70f9550e9ed4019351e491c028e83b1cdf836eb32b793ca06cdcccc9	done	crm.orderentity.deletebyfilter
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
 2026-06-12T09:17:41+00:00	api-reference/departments/department-fields.md	dd34714d44ad967cdc42c272e4dde3780a4c543adbf1ad0e01e96c08b34dc54d	done	department.fields
