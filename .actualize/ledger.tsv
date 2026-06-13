@@ -471,6 +471,8 @@ date	file	sha256	status	method
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-get.md	ac3b6c319aaeaf8768bb9783c413255f228d17ad18f3f54f4d66293ed4ed417a	done	crm.contact.userfield.get
 2026-06-08T15:21:27+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-list.md	7dceda35acba630043511d11b3da1f38f41420589cd853f2c0d0c41a9b8320fb	done	crm.contact.userfield.list
 2026-06-12T14:16:49+00:00	api-reference/crm/contacts/userfield/crm-contact-userfield-update.md	5570b9a2d3f5fd79a2fa805053425713d50ef4f4ecd5c88c722de238100e46a6	done	crm.contact.userfield.update
+2026-06-13T06:25:53+00:00	api-reference/crm/crm-settings-mode-get.md	c8f478f0aecc71758a6dba50e78d47130a56327d8d1fe12cd85f584e2e7160c3	done	crm.settings.mode.get
+2026-06-13T06:37:35+00:00	api-reference/crm/crm-stage-history-list.md	711e6a41e0acdfab16596bcda174647834dbf995f80d2c5b367fac161bf27937	done	crm.stagehistory.list
 2026-06-05T12:53:53+00:00	api-reference/crm/currency/crm-currency-add.md	eee78caae39e03f3f2b84c0bdea1a7a5e366bd6f6c2d6fb621e971f03c5b7c91	done	crm.currency.add
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-base-get.md	3c473942e14baab369612d45084f9ea5188b9369b30f8ec1a81698b7010d2aa4	done	crm.currency.base.get
 2026-06-05T08:05:05+00:00	api-reference/crm/currency/crm-currency-base-set.md	852910654e3240e101ce688fba4d6f1e95438f41b991740b0f7c62fd79bdc08f	done	crm.currency.base.set
@@ -692,10 +694,12 @@ date	file	sha256	status	method
 2026-06-13T04:04:12+00:00	api-reference/crm/universal/category/crm-category-get.md	12ab638b9d277301a88912a1fce8f968801ee86843d48355d6771e4c97c8d163	done	crm.category.get
 2026-06-13T04:04:13+00:00	api-reference/crm/universal/category/crm-category-list.md	b28a7371e7799b42f0ff2b74147fc15646426dc7437af360b110114e61149c6a	done	crm.category.list
 2026-06-13T04:04:14+00:00	api-reference/crm/universal/category/crm-category-update.md	6e8e5652b0983f08db7f4e8e033e475693c4fee6ba2ad3cf6fd13b89658eebd7	done	crm.category.update
+2026-06-13T06:35:49+00:00	api-reference/crm/universal/crm-item-add.md	d575c0e21259ca7f80b1fb6d651a499c77b1a64c92c32033ea82b4402b58b9f9	done	crm.item.add
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-delete.md	1e608f28f2d27dea7771b52532b6bb5008dee7884d23704e3eba6b7695f9dd71	done	crm.item.delete
 2026-06-13T04:04:15+00:00	api-reference/crm/universal/crm-item-fields.md	0c17bdf8060fed73349bd1529bff1e98843304f054d661d3ad336bd8e71962cf	done	crm.item.fields
 2026-06-13T04:04:16+00:00	api-reference/crm/universal/crm-item-get.md	5477e1b69e98270e5b5d344dcf3cf7f9334edafaf9690b4b3378c6a229f1ff44	done	crm.item.get
 2026-06-13T05:51:10+00:00	api-reference/crm/universal/crm-item-list.md	290ac7a8036585d604ac5d3dd85c1fc30e70aca38ed246234e80c21a33cb2049	done	crm.item.list
+2026-06-13T06:32:32+00:00	api-reference/crm/universal/crm-item-update.md	b6849e05b56a8a9f7363a1c26ea87b48c03b75305da7cc2298dc57f334c03852	done	crm.item.update
 2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-get.md	14fac49f55578db4fafb5e9d2ccdd3f7c0c799d1447157e419c0b97fc1181eed	done	crm.item.delivery.get
 2026-06-13T04:19:17+00:00	api-reference/crm/universal/delivery/crm-item-delivery-list.md	c6d8f87f6960e97f4f5697a35993c2b0b21bc9f35bd91771bbd80a3b018d2e9a	done	crm.item.delivery.list
 2026-06-13T04:19:18+00:00	api-reference/crm/universal/import/crm-item-batch-import.md	b3511a100086262cba30a97a8cb74077efeb44846a950906254324ec81b0d93a	done	crm.item.batchImport
@@ -741,10 +745,12 @@ date	file	sha256	status	method
 2026-06-13T05:20:40+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get-by-entity-type-id.md	e54c8e6417dd0a57046e0d1dd1e827df295b071f97ca37f0b65f88aa5c502209	done	crm.type.getByEntityTypeId
 2026-06-13T05:20:41+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-get.md	951b4800eb22ff88a820f0e4a9f0d64bde09efa58ddea1759a09a01f7310c4fa	done	crm.type.get
 2026-06-13T05:51:12+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-list.md	a95534b2f663dd1dd509c971d7e3babe22ca30ca9ca441db33dc723156e9543f	done	crm.type.list
+2026-06-13T06:31:28+00:00	api-reference/crm/universal/user-defined-object-types/crm-type-update.md	bad06178af343c07552c84bebcc7d8b9ac43bbee6234748ea15cd5666bdfb65a	done	crm.type.update
 2026-06-13T05:38:39+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-add.md	5b5d526c2caadc1ff21446bff79f1bce3c28f62eb2ec23adb03d11ca641ed4e5	done	userfieldconfig.add
 2026-06-13T05:38:40+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-delete.md	0b072bf5ac42c789db509cb2dd1afe7ce97983a76da44993cfdf2e7f16ea2258	done	userfieldconfig.delete
 2026-06-13T05:38:41+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-get-types.md	d75cf773cedb071be781f0cb70df05fa96f006b13c875593323d211f77e85167	done	userfieldconfig.getTypes
 2026-06-13T05:38:42+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-get.md	82d6ed5932fe5217fc9c0b818b3cca8bcb880f533096e8b96e3a39a390e6273b	done	userfieldconfig.get
+2026-06-13T06:29:17+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-list.md	44f3183a2aa0892f5c35233db5363acfc4c631725a61383c65811c7479eed9b3	done	userfieldconfig.list
 2026-06-13T05:38:43+00:00	api-reference/crm/universal/userfieldconfig/userfieldconfig-update.md	8641557604f34620eabab8e2b4a1b2d09847bc2361fe66578fbb01b108bb17e4	done	userfieldconfig.update
 2026-06-12T09:17:39+00:00	api-reference/departments/department-add.md	d05be08d91d5e71b99cc6bd5afe246ab0ef824476fe10dfcbba6bcb9969d3ee2	done	department.add
 2026-06-12T09:17:40+00:00	api-reference/departments/department-delete.md	68b345fd0253d773a2f88581a5a51608ddb32c9cf6bd03abdbf3daa60ce494b7	done	department.delete
