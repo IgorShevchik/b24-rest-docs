@@ -399,6 +399,12 @@ date	file	sha256	status	method
 2026-06-12T10:48:13+00:00	api-reference/common/users/profile.md	78e6165cd4c96fbcc29812997009c3a9951697fa825c9059175ac3a1da72dd87	done	profile
 2026-06-12T10:52:31+00:00	api-reference/common/users/user-access.md	7c516bb33f31bd56ef3950e6de5c81502ac0028b26e712bee9d8ca5d04483185	done	user.access
 2026-06-12T10:52:31+00:00	api-reference/common/users/user-admin.md	e55e94a24bb6371215708f10efe41f80559c729eb8a53fdfe984caf17e18506d	done	user.admin
+2026-06-13T03:18:24+00:00	api-reference/crm/automated-solution/crm-automated-solution-add.md	e6c09a4015b563165f5b0f7efcaeadacf656e938bf8fff0eebaf72c6ed90bd4f	done	crm.automatedsolution.add
+2026-06-13T03:18:24+00:00	api-reference/crm/automated-solution/crm-automated-solution-delete.md	b070766da8845e3e6238242281c2c1a54fdb3bad6e17a56e9764c041a08146a6	done	crm.automatedsolution.delete
+2026-06-13T03:18:24+00:00	api-reference/crm/automated-solution/crm-automated-solution-fields.md	77655100f4577790d0123a425388b09423991946e6c968601c623d01934c4ad1	done	crm.automatedsolution.fields
+2026-06-13T03:18:24+00:00	api-reference/crm/automated-solution/crm-automated-solution-get.md	ad510f36ff2792448cb2ee15e612e9a23bee561286d7ef773773d100e65d6799	done	crm.automatedsolution.get
+2026-06-13T03:18:24+00:00	api-reference/crm/automated-solution/crm-automated-solution-list.md	1370cc396551409bdf3795ce715362ee493aace1f592ec28164164751ed6c29d	done	crm.automatedsolution.list
+2026-06-13T03:18:25+00:00	api-reference/crm/automated-solution/crm-automated-solution-update.md	759bb9c6c90209f33bb21f32b5e520d32d6f10811bfcfe683e1b0524401561de	done	crm.automatedsolution.update
 2026-06-12T14:21:46+00:00	api-reference/crm/automation/crm-automation-trigger.md	40356c1360964b9895f6f6532ad1e8062c5870adeb96bad63e6de70cea617b26	done	crm.automation.trigger
 2026-06-12T14:21:47+00:00	api-reference/crm/automation/triggers/crm-automation-trigger-add.md	59cd84d6cb8b93381ce578392deee730a16e25387a583c1b1d419880ba8915a7	done	crm.automation.trigger.add
 2026-06-12T14:21:48+00:00	api-reference/crm/automation/triggers/crm-automation-trigger-delete.md	78d7995f1ecbed3cebf7f6632d21fd6591a0436a7dca7b8ef721691f044f7910	done	crm.automation.trigger.delete
