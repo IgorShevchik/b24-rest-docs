@@ -278,6 +278,7 @@ date	file	sha256	status	method
 2026-06-11T05:26:09+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/events/event-get.md	fd58c3528ba547c865105f687083fa21ce4da1289043ba8c94eeb9ff3e43c28a	done	imbot.v2.Event.get
 2026-06-11T05:26:09+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/files/file-download.md	0f95ea2359814d85871ea619b82027c2737e5b6cccd576ae7d649971c161dd4b	done	imbot.v2.File.download
 2026-06-11T05:26:10+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/files/file-upload.md	d07f65a0eb44d5499b6ed2b88c245605df724a1afc60e712da39fbc13e02a55c	done	imbot.v2.File.upload
+2026-06-14T04:43:55+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/messages/attachments/block-collections/delimiter.md	44e9a2bbdd2d9983b4693f537f226e43b321cac44d1122977b6b070597a51813	done	imbot.v2.Chat.Message.send
 2026-06-11T05:26:12+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/messages/attachments/constructor.md	d61fab3b7d65203a678c98b72731c816e6bf44b42b32095aa7eb5c1786b453b1	done	imbot.v2.Chat.Message.send
 2026-06-11T05:26:12+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/messages/chat-message-delete.md	d3d6cf2a637ee8a375e5925b722b47c64d517ca6cee1610807367562a738ae9a	done	imbot.v2.Chat.Message.delete
 2026-06-11T05:26:13+00:00	api-reference/chat-bots/chat-bots-v2/imbot.v2/messages/chat-message-get-context.md	1ad7e8bf2cbf5ed4372e5e87ed253bf95d7be3ed3fd6bde4dac1ba0480078db5	done	imbot.v2.Chat.Message.getContext
