@@ -97,7 +97,7 @@ Once a section is merged upstream, move its row up to **Merged**.
 ## Upstream PR conventions
 
 - **One section = one PR** — keeps upstream review small.
-- **Title:** `docs(<section>): actualize JS examples to TS + UMD (b24jssdk actions API)`.
+- **Title:** `docs(<section>): actualize JS examples to TS + UMD`.
 - **Body:** `.actualize/upstream/PR-TEMPLATE.md` (mention: examples target the actions API;
   `callMethod` / `callListMethod` / `fetchListMethod` are removed in SDK 2.0; non-JS tabs and
   page prose are intentionally unchanged; list methods use `call.make` with `start`).

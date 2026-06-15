@@ -9,8 +9,7 @@ ship and prints a compare URL per section; the live shipped/in-review list lives
 ## Title
 
 ```
-docs(<label>): actualize JS examples to TS + UMD (b24jssdk actions API)
-```
+docs(<label>): actualize JS examples to TS + UMD```
 
 e.g. `docs(crm/contacts): …`, `docs(telephony): …`, `docs(catalog): …`.
 

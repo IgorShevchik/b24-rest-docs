@@ -101,7 +101,7 @@ foreach ($label in $labels) {
     & git checkout -q $start; continue
   }
   $files = @(& git diff --cached --name-only).Count
-  & git commit -q -m "docs($label): actualize JS examples to TS + UMD (b24jssdk actions API)"
+  & git commit -q -m "docs($label): actualize JS examples to TS + UMD"
   & git checkout -q $start
 
   $ts      = Count-Match 'F' '- JS (TS)'  $slug $path
@@ -129,7 +129,7 @@ if ($env:PUSH -ne "1") {
   Write-Host "Set `$env:PUSH=1 to push these branches to the fork, then open one PR per URL (base = bitrix-tools : main):"
   Print-Urls
   Write-Host ""
-  Write-Host "PR title:  docs(<section>): actualize JS examples to TS + UMD (b24jssdk actions API)"
+  Write-Host "PR title:  docs(<section>): actualize JS examples to TS + UMD"
   Write-Host "PR body:   .actualize/upstream/PR-TEMPLATE.md"
   Cleanup
   exit 0

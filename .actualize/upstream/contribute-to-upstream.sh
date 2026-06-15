@@ -122,7 +122,7 @@ for label in "${LABELS[@]}"; do
     git checkout -q "$START"; continue
   fi
   files=$(git diff --cached --name-only | wc -l | tr -d ' ')
-  git commit -q -m "docs($label): actualize JS examples to TS + UMD (b24jssdk actions API)"
+  git commit -q -m "docs($label): actualize JS examples to TS + UMD"
   git checkout -q "$START"
 
   ts=$(count_F '- JS (TS)'  "$slug" "$path")
@@ -154,7 +154,7 @@ if [ "${PUSH:-0}" != "1" ]; then
   echo "Set PUSH=1 to push these branches to the fork, then open one PR per URL (base = bitrix-tools : main):"
   print_urls
   echo
-  echo "PR title:  docs(<section>): actualize JS examples to TS + UMD (b24jssdk actions API)"
+  echo "PR title:  docs(<section>): actualize JS examples to TS + UMD"
   echo "PR body:   .actualize/upstream/PR-TEMPLATE.md"
   cleanup   # remove the temp branches — dry run leaves the tree as it was
   exit 0
