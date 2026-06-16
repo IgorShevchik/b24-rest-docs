@@ -94,6 +94,20 @@ PR per section (base `bitrix-tools : main`). **398 files across 9 sections:**
 Compare URL per section: `https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:actualize/<slug>?expand=1`.
 Once a section is merged upstream, move its row up to **Merged**.
 
+Shipped via `contribute-to-upstream.sh` on 2026-06-16 — **74 files, 1 section:**
+
+| Section | Branch | Pages |
+|---|---|---|
+| `rest-v3` | `actualize/rest-v3` | 74 |
+
+Compare URL: `https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:actualize/rest-v3?expand=1`.
+
+> **Drift handled at hand-off:** upstream had added 8 legacy pages after our fork point
+> (`humanresources/employee/*`, `humanresources/node-communication/*`) and updated the
+> `humanresources` TOC/index. These were re-synced from `upstream/main` and actualized, and
+> upstream's current TOC/index were adopted, so the PR diff is exactly the JS-tab changes and
+> reverts no newer upstream content.
+
 ## Upstream PR conventions
 
 - **One section = one PR** — keeps upstream review small.
