@@ -1053,6 +1053,7 @@ date	file	sha256	status	method
 2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-payment-get.md	521e05d0a782570d1198dc56245df1c703e532db3501279ed70d5cdf39d9f48c	done	sale.paysystem.settings.payment.get
 2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-update.md	b8568f59881ef8deda3a7e9ac56f45c72542dcb7a5ff241304570640489f3b5f	done	sale.paysystem.settings.update
 2026-06-12T11:28:24+00:00	api-reference/pay-system/sale-pay-system-update.md	5fa6e157a7c57969c610fc37f82e7217fbb76aec93c1ac525fb9ef3c3e6dc122	done	sale.paysystem.update
+2026-06-16T04:47:11+00:00	api-reference/rest-v3/mail/mailbox/mail-mailbox-field-get.md	a32e532b129f9ac8642b563a51a3ac993ed8bea90c6a922fe89f1e82c8efa38a	done	mail.mailbox.field.get
 2026-06-16T04:35:00+00:00	api-reference/rest-v3/mail/mailbox/mail-mailbox-field-list.md	b869a85561dcfc82deddcb2963431779e15ffc2827f2bc17bda167c5569cc15a	done	mail.mailbox.field.list
 2026-06-16T04:35:00+00:00	api-reference/rest-v3/mail/mailbox/mail-mailbox-get.md	2d824ceae3b90acfb0504a643c1a3e0e57c4b5a504b6b75ff4a61f687f4f9bca	done	mail.mailbox.get
 2026-06-16T04:35:01+00:00	api-reference/rest-v3/mail/mailbox/mail-mailbox-list.md	18490939b780db84b70dfb0abd417490f025dfb3978547c5ba67543e0d857a61	done	mail.mailbox.list
@@ -1063,6 +1064,16 @@ date	file	sha256	status	method
 2026-06-16T04:35:05+00:00	api-reference/rest-v3/mail/message/mail-message-createfeedpost.md	4950a17487d56fc8ca2a0845f0e3b6dd64cba98a217876576dd639688eaa5f1d	done	mail.message.createfeedpost
 2026-06-16T04:35:06+00:00	api-reference/rest-v3/mail/message/mail-message-createtask.md	9f26f7714327ec3a54d30ecfca7be1d92f49da2080501ca483e8a7d793f7bc97	done	mail.message.createtask
 2026-06-16T04:35:06+00:00	api-reference/rest-v3/mail/message/mail-message-field-list.md	7b816bd86fed796834747d8fdc15b9fd676792dfe14a1b4bd9a28d8c28a28341	done	mail.message.field.list
+2026-06-16T04:47:11+00:00	api-reference/rest-v3/mail/message/mail-message-forward.md	6409064f20676c9743f60e2f486be21d3712e8941087b6d19d7ad79b7987c62d	done	mail.message.forward
+2026-06-16T04:47:12+00:00	api-reference/rest-v3/mail/message/mail-message-get.md	cb71645bf73cbdc9d892ef4dde7f903e597bdf58e3552124df407c2227bc88d0	done	mail.message.get
+2026-06-16T04:47:13+00:00	api-reference/rest-v3/mail/message/mail-message-list.md	07e71c04fc66958cf4a9e9f5a2493acf220177de252fd3dd4d1ec5baf390ffa7	done	mail.message.list
+2026-06-16T04:47:13+00:00	api-reference/rest-v3/mail/message/mail-message-movetofolder.md	ccb8362a1dca50fea76d0bf5b8e219ffa1cff24a7b51815796f04d6b252a0784	done	mail.message.movetofolder
+2026-06-16T04:47:14+00:00	api-reference/rest-v3/mail/message/mail-message-removecrmactivity.md	1cef80d8ef1d366317e75ac4ef470623b5fd17e1692c77e64956ed89de206be9	done	mail.message.removecrmactivity
+2026-06-16T04:47:15+00:00	api-reference/rest-v3/mail/message/mail-message-reply.md	678705a1a3279475673ef31bfcf687db32d72dd1fdab5e130e66ab47825b6c29	done	mail.message.reply
+2026-06-16T04:47:16+00:00	api-reference/rest-v3/mail/message/mail-message-send.md	892bffa5d9604a68e9d27903c8d2ed79df71323494faf201f1e17351bcdd250f	done	mail.message.send
+2026-06-16T04:47:16+00:00	api-reference/rest-v3/mail/message/mail-message-thread.md	4667ec319e640e1bf405d8c31690abbc3361a6f6ae3669dedba77f01a7f6593d	done	mail.message.thread
+2026-06-16T04:47:17+00:00	api-reference/rest-v3/mail/recipient/mail-recipient-field-get.md	c122f606c290ee6e0515ee0037cfa350454a27970eee2a44b001f613dae479be	done	mail.recipient.field.get
+2026-06-16T04:47:18+00:00	api-reference/rest-v3/mail/recipient/mail-recipient-field-list.md	20fff50fdc18a522d7feb11d89734f8be9faa36b462b5f878bdcab51e4c03787	done	mail.recipient.field.list
 2026-06-10T08:54:51+00:00	api-reference/sale/basket-item/sale-basket-item-add-catalog-product.md	e53aae2063dbee38f0ce78b1bf9409fe182e20dd81e9da7811033a2b7212915e	done	sale.basketitem.addCatalogProduct
 2026-06-10T08:54:52+00:00	api-reference/sale/basket-item/sale-basket-item-add.md	cb42eb2df235ba19647c56cc50df7cde7286efea9d1e34aea7e829c1846f5e00	done	sale.basketitem.add
 2026-06-10T08:54:53+00:00	api-reference/sale/basket-item/sale-basket-item-delete.md	d0fd39311eb8775662885da16ee4ba462fdad8732930cec96df40bd73c4cadfd	done	sale.basketitem.delete
