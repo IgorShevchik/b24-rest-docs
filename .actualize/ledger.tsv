@@ -1066,6 +1066,7 @@ date	file	sha256	status	method
 2026-06-16T05:18:12+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-get.md	0edbd7c55ccd0713b299ea043db97b573ea95133d3053c21b1625a2d75614f74	done	humanresources.node.get
 2026-06-16T05:18:13+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-list.md	7ded6ecb0cc52b908a7bc777e71b4aa07ad560e43632463618d5baa78cd88929	done	humanresources.node.list
 2026-06-16T05:21:24+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-move.md	bf532100c8e96ccd2f81fe2bf866899f75c2b227a03a22782359d79cb79118ed	done	humanresources.node.move
+2026-06-16T05:23:06+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-search.md	06674ba2657f9d35c00995a805e1a5c38968c234fcbe3f806d21ec0511e3c711	done	humanresources.node.search
 2026-06-10T08:54:51+00:00	api-reference/sale/basket-item/sale-basket-item-add-catalog-product.md	e53aae2063dbee38f0ce78b1bf9409fe182e20dd81e9da7811033a2b7212915e	done	sale.basketitem.addCatalogProduct
 2026-06-10T08:54:52+00:00	api-reference/sale/basket-item/sale-basket-item-add.md	cb42eb2df235ba19647c56cc50df7cde7286efea9d1e34aea7e829c1846f5e00	done	sale.basketitem.add
 2026-06-10T08:54:53+00:00	api-reference/sale/basket-item/sale-basket-item-delete.md	d0fd39311eb8775662885da16ee4ba462fdad8732930cec96df40bd73c4cadfd	done	sale.basketitem.delete
