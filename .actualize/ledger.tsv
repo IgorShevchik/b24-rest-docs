@@ -1053,6 +1053,17 @@ date	file	sha256	status	method
 2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-payment-get.md	521e05d0a782570d1198dc56245df1c703e532db3501279ed70d5cdf39d9f48c	done	sale.paysystem.settings.payment.get
 2026-06-12T11:28:23+00:00	api-reference/pay-system/sale-pay-system-settings-update.md	b8568f59881ef8deda3a7e9ac56f45c72542dcb7a5ff241304570640489f3b5f	done	sale.paysystem.settings.update
 2026-06-12T11:28:24+00:00	api-reference/pay-system/sale-pay-system-update.md	5fa6e157a7c57969c610fc37f82e7217fbb76aec93c1ac525fb9ef3c3e6dc122	done	sale.paysystem.update
+2026-06-16T05:18:05+00:00	api-reference/rest-v3/humanresources/node-member/humanresources-node-member-add.md	b3455e6e59f7a29dc5e7d1d608afff6de43c20bf9c2207650e0dc88e0abce759	done	humanresources.node.member.add
+2026-06-16T05:18:06+00:00	api-reference/rest-v3/humanresources/node-member/humanresources-node-member-move.md	aab2db3deefba4172a7a5a76201def54fee48faee3ea85a72a51007a6a98c33e	done	humanresources.node.member.move
+2026-06-16T05:18:07+00:00	api-reference/rest-v3/humanresources/node-member/humanresources-node-member-remove.md	e91bd2d6d6216d3dfc45bbcc77c4b61ec87ba738e6110d8ef9b32f611f4c07bf	done	humanresources.node.member.remove
+2026-06-16T05:18:07+00:00	api-reference/rest-v3/humanresources/node-member/humanresources-node-member-set.md	03da6784b1f12af584156dbde47ed7a4266fefd9de7586c490c434164702b3e6	done	humanresources.node.member.set
+2026-06-16T05:18:08+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-add.md	a97166eedbbd773acf4b1762459fdb668d21273a95ea917e166360f2ce6a09c1	done	humanresources.node.add
+2026-06-16T05:18:09+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-count.md	6f0899c63f7b2b71c2b2705b827eb06f45a7e5589470aba1aa14742eb9c97efd	done	humanresources.node.count
+2026-06-16T05:18:10+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-edit.md	f9df4f552fdb809cb8bfdae1ae1f3100facd363870457a38ce76777d8cf34d69	done	humanresources.node.edit
+2026-06-16T05:18:10+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-field-get.md	1aaf1ac39cdc8d544117662979a20223c5c4661938e48021b3e77fa4be6bf1a7	done	humanresources.node.field.get
+2026-06-16T05:18:11+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-field-list.md	06b9a04f80336200d53d550c51212ce2d7e4cd60882d705f484e81761d75f21c	done	humanresources.node.field.list
+2026-06-16T05:18:12+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-get.md	0edbd7c55ccd0713b299ea043db97b573ea95133d3053c21b1625a2d75614f74	done	humanresources.node.get
+2026-06-16T05:18:13+00:00	api-reference/rest-v3/humanresources/node/humanresources-node-list.md	7ded6ecb0cc52b908a7bc777e71b4aa07ad560e43632463618d5baa78cd88929	done	humanresources.node.list
 2026-06-10T08:54:51+00:00	api-reference/sale/basket-item/sale-basket-item-add-catalog-product.md	e53aae2063dbee38f0ce78b1bf9409fe182e20dd81e9da7811033a2b7212915e	done	sale.basketitem.addCatalogProduct
 2026-06-10T08:54:52+00:00	api-reference/sale/basket-item/sale-basket-item-add.md	cb42eb2df235ba19647c56cc50df7cde7286efea9d1e34aea7e829c1846f5e00	done	sale.basketitem.add
 2026-06-10T08:54:53+00:00	api-reference/sale/basket-item/sale-basket-item-delete.md	d0fd39311eb8775662885da16ee4ba462fdad8732930cec96df40bd73c4cadfd	done	sale.basketitem.delete
