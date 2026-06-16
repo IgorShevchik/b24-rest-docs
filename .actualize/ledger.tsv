@@ -1065,6 +1065,14 @@ date	file	sha256	status	method
 2026-06-16T04:59:59+00:00	api-reference/rest-v3/tasks/tasks-task-chat-message-field-get.md	7b8fa50f318d9fe610737ab7b6bd92e7b00beec3edd9e75a450e6e007ce8869a	done	tasks.task.chat.message.field.get
 2026-06-16T05:00:00+00:00	api-reference/rest-v3/tasks/tasks-task-chat-message-field-list.md	192d2c89429009d4165dcd562f2f8a1409121980ff83f2c4246a46c74902ccb9	done	tasks.task.chat.message.field.list
 2026-06-16T05:00:01+00:00	api-reference/rest-v3/tasks/tasks-task-chat-message-send.md	b754b3a1bb0078347cb53f7d8c73e8ffa9dcce24d1f0a80dae7f720d7f03290a	done	tasks.task.chat.message.send
+2026-06-16T05:07:28+00:00	api-reference/rest-v3/tasks/tasks-task-delete.md	064c7c9ebfd95de42efd6ae2989846beaa55824869b9dc24305e400856198050	done	tasks.task.delete
+2026-06-16T05:07:29+00:00	api-reference/rest-v3/tasks/tasks-task-field-get.md	db86100179144cf3f2cff1224b34382583faeae9c50a3564da0da66cb9c5a287	done	tasks.task.field.get
+2026-06-16T05:07:30+00:00	api-reference/rest-v3/tasks/tasks-task-field-list.md	022d5f8a0fa5359d410b58aff1c8f4c32a548d962d412f5d4d0b010e06c4a059	done	tasks.task.field.list
+2026-06-16T05:07:30+00:00	api-reference/rest-v3/tasks/tasks-task-file-attach.md	9793dd7439c3567f90efac4069da084fe6a82268a7c6644e4a08ab83aea6df76	done	tasks.task.file.attach
+2026-06-16T05:07:31+00:00	api-reference/rest-v3/tasks/tasks-task-file-field-get.md	4ca3e4f690d5acfadec75c36030f016292e903d59c73e707ec9d44bba4a83b1b	done	tasks.task.file.field.get
+2026-06-16T05:07:32+00:00	api-reference/rest-v3/tasks/tasks-task-file-field-list.md	a231a63772f60a5c4b5b142de46d3d49dfb662e2c50b67d46944961c60c2cec0	done	tasks.task.file.field.list
+2026-06-16T05:07:32+00:00	api-reference/rest-v3/tasks/tasks-task-get.md	4deb95301f1f63027738f7e25f521379ee7c544214c5140ed06c58043fcb2cb2	done	tasks.task.get
+2026-06-16T05:07:33+00:00	api-reference/rest-v3/tasks/tasks-task-update.md	72fe5e56f249199aa5f53972cbb672be618bbe64d3f44fce155619a4464d8f72	done	tasks.task.update
 2026-06-10T08:54:51+00:00	api-reference/sale/basket-item/sale-basket-item-add-catalog-product.md	e53aae2063dbee38f0ce78b1bf9409fe182e20dd81e9da7811033a2b7212915e	done	sale.basketitem.addCatalogProduct
 2026-06-10T08:54:52+00:00	api-reference/sale/basket-item/sale-basket-item-add.md	cb42eb2df235ba19647c56cc50df7cde7286efea9d1e34aea7e829c1846f5e00	done	sale.basketitem.add
 2026-06-10T08:54:53+00:00	api-reference/sale/basket-item/sale-basket-item-delete.md	d0fd39311eb8775662885da16ee4ba462fdad8732930cec96df40bd73c4cadfd	done	sale.basketitem.delete
