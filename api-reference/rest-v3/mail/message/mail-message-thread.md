@@ -68,8 +68,6 @@
 
 - JS (TS)
 
-    SDK пока не поддерживают в вызовах адрес /rest/api/. Используйте прямые HTTP-запросы, например, через curl, fetch.
-
     ```ts
     // This snippet is an ES module: top-level await requires type="module" or a bundler.
     // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
@@ -114,8 +112,6 @@
     ```
 
 - JS (UMD)
-
-    SDK пока не поддерживают в вызовах адрес /rest/api/. Используйте прямые HTTP-запросы, например, через curl, fetch.
 
     ```html
     <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
