@@ -69,44 +69,27 @@ One PR per section, all passed `validate.py` in the fork, ledger 0 drift.
 | Batch | Sections | Date |
 |---|---|---|
 | Tier-1 CRM + calendar | `crm/status` (8), `crm/deals` (29), `crm/leads` (23), `crm/companies` (21), `crm/currency` (12), `calendar` (20) | 2026-06-08 |
+| Tier-2 (9 sections) | `crm/contacts` (17), `messageservice` (5), `telephony` (29), `disk` (37), `document-generator` (29), `booking` (38), `sonet-group` (44), `imopenlines` (50), `catalog` (149) | 2026-06-16 |
+| `rest-v3` | `rest-v3` (74) | 2026-06-16 |
 
+> Merge **confirmed by a fork↔upstream byte-identity check on 2026-06-16** — our examples are
+> present verbatim in `upstream/main`, with 0 legacy in every shipped section.
+>
+> `rest-v3` drift handled at hand-off: upstream had added 8 legacy pages after our fork point
+> (`humanresources/employee/*`, `humanresources/node-communication/*`) and updated the
+> `humanresources` TOC/index; these were re-synced from `upstream/main` and actualized, TOC/index
+> adopted from upstream — so the PR reverted no newer upstream content.
+>
 > `user/` and `tasks/` were **dropped from the hand-off**: upstream actualized those pages itself
-> (found during a fork↔upstream sync), so shipping them would duplicate. The auto-detect rule now
-> encodes that automatically (upstream has no legacy there → not selected).
+> (found during a fork↔upstream sync), so the auto-detect rule skips them (no legacy upstream →
+> not selected).
 
 ## In review (pushed, PRs to open/awaiting) ⏳
 
-Shipped via `contribute-to-upstream.sh` on 2026-06-10 — branches pushed to the fork, one upstream
-PR per section (base `bitrix-tools : main`). **398 files across 9 sections:**
-
-| Section | Branch | Pages |
-|---|---|---|
-| `crm/contacts` | `actualize/crm-contacts` | 17 |
-| `messageservice` | `actualize/messageservice` | 5 |
-| `telephony` | `actualize/telephony` | 29 |
-| `disk` | `actualize/disk` | 37 |
-| `document-generator` | `actualize/document-generator` | 29 |
-| `booking` | `actualize/booking` | 38 |
-| `sonet-group` | `actualize/sonet-group` | 44 |
-| `imopenlines` | `actualize/imopenlines` | 50 |
-| `catalog` | `actualize/catalog` | 149 |
-
-Compare URL per section: `https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:actualize/<slug>?expand=1`.
-Once a section is merged upstream, move its row up to **Merged**.
-
-Shipped via `contribute-to-upstream.sh` on 2026-06-16 — **74 files, 1 section:**
-
-| Section | Branch | Pages |
-|---|---|---|
-| `rest-v3` | `actualize/rest-v3` | 74 |
-
-Compare URL: `https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:actualize/rest-v3?expand=1`.
-
-> **Drift handled at hand-off:** upstream had added 8 legacy pages after our fork point
-> (`humanresources/employee/*`, `humanresources/node-communication/*`) and updated the
-> `humanresources` TOC/index. These were re-synced from `upstream/main` and actualized, and
-> upstream's current TOC/index were adopted, so the PR diff is exactly the JS-tab changes and
-> reverts no newer upstream content.
+_Nothing pending._ As of **2026-06-16** every shipped section is merged into `upstream/main`
+(verified by byte-identity). `contribute-to-upstream.sh` with no args auto-detects **nothing to
+ship** — each section fully actualized in the fork is already upstream. New hand-offs become
+available only after the remaining fork sections (mostly `crm/*`) are finished.
 
 ## Upstream PR conventions
 
