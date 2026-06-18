@@ -88,8 +88,28 @@ One PR per section, all passed `validate.py` in the fork, ledger 0 drift.
 
 _Nothing pending._ As of **2026-06-16** every shipped section is merged into `upstream/main`
 (verified by byte-identity). `contribute-to-upstream.sh` with no args auto-detects **nothing to
-ship** — each section fully actualized in the fork is already upstream. New hand-offs become
-available only after the remaining fork sections (mostly `crm/*`) are finished.
+ship** — each section fully actualized in the fork is already upstream. New hand-offs unlock only
+after the **Remaining in the fork** sections (below) are finished.
+
+## Remaining in the fork (state as of 2026-06-16 — resume Mon)
+
+Fork actualization: **1553 pages done, 80 with legacy `$b24.callMethod` left.** But **75 of those 80
+are in deprecated `outdated/` folders** — likely **skip** (no point modernizing deprecated docs;
+upstream may not want SDK examples there):
+
+| Bucket | Pages | Action |
+|---|---|---|
+| `crm/outdated/*` | 71 | deprecated → decide skip |
+| `outdated/*` (top-level) | 4 | deprecated → decide skip |
+| `chat-bots/*` | 2 | **live → actualize** |
+| `files/*` | 1 | **live → actualize** |
+| `departments/*` | 1 | **live → actualize** |
+| `bizproc/*` | 1 | **live → actualize** |
+
+**Next session (Mon):** (1) confirm we skip the deprecated `outdated/` pages; (2) actualize the **5
+live pages** (chat-bots, files, departments, bizproc) via `run-section.sh`; (3) once their sections
+are 0-legacy in the fork, `contribute-to-upstream.sh` (no args) will auto-detect + ship them. After
+that the corpus is effectively complete (modulo the deprecated skip).
 
 ## Upstream PR conventions
 
