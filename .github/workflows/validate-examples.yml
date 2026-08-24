@@ -5,6 +5,14 @@ name: validate-examples
 # The .actualize/ tooling must already be on the default branch, so the tooling
 # PR is merged before this workflow can check documentation PRs.
 #
+# Shape: `prepare` works out which pages need validating (see
+# .actualize/ci/changed-examples.sh) and how many runners to spread them over;
+# `validate` is a matrix over that many shards. A routine PR touches a handful of
+# pages and runs on a single shard. A corpus-wide change — an upstream resync
+# rewrites ~1500 pages — fans out instead of walking into the job timeout, which
+# is what a single serial runner did (~2s/page against a 20 minute limit).
+# Nothing is capped or sampled: every qualifying page is validated on some shard.
+#
 # Security notes:
 #   - on pull_request the checkout is the PR *merge ref* (PR-controlled), so jobs
 #     are restricted to same-repo PRs; fork PRs do not run the npm/tsc/python chain;
@@ -23,6 +31,13 @@ on:
 
 permissions:
   contents: read
+
+env:
+  # Pages per runner, and the ceiling on how many runners to ask for. The shard
+  # count is ceil(total / PER_SHARD) clamped to MAX_SHARDS, so cost tracks the
+  # size of the change instead of being paid on every PR.
+  PER_SHARD: 120
+  MAX_SHARDS: 12
 
 jobs:
   test-tooling:
@@ -50,17 +65,70 @@ jobs:
       - name: contribute-to-upstream.sh hand-off tests (offline, local remotes)
         run: bash .actualize/tests/test_contribute_upstream.sh
 
-  validate:
+      - name: changed-examples.sh selection/sharding tests (offline)
+        run: bash .actualize/tests/test_changed_examples.sh
+
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # Run on push to main, and on PRs from this repository only (skip forks).
+    timeout-minutes: 10
     if: >-
       github.event_name == 'push' ||
       github.event.pull_request.head.repo.full_name == github.repository
+    outputs:
+      total: ${{ steps.collect.outputs.total }}
+      shards: ${{ steps.collect.outputs.shards }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Collect changed example files
+        id: collect
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          bash .actualize/ci/changed-examples.sh "$base" > changed.txt
+          total="$(wc -l < changed.txt | tr -d ' ')"
+          shards=$(( (total + PER_SHARD - 1) / PER_SHARD ))
+          if [ "$shards" -lt 1 ]; then shards=1; fi
+          if [ "$shards" -gt "$MAX_SHARDS" ]; then shards="$MAX_SHARDS"; fi
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+          jq -nc --argjson n "$shards" '[range($n)]' \
+            | sed 's/^/shards=/' >> "$GITHUB_OUTPUT"
+          echo "Pages to validate: $total, across $shards shard(s)"
+          echo "::group::changed example files"; cat changed.txt; echo "::endgroup::"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: changed-examples
+          path: changed.txt
+          retention-days: 1
+
+      - name: Verify ledger drift (push to main, informational)
+        if: github.event_name == 'push'
+        continue-on-error: true
+        run: python3 .actualize/record.py --verify-all
+
+  validate:
+    needs: prepare
+    if: needs.prepare.outputs.total != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.prepare.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
           persist-credentials: false
 
       - uses: actions/setup-node@v4
@@ -77,41 +145,21 @@ jobs:
           path: .actualize/.tscheck
           key: tscheck-${{ runner.os }}-${{ hashFiles('.actualize/typecheck/package-lock.json') }}
 
-      - name: Collect changed example files
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base='${{ github.event.pull_request.base.sha }}'
-          else
-            base='${{ github.event.before }}'
-          fi
-          # guard against a missing/zero base (new branch, first push, force-push)
-          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
-            base="$(git rev-list --max-parents=0 HEAD | tail -1)"
-            echo "base unavailable; falling back to root commit ${base}"
-          fi
-          git diff --name-only "$base" HEAD -- 'api-reference/**/*.md' > changed.txt
-          echo "Changed example files:"; cat changed.txt || true
+      - uses: actions/download-artifact@v4
+        with:
+          name: changed-examples
 
       - name: Validate TS + UMD examples
         run: |
+          shards='${{ strategy.job-total }}'
+          bash .actualize/ci/changed-examples.sh \
+            --shard "${{ matrix.shard }}/$shards" changed.txt > shard.txt
+          echo "shard ${{ matrix.shard }} of $shards: $(wc -l < shard.txt | tr -d ' ') page(s)"
           rc=0
-          # A page is validated if it carries an actualized TS tab ("JS (TS)" canonical or legacy
-          # "TS") OR is tracked in the ledger. The ledger clause is the §5 fix: a tracked page that
-          # LOSES its tab (typo, accidental deletion) must FAIL loudly via validate.py's structural
-          # check, not be silently skipped. Non-tracked tab-less pages are genuinely not actualized.
-          ledger_paths="$(cut -f2 .actualize/ledger.tsv)"   # in a var, not a file in the checkout
           while IFS= read -r f; do
-            [ -z "$f" ] && continue
-            [ -f "$f" ] || continue
-            if grep -qE '^- (JS \(TS\)|TS)$' "$f" || grep -qxF "$f" <<<"$ledger_paths"; then
-              echo "::group::validate $f"
-              python3 .actualize/validate.py "$f" || rc=1
-              echo "::endgroup::"
-            fi
-          done < changed.txt
+            [ -n "$f" ] || continue
+            echo "::group::validate $f"
+            python3 .actualize/validate.py "$f" || rc=1
+            echo "::endgroup::"
+          done < shard.txt
           exit $rc
-
-      - name: Verify ledger drift (push to main, informational)
-        if: github.event_name == 'push'
-        continue-on-error: true
-        run: python3 .actualize/record.py --verify-all
