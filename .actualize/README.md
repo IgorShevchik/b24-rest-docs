@@ -19,6 +19,7 @@ documentation PRs.
 | `_tabs.py` | Shared tab-parsing regexes (used by `validate.py` and `record.py`). A page may have several `{% list tabs %}` blocks; `code_regions()` returns every region holding a TS example, so each one is validated. |
 | `ledger.tsv` | Journal: date, file, sha256, status, method (empty in the tooling PR). |
 | `typecheck/` | Pinned typecheck environment (`package.json` + `package-lock.json`). |
+| `ci/changed-examples.sh` | Which pages a CI run must validate (changed **and** TS-tabbed or ledger-tracked), plus `--shard I/N` to slice that list. Lets `validate-examples.yml` fan a corpus-wide change across runners instead of hitting the job timeout; the shards are a partition, so nothing is capped or dropped. |
 | `tests/` | Offline tooling unit tests (`python -m unittest discover -s .actualize/tests`). |
 
 ## How to run
