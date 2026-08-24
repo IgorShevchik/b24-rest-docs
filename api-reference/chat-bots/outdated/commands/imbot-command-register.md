@@ -103,91 +103,35 @@
     https://**put_your_bitrix24_address**/rest/imbot.command.register
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<number>({
-        method: 'imbot.command.register',
-        params: {
-          BOT_ID: 1291,
-          COMMAND: 'echo',
-          EVENT_COMMAND_ADD: 'https://example.com/bot/command.php',
-          LANG: [
-            { LANGUAGE_ID: 'ru', TITLE: 'Echo', PARAMS: 'text' },
-            { LANGUAGE_ID: 'en', TITLE: 'Echo', PARAMS: 'text' },
-          ],
-          COMMON: 'Y',
-          HIDDEN: 'N',
-          EXTRANET_SUPPORT: 'N',
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Registered command ID:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+        const response = await $b24.callMethod(
+            'imbot.command.register',
+            {
+                BOT_ID: 1291,
+                COMMAND: 'echo',
+                EVENT_COMMAND_ADD: 'https://example.com/bot/command.php',
+                LANG: [
+                    { LANGUAGE_ID: 'ru', TITLE: 'Эхо', PARAMS: 'текст' },
+                    { LANGUAGE_ID: 'en', TITLE: 'Echo', PARAMS: 'text' }
+                ],
+                COMMON: 'Y',
+                HIDDEN: 'N',
+                EXTRANET_SUPPORT: 'N'
+            }
+        );
+        
+        const result = response.getData().result;
+        console.log('Created element with ID:', result);
+        processResult(result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function registerBotCommand() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.command.register',
-            params: {
-              BOT_ID: 1291,
-              COMMAND: 'echo',
-              EVENT_COMMAND_ADD: 'https://example.com/bot/command.php',
-              LANG: [
-                { LANGUAGE_ID: 'ru', TITLE: 'Echo', PARAMS: 'text' },
-                { LANGUAGE_ID: 'en', TITLE: 'Echo', PARAMS: 'text' },
-              ],
-              COMMON: 'Y',
-              HIDDEN: 'N',
-              EXTRANET_SUPPORT: 'N',
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Registered command ID:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', registerBotCommand)
-    </script>
+    catch( error )
+    {
+        console.error('Error:', error);
+    }
     ```
 
 - PHP
@@ -276,6 +220,42 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.command.register", b24.Params{
+    	"BOT_ID":            1291,
+    	"COMMAND":           "echo",
+    	"EVENT_COMMAND_ADD": "https://example.com/bot/command.php",
+    	"LANG": []b24.Params{
+    		{
+    			"LANGUAGE_ID": "ru",
+    			"TITLE":       "Эхо",
+    			"PARAMS":      "текст",
+    		},
+    		{
+    			"LANGUAGE_ID": "en",
+    			"TITLE":       "Echo",
+    			"PARAMS":      "text",
+    		},
+    	},
+    	"COMMON":           "Y",
+    	"HIDDEN":           "N",
+    	"EXTRANET_SUPPORT": "N",
+    	"CLIENT_ID":        "**put_your_client_id_here**",
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.command.register: %w", err)
+    }
+
+    var value b24.ID
+    if err := json.Unmarshal(res.Result, &value); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("результат:", value)
     ```
 
 {% endlist %}

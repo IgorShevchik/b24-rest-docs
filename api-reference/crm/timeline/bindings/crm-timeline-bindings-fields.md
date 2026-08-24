@@ -148,6 +148,33 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.bindings.fields().response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -174,6 +201,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.bindings.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.bindings.fields: %w", err)
+    }
+
+    keys, ok := b24.Keys(res.Result)
+    if !ok {
+    	return fmt.Errorf("ожидался объект в ответе")
+    }
+    fmt.Println("полей в ответе:", len(keys))
     ```
 
 {% endlist %}
@@ -232,7 +275,7 @@ HTTP-статус: **200**
 || **result**
 [`object`](../../../data-types.md) | Корневой элемент ответа. Содержит [поля](#fields) связи записи таймлайна с элементами CRM ||
 || **time**
-[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 #### Список полей {#fields}
@@ -243,11 +286,11 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **OWNER_ID***
-[`integer`](../../../data-types.md) | Идентфикатор записи таймлайна. Только для чтения ||
+[`integer`](../../../data-types.md) | Идентификатор записи таймлайна. Неизменяемое ||
 || **ENTITY_ID***
-[`integer`](../../../data-types.md) | `ID` элемента CRM, к которому привязан комментарий. Неизменяемое ||
+[`integer`](../../../data-types.md) | Идентификатор элемента CRM, к которому привязана запись таймлайна. Неизменяемое ||
 || **ENTITY_TYPE***
-[`string`](../../../data-types.md) | Тип элемента, к которому привязан комментарий. Неизменяемое. Возможные значения:
+[`string`](../../../data-types.md) | Тип элемента CRM, к которому привязана запись таймлайна. Неизменяемое. Возможные значения:
 - `lead` — лид
 - `deal` — сделка
 - `contact` — контакт

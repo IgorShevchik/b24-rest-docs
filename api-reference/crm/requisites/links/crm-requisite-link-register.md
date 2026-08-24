@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на изменение объекта CRM, для которого регистрируется связь
 
 Метод регистрирует связь реквизитов с объектом.
 
@@ -258,6 +258,65 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.link.register(
+            fields={
+                "ENTITY_TYPE_ID": 31,
+                "ENTITY_ID": 315,
+                "REQUISITE_ID": 60,
+                "BANK_DETAIL_ID": 24,
+                "MC_REQUISITE_ID": 2,
+                "MC_BANK_DETAIL_ID": 2,
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.requisite.link.register", b24.Params{
+    	"fields": b24.Params{
+    		"ENTITY_TYPE_ID":    31,
+    		"ENTITY_ID":         315,
+    		"REQUISITE_ID":      60,
+    		"BANK_DETAIL_ID":    24,
+    		"MC_REQUISITE_ID":   2,
+    		"MC_BANK_DETAIL_ID": 2,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.requisite.link.register: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

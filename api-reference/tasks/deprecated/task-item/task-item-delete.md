@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод удаляет задачу.
+Метод `task.item.delete` удаляет задачу.
 
 {% note warning "DEPRECATED" %}
 
@@ -65,6 +65,7 @@
     declare const $b24: B24Frame
 
     try {
+      // TODO: verify API version — this page has no JSON response example
       const response = await $b24.actions.v2.call.make<boolean>({
         method: 'task.item.delete',
         params: {
@@ -97,6 +98,7 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
+          // TODO: verify API version — this page has no JSON response example
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.delete',
             params: {
@@ -178,6 +180,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.delete", b24.Params{
+    	"TASKID": 13,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.delete: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

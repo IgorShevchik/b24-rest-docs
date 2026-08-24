@@ -48,79 +48,16 @@
       https://**put_your_bitrix24_address**/rest/imbot.bot.list
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type BotListResult = Record<string, BotItem>
-
-    type BotItem = {
-      ID: number
-      NAME: string
-      CODE: string
-      OPENLINE: string
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<BotListResult>({
-        method: 'imbot.bot.list',
-        params: {},
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Registered bots:', Object.values(result))
-      }
+      const response = await $b24.callMethod('imbot.bot.list', {});
+      const { result } = response.getData();
+      console.log('Bots:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error getting bot list:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function fetchBotList() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.bot.list',
-            params: {},
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Registered bots:', Object.values(result))
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', fetchBotList)
-    </script>
     ```
 
 - PHP
@@ -173,6 +110,30 @@
         echo 'Error: ' . $result['error_description'];
     } else {
         print_r($result['result']);
+    }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.bot.list", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("imbot.bot.list: %w", err)
+    }
+
+    // Ответ — объект, где ключ верхнего уровня — идентификатор.
+    var items map[string]struct {
+    	ID       b24.ID `json:"ID"`
+    	Name     string `json:"NAME"`
+    	Code     string `json:"CODE"`
+    	Openline string `json:"OPENLINE"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for id, it := range items {
+    	fmt.Println(id, it.Name)
     }
     ```
 

@@ -212,6 +212,25 @@
         echo '</PRE>';
         ```
 
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.company.details.configuration.reset", b24.Params{
+        	"scope":  "P",
+        	"userId": 1,
+        })
+        if err != nil {
+        	return fmt.Errorf("crm.company.details.configuration.reset: %w", err)
+        }
+
+        var ok bool
+        if err := json.Unmarshal(res.Result, &ok); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        fmt.Println("выполнено:", ok)
+        ```
+
     {% endlist %}
 
 2. Сбросить общие настройки карточки
@@ -336,6 +355,35 @@
         }
         ```
 
+    - Python
+
+        Пример
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.company.details.configuration.reset(
+                scope="C",
+            ).response
+            result = bitrix_response.result
+            print(result)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
     - BX24.js
 
         ```js
@@ -369,6 +417,24 @@
         echo '<PRE>';
         print_r($result);
         echo '</PRE>';
+        ```
+
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.company.details.configuration.reset", b24.Params{
+        	"scope": "C",
+        })
+        if err != nil {
+        	return fmt.Errorf("crm.company.details.configuration.reset: %w", err)
+        }
+
+        var ok bool
+        if err := json.Unmarshal(res.Result, &ok); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        fmt.Println("выполнено:", ok)
         ```
 
     {% endlist %}
@@ -423,7 +489,7 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-` | `Access denied` | У пользователя нет прав на сброс настроек ||
+|| Пустое значение | `Access denied` | У пользователя нет прав на сброс настроек ||
 |#
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}

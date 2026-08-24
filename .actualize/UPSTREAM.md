@@ -86,30 +86,54 @@ One PR per section, all passed `validate.py` in the fork, ledger 0 drift.
 
 ## In review (pushed, PRs to open/awaiting) ⏳
 
-_Nothing pending._ As of **2026-06-16** every shipped section is merged into `upstream/main`
-(verified by byte-identity). `contribute-to-upstream.sh` with no args auto-detects **nothing to
-ship** — each section fully actualized in the fork is already upstream. New hand-offs unlock only
-after the **Remaining in the fork** sections (below) are finished.
+**`installFinish` warning (2026-08-24)** — branch `claude/bitrix24-rest-api-docs-vn02yg`, built off
+fresh `upstream/main`, 6 files, +41 −2. Not an actualization hand-off: it warns on the
+`BX24.installFinish` page that the portal delivers no events until the install is finished, and
+cross-links `event.bind`, the events overview, `imbot.v2.Bot.register`, the deprecated
+`imbot.register` and `app.info`. Pushed to the fork; a human opens the PR at
+<https://github.com/bitrix-tools/b24-rest-docs/compare/main...IgorShevchik:b24-rest-docs:claude/bitrix24-rest-api-docs-vn02yg>.
+The same change went to the English documentation from the `b24restdocs` fork.
 
-## Remaining in the fork (state as of 2026-06-16 — resume Mon)
+Actualization hand-offs: as of **2026-06-16** every shipped section was merged into `upstream/main`
+(verified by byte-identity). The next ones unlock after the 94 pages listed under **Resynced with
+upstream** are re-actualized on the synced `main`.
 
-Fork actualization: **1553 pages done, 80 with legacy `$b24.callMethod` left.** But **75 of those 80
-are in deprecated `outdated/` folders** — likely **skip** (no point modernizing deprecated docs;
-upstream may not want SDK examples there):
+## Resynced with upstream — 2026-08-24
 
-| Bucket | Pages | Action |
+`main` had drifted two months behind the parent (fork +110, upstream +370 commits; a plain merge
+reported **1645** conflicting files), so every branch cut from fork `main` started on stale content
+— including the pages the parent had renamed or restructured in the meantime.
+
+Fixed by merge commit `9066c74` (first parent `04e262a` — the pre-sync tree, still reachable):
+`upstream/main` is recorded as a parent and the tree is set to `upstream/main` **verbatim** for all
+documentation content, restoring only the fork-only paths that never go upstream — `.actualize/`
+and `.github/`. Everything else is byte-identical to the parent.
+
+**What the resync rolled back.** 193 pages carried a `- JS (TS)` / `- JS (UMD)` example in the fork
+but not upstream:
+
+| Bucket | Pages | State |
 |---|---|---|
-| `crm/outdated/*` | 71 | deprecated → decide skip |
-| `outdated/*` (top-level) | 4 | deprecated → decide skip |
-| `chat-bots/*` | 2 | **live → actualize** |
-| `files/*` | 1 | **live → actualize** |
-| `departments/*` | 1 | **live → actualize** |
-| `bizproc/*` | 1 | **live → actualize** |
+| Upstream rewrote/restructured the page since (`rest-v3/mail`, `rest-v3/tasks`, `chat-bots-v2` renames) | 99 | fork copies were stale either way — nothing to recover |
+| Upstream still on legacy `$b24.callMethod` | **94** | **genuine unshipped work — re-actualize** |
 
-**Next session (Mon):** (1) confirm we skip the deprecated `outdated/` pages; (2) actualize the **5
-live pages** (chat-bots, files, departments, bizproc) via `run-section.sh`; (3) once their sections
-are 0-legacy in the fork, `contribute-to-upstream.sh` (no args) will auto-detect + ship them. After
-that the corpus is effectively complete (modulo the deprecated skip).
+The 94 are listed in [`upstream/resync-backlog-2026-08-24.txt`](upstream/resync-backlog-2026-08-24.txt):
+`chat-bots/chat-bots-v2` (41), `chat-bots/outdated` (26), `bizproc/*` (16), `departments` (4),
+`crm` (2), `files` (1). They are **not** recovered by cherry-picking the pre-sync versions: per
+**Drift** below, a page the parent has moved under must be re-actualized against the *current*
+upstream text and re-validated. Run them through `run-section.sh` off the synced `main`.
+
+**Corpus after the resync:** 1544 pages with `- JS (TS)`, **174** still on legacy `$b24.callMethod`
+(the 94 above plus 80 that were already legacy in both trees — 75 of those in deprecated
+`outdated/` folders, where modernizing is probably not wanted).
+
+**⚠️ `ledger.tsv` is stale — re-baseline before trusting it.** `record.py --verify-all` now reports
+**1544 of 1553 tracked pages drifted**: the recorded sha256 values describe the pre-sync fork
+content, not the upstream text now in the tree. The pages are still actualized; only the hashes are
+wrong. Re-baselining is a deliberate call, not a mechanical one — re-recording every row would mark
+upstream's *own* actualization as fork-done work and erase that distinction. Decide first what the
+ledger should mean after the resync, then re-record accordingly.
+
 
 ## Upstream PR conventions
 

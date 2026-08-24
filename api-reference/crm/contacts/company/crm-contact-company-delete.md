@@ -17,21 +17,21 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id***
-[`integer`][1] | Идентификатор контакта.
+[`integer`](../../../data-types.md) | Идентификатор контакта.
 
 Идентификатор можно получить с помощью методов [crm.contact.list](../crm-contact-list.md) или [crm.contact.add](../crm-contact-add.md) ||
 || **fields***
-[`object`][1] | Объект с информацией о том, какую компанию необходимо удалить из привязок.
+[`object`](../../../data-types.md) | Объект с информацией о том, какую компанию необходимо удалить из привязок.
 
 Содержит единственный ключ `COMPANY_ID` ||
 || **fields.COMPANY_ID***
-[`integer`][1] | Идентификатор компании, которую необходимо удалить из привязок ||
+[`integer`](../../../data-types.md) | Идентификатор компании, которую необходимо удалить из привязок ||
 |#
 
 {% note info "Удалить первичную привязку" %}
@@ -178,6 +178,36 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.contact.company.delete(
+            bitrix_id=54,
+            fields={"COMPANY_ID": 32},
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -218,6 +248,27 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.company.delete", b24.Params{
+    	"id": 54,
+    	"fields": b24.Params{
+    		"COMPANY_ID": 32,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.contact.company.delete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -244,12 +295,12 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`boolean`][1] | Корневой элемент ответа. Содержит:
+[`boolean`](../../../data-types.md) | Корневой элемент ответа. Содержит:
 - `true` — в случае успеха
 - `false` — в случае неудачи (скорее всего компания, которую вы пытаетесь удалить, не привязана к контакту)
 ||
 || **time**
-[`time`][1] | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок
@@ -269,11 +320,11 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-`     | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше 0 ||
-|| `-`     | `The parameter 'fields' must be array` | В `fields` передан не объект ||
+|| Пустое значение | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше 0 ||
+|| Пустое значение | `The parameter 'fields' must be array` | В `fields` передан не объект ||
 || `ACCESS_DENIED` | `Access denied!` | У пользователя нет прав на изменения контактов ||
-|| `-`     | `Not found` | Контакт с переданным `id` не найден ||
-|| `-`     | `The parameter 'fields' is not valid` | Может возникать из-за нескольких причин:
+|| Пустое значение | `Not found` | Контакт с переданным `id` не найден ||
+|| Пустое значение | `The parameter 'fields' is not valid` | Может возникать из-за нескольких причин:
 - если не передан обязательный параметр `fields.COMPANY_ID`
 - если переданный параметр `fields.COMPANY_ID` меньше или равен 0 ||
 |#
@@ -287,5 +338,3 @@ HTTP-статус: **400**
 - [{#T}](./crm-contact-company-items-get.md)
 - [{#T}](./crm-contact-company-items-set.md)
 - [{#T}](./crm-contact-company-items-delete.md)
-
-[1]: ../../../data-types.md

@@ -25,7 +25,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -103,95 +103,24 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Command.register
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type CommandRegisterResult = {
-      command: {
-        id: number
-        botId: number
-        command: string
-        common: boolean
-        hidden: boolean
-        extranetSupport: boolean
-      }
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<CommandRegisterResult>({
-        method: 'imbot.v2.Command.register',
-        params: {
-          botId: 456,
-          fields: {
-            command: 'help',
-            title: { en: 'Show help' },
-            params: { en: 'query' },
-          },
+      const response = await $b24.callMethod('imbot.v2.Command.register', {
+        botId: 456,
+        fields: {
+          command: 'help',
+          title: { en: 'Show help', ru: 'Показать помощь' },
+          params: { en: 'query', ru: 'запрос' },
         },
-        requestId: Text.getUuidRfc4122()
-      })
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Registered command:', result.command.id, result.command.command)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function registerCommand() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.Command.register',
-            params: {
-              botId: 456,
-              fields: {
-                command: 'help',
-                title: { en: 'Show help' },
-                params: { en: 'query' },
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Registered command:', result.command.id, result.command.command)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', registerCommand)
-    </script>
     ```
 
 - PHP
@@ -268,6 +197,49 @@
     } else {
         echo 'Command ID: '. $result['result']['command']['id'];
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.Command.register", b24.Params{
+    	"botId":    456,
+    	"botToken": "my_bot_token",
+    	"fields": b24.Params{
+    		"command": "help",
+    		"title": b24.Params{
+    			"en": "Show help",
+    			"ru": "Показать помощь",
+    		},
+    		"params": b24.Params{
+    			"en": "query",
+    			"ru": "запрос",
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.Command.register: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "command".
+    raw, ok := b24.Unwrap(res.Result, "command")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа command")
+    }
+
+    var item struct {
+    	ID              b24.ID `json:"id"`
+    	BotID           b24.ID `json:"botId"`
+    	Command         string `json:"command"`
+    	Common          bool   `json:"common"`
+    	Hidden          bool   `json:"hidden"`
+    	ExtranetSupport bool   `json:"extranetSupport"`
+    }
+    if err := json.Unmarshal(raw, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.BotID)
     ```
 
 {% endlist %}

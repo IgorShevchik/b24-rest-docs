@@ -11,13 +11,13 @@
 
 > Scope: [`crm`](../../scopes/permissions.md)
 > 
-> Кто может выполнять метод: администратор
+> Кто может выполнять метод: пользователь с правом на изменение главного элемента и правом на удаление остальных объединяемых элементов
 
 Метод `crm.entity.mergeBatch` объединяет несколько элементов в один. 
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -53,6 +53,8 @@
 - элементы не идентичны, но разница в значениях полей не требует ручной обработки. Например, в одном элементе поле заполнено, а в другом это же поле пустое — будет сохранено значение из заполненного поля.
 
 Главным элементом при объединении будет тот, `ID` которого указан первым в массиве `entityIds`. В главный элемент будет перенесена информация из других элементов. Все элементы кроме главного будут удалены после успешного объединения. 
+
+Права проверяются по каждому элементу отдельно. Для главного элемента нужны права на чтение и изменение, для остальных — на чтение и удаление. Администратору права не проверяют.
 
 #### Ручное объединение при конфликте
 
@@ -211,6 +213,36 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.entity.merge_batch(
+            params={
+                "entityTypeId": 3,
+                "entityIds": [100, 101, 102],
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -249,6 +281,29 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.entity.mergeBatch", b24.Params{
+    	"params": b24.Params{
+    		"entityTypeId": 3,
+    		"entityIds":    []int{100, 101, 102},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.entity.mergeBatch: %w", err)
+    }
+
+    var item struct {
+    	Status string `json:"STATUS"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.Status)
     ```
 
 {% endlist %}
@@ -323,4 +378,4 @@ HTTP-статус: **400**
 
 ## Продолжите изучение
 
-- [crm.duplicate.findbycomm](./crm-duplicate-find-by-comm.md) 
+- [{#T}](./crm-duplicate-find-by-comm.md)

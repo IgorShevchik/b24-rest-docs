@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на чтение реквизитов
 
 Метод возвращает список пользовательских полей реквизита по фильтру.
 
@@ -67,7 +67,7 @@
 || **Название**
 `тип` | **Описание** ||
 || **ID**
-[`int`](../../../data-types.md) | Идентификатор пользовательского поля ||
+[`integer`](../../../data-types.md) | Идентификатор пользовательского поля ||
 || **ENTITY_ID**
 [`string`](../../../data-types.md) | Идентификатор сущности, к которой относится пользовательское поле. Для реквизитов это всегда `CRM_REQUISITE` ||
 || **FIELD_NAME^*^**
@@ -79,7 +79,7 @@
 
 Назначение поля может меняться конечным разработчиком ||
 || **SORT**
-[`int`](../../../data-types.md) | Сортировка ||
+[`integer`](../../../data-types.md) | Сортировка ||
 || **MULTIPLE**
 [`char`](../../../data-types.md) | Признак множественности. Возможные значения:
 - `Y` — да
@@ -123,7 +123,7 @@
 || **HELP_MESSAGE**
 [`string`](../../../data-types.md) | Помощь ||
 || **LIST**
-[`uf_enum_element`](../../../data-types.md) | Элементы списка. Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-enumeration-fields.md) ||
+[`uf_enum_element`](../../../data-types.md#uf_enum_element) | Элементы списка. Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-enumeration-fields.md) ||
 || **SETTINGS**
 [`object`](../../../data-types.md) | Дополнительные настройки (зависят от типа). Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-settings-fields.md) ||
 |#
@@ -290,6 +290,109 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.userfield.list(
+            order={
+                "SORT": "ASC",
+            },
+            filter={
+                "MANDATORY": "N",
+                "LANG": "ru",
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.userfield.list(
+            order={
+                "SORT": "ASC",
+            },
+            filter={
+                "MANDATORY": "N",
+                "LANG": "ru",
+            },
+        ).as_list().response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list_fast`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.userfield.list(
+            order={
+                "SORT": "ASC",
+            },
+            filter={
+                "MANDATORY": "N",
+                "LANG": "ru",
+            },
+        ).as_list_fast(descending=True).response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -329,6 +432,45 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.requisite.userfield.list", b24.Params{
+    	"order": b24.Params{
+    		"SORT": "ASC",
+    	},
+    	"filter": b24.Params{
+    		"MANDATORY": "N",
+    		"LANG":      "ru",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.requisite.userfield.list: %w", err)
+    }
+
+    var items []struct {
+    	ID         b24.ID `json:"ID"`
+    	EntityID   string `json:"ENTITY_ID"`
+    	FieldName  string `json:"FIELD_NAME"`
+    	UserTypeID string `json:"USER_TYPE_ID"`
+    	Sort       string `json:"SORT"`
+    	Multiple   string `json:"MULTIPLE"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID, it.EntityID)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
     ```
 
 {% endlist %}
@@ -488,7 +630,7 @@ HTTP-статус: **40x**, **50x**
 
 {% include notitle [обработка ошибок](../../../../_includes/error-info.md) %}
 
-### Возможные ошибки
+### Возможные коды ошибок
 
 #|  
 || **Текст ошибки** | **Описание** ||

@@ -27,7 +27,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -42,6 +42,16 @@
 [`object`](../../data-types.md) | Объект для фильтрации списка заданий в формате `{"field_1": "value_1", ... "field_N": "value_N"}`, где
 - `field_N` — [поле](#fields) задания для фильтра
 - `value_N` — значение поля
+
+Перед названием фильтруемого поля можно указать тип фильтрации:
+- `=` — равно
+- `!` или `!=` — не равно
+- `<` — меньше
+- `<=` — меньше либо равно
+- `>` — больше
+- `>=` — больше либо равно
+
+Без префикса фильтр сравнивает значение на равенство. Название поля можно передавать в любом регистре.
 
 Если в фильтре присутствует `USER_ID`, то проверяется субординация пользователей:
 - руководитель может запросить список заданий своих подчиненных
@@ -97,52 +107,14 @@
     https://**put_your_bitrix24_address**/rest/bizproc.task.list
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    // Shape of each task item returned in result[]
-    type BizprocTaskItem = {
-      ID: string
-      WORKFLOW_ID: string
-      DOCUMENT_NAME: string
-      DESCRIPTION: string
-      NAME: string
-      MODIFIED: ISODate
-      WORKFLOW_STARTED: ISODate
-      WORKFLOW_STARTED_BY: string
-      OVERDUE_DATE: ISODate | null
-      WORKFLOW_TEMPLATE_ID: string
-      WORKFLOW_TEMPLATE_NAME: string
-      WORKFLOW_STATE: string
-      STATUS: string
-      USER_ID: string
-      USER_STATUS: string
-      MODULE_ID: string
-      ENTITY: string
-      DOCUMENT_ID: string
-      ACTIVITY: string
-      ACTIVITY_NAME: string
-      DOCUMENT_URL: string
-      PARAMETERS: Record<string, unknown>
-    }
-
-    try {
-      // bizproc.task.list returns a single page (max 50 records). For the whole result set
-      // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-      // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-      // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-      // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-      const response = await $b24.actions.v2.call.make<BizprocTaskItem[]>({
-        method: 'bizproc.task.list',
-        params: {
-          select: [
+    ```js
+    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
+    
+    const parameters = {
+        select: [
             'ID',
             'WORKFLOW_ID',
             'DOCUMENT_NAME',
@@ -164,106 +136,116 @@
             'ACTIVITY',
             'ACTIVITY_NAME',
             'DOCUMENT_URL',
-            'PARAMETERS',
-          ],
-          order: {
-            ID: 'DESC',
-          },
-          filter: {
-            USER_ID: 1,
-            STATUS: 0,
-            ACTIVITY: 'RequestInformationOptionalActivity',
-          },
-          start: 0,
+            'PARAMETERS'
+        ],
+        order: {
+            ID: 'DESC'
         },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Tasks count:', result.length, 'First task ID:', result[0]?.ID)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function fetchBizprocTaskList() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          // bizproc.task.list returns a single page (max 50 records). For the whole result set
-          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.task.list',
-            params: {
-              select: [
-                'ID',
-                'WORKFLOW_ID',
-                'DOCUMENT_NAME',
-                'DESCRIPTION',
-                'NAME',
-                'MODIFIED',
-                'WORKFLOW_STARTED',
-                'WORKFLOW_STARTED_BY',
-                'OVERDUE_DATE',
-                'WORKFLOW_TEMPLATE_ID',
-                'WORKFLOW_TEMPLATE_NAME',
-                'WORKFLOW_STATE',
-                'STATUS',
-                'USER_ID',
-                'USER_STATUS',
-                'MODULE_ID',
-                'ENTITY',
-                'DOCUMENT_ID',
-                'ACTIVITY',
-                'ACTIVITY_NAME',
-                'DOCUMENT_URL',
-                'PARAMETERS',
-              ],
-              order: {
-                ID: 'DESC',
-              },
-              filter: {
-                USER_ID: 1,
-                STATUS: 0,
-                ACTIVITY: 'RequestInformationOptionalActivity',
-              },
-              start: 0,
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Tasks count:', result.length, 'First task ID:', result[0]?.ID)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
+        filter: {
+            'USER_ID': 1,
+            'STATUS': 0,
+            'ACTIVITY': 'RequestInformationOptionalActivity'
         }
-      }
-
-      document.addEventListener('DOMContentLoaded', fetchBizprocTaskList)
-    </script>
+    };
+    
+    try {
+        const response = await $b24.callListMethod('bizproc.task.list', parameters);
+        const items = response.getData() || [];
+        for (const entity of items) { console.log('Entity:', entity); }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
+    
+    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
+    
+    const parameters = {
+        select: [
+            'ID',
+            'WORKFLOW_ID',
+            'DOCUMENT_NAME',
+            'DESCRIPTION',
+            'NAME',
+            'MODIFIED',
+            'WORKFLOW_STARTED',
+            'WORKFLOW_STARTED_BY',
+            'OVERDUE_DATE',
+            'WORKFLOW_TEMPLATE_ID',
+            'WORKFLOW_TEMPLATE_NAME',
+            'WORKFLOW_STATE',
+            'STATUS',
+            'USER_ID',
+            'USER_STATUS',
+            'MODULE_ID',
+            'ENTITY',
+            'DOCUMENT_ID',
+            'ACTIVITY',
+            'ACTIVITY_NAME',
+            'DOCUMENT_URL',
+            'PARAMETERS'
+        ],
+        order: {
+            ID: 'DESC'
+        },
+        filter: {
+            'USER_ID': 1,
+            'STATUS': 0,
+            'ACTIVITY': 'RequestInformationOptionalActivity'
+        }
+    };
+    
+    try {
+        const generator = $b24.fetchListMethod('bizproc.task.list', parameters, 'ID');
+        for await (const page of generator) {
+            for (const entity of page) { console.log('Entity:', entity); }
+        }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
+    
+    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
+    
+    const parameters = {
+        select: [
+            'ID',
+            'WORKFLOW_ID',
+            'DOCUMENT_NAME',
+            'DESCRIPTION',
+            'NAME',
+            'MODIFIED',
+            'WORKFLOW_STARTED',
+            'WORKFLOW_STARTED_BY',
+            'OVERDUE_DATE',
+            'WORKFLOW_TEMPLATE_ID',
+            'WORKFLOW_TEMPLATE_NAME',
+            'WORKFLOW_STATE',
+            'STATUS',
+            'USER_ID',
+            'USER_STATUS',
+            'MODULE_ID',
+            'ENTITY',
+            'DOCUMENT_ID',
+            'ACTIVITY',
+            'ACTIVITY_NAME',
+            'DOCUMENT_URL',
+            'PARAMETERS'
+        ],
+        order: {
+            ID: 'DESC'
+        },
+        filter: {
+            'USER_ID': 1,
+            'STATUS': 0,
+            'ACTIVITY': 'RequestInformationOptionalActivity'
+        }
+    };
+    
+    try {
+        const response = await $b24.callMethod('bizproc.task.list', parameters, 0);
+        const result = response.getData().result || [];
+        for (const entity of result) { console.log('Entity:', entity); }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
     ```
 
 - PHP
@@ -424,6 +406,30 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.task.list", b24.Params{
+    	"SELECT": []string{"ID", "WORKFLOW_ID", "DOCUMENT_NAME", "DESCRIPTION", "NAME", "MODIFIED", "WORKFLOW_STARTED", "WORKFLOW_STARTED_BY", "OVERDUE_DATE", "WORKFLOW_TEMPLATE_ID", "WORKFLOW_TEMPLATE_NAME", "WORKFLOW_STATE", "STATUS", "USER_ID", "USER_STATUS", "MODULE_ID", "ENTITY", "DOCUMENT_ID", "ACTIVITY", "ACTIVITY_NAME", "DOCUMENT_URL", "PARAMETERS"},
+    	"ORDER": b24.Params{
+    		"ID": "DESC",
+    	},
+    	"FILTER": b24.Params{
+    		"USER_ID":  1,
+    		"STATUS":   0,
+    		"ACTIVITY": "RequestInformationOptionalActivity",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("bizproc.task.list: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -500,7 +506,31 @@ HTTP-статус: **200**
             "ENTITY": "BizprocDocument",
             "DOCUMENT_ID": "2237",
             "ID": "1471",
-            ...
+            "WORKFLOW_ID": "67a2fda6732f98.84769464",
+            "DOCUMENT_NAME": "Партнерская конференция",
+            "DESCRIPTION": "",
+            "NAME": "Утвердить подрядчика",
+            "MODIFIED": "2025-02-05T08:58:14+03:00",
+            "WORKFLOW_STARTED": "2025-02-05T08:58:14+03:00",
+            "WORKFLOW_STARTED_BY": "1",
+            "OVERDUE_DATE": null,
+            "WORKFLOW_TEMPLATE_ID": "565",
+            "WORKFLOW_TEMPLATE_NAME": "Организация мероприятия",
+            "WORKFLOW_STATE": "Ожидание утверждения",
+            "STATUS": "0",
+            "USER_ID": "1",
+            "USER_STATUS": "0",
+            "MODULE_ID": "lists",
+            "ACTIVITY": "ApproveActivity",
+            "ACTIVITY_NAME": "A3651_68033_56029_16414",
+            "PARAMETERS": {
+                "CommentLabel": "Комментарий",
+                "CommentRequired": "N",
+                "ShowComment": "Y",
+                "StatusYesLabel": "Утвердить",
+                "StatusNoLabel": "Отклонить"
+            },
+            "DOCUMENT_URL": "/bizproc/processes/?livefeed=y&list_id=171&element_id=2237"
         }
     ],
     "total": 2,
@@ -523,7 +553,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../data-types.md) | Корневой элемент ответа. 
+[`array`](../../data-types.md) | Корневой элемент ответа.
 
 Содержит массив объектов с информацией о заданиях бизнес-процессов.
 
@@ -542,7 +572,7 @@ HTTP-статус: **200**
 || **ID**
 [`integer`](../../data-types.md) | Идентификатор задания ||
 || **WORKFLOW_ID**
-[`integer`](../../data-types.md) | Идентификатор бизнес-процесса ||
+[`string`](../../data-types.md) | Идентификатор бизнес-процесса ||
 || **DOCUMENT_NAME**
 [`string`](../../data-types.md) | Название документа ||
 || **DESCRIPTION**
@@ -601,7 +631,7 @@ HTTP-статус: **200**
 || **PARAMETERS**
 [`object`](../../data-types.md) | Объект с описанием [параметров задания](#parameters) ||
 || **DOCUMENT_URL**
-[`object`](../../data-types.md) | Ссылка на документ ||
+[`string`](../../data-types.md) | Ссылка на документ ||
 |#
 
 #### Объект PARAMETERS {#parameters}
@@ -674,7 +704,7 @@ HTTP-статус: **200**
 "Options": {
     "1": "Первый вариант",
     "2": "Второй вариант",
-    "3": "Третий вариант",
+    "3": "Третий вариант"
 },
 ```
 - для типа Привязка к CRM `'E:ECrm'` это доступные типы объектов
@@ -714,6 +744,7 @@ HTTP-статус: **400**
 #|
 || **Код** | **Сообщение об ошибке** | **Описание** ||
 || `ACCESS_DENIED` | Access denied! | Метод запустил не администратор или вы не можете просматривать задания указанного сотрудника ||
+|| `ERROR_SELECT_VALIDATION_FAILURE` | Invalid data in SELECT parameter | В параметре `SELECT` переданы некорректные данные ||
 |#
 
 {% include [системные ошибки](../../../_includes/system-errors.md) %}

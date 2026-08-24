@@ -186,6 +186,37 @@
     );
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.comment.delete(
+            bitrix_id=999,
+            owner_type_id=2,
+            owner_id=10,
+        )
+        result = bitrix_response.response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - PHP CRest
 
     ```php
@@ -203,6 +234,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.comment.delete", b24.Params{
+    	"id":          999,
+    	"ownerTypeId": 2,
+    	"ownerId":     10,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.comment.delete: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

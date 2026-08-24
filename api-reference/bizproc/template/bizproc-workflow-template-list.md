@@ -32,11 +32,14 @@
 - `value_N` — значение поля
 
 Перед названием фильтруемого поля можно указать тип фильтрации:
-- `!` — не равно
+- `=` — равно
+- `!` или `!=` — не равно
 - `<` — меньше
 - `<=` — меньше либо равно
 - `>` — больше
-- `>=` — больше либо равно | ||
+- `>=` — больше либо равно
+
+Без префикса фильтр сравнивает значение на равенство. Название поля можно передавать в любом регистре ||
 || **ORDER**
 [`object`](../../data-types.md) | Объект для сортировки списка запущенных бизнес-процессов в формате `{"field_1": "value_1", ... "field_N": "value_N"}`, где
 - `field_N` — [поле](#fields) шаблона для сортировки
@@ -92,7 +95,7 @@ CRM
 Диск
 - `Bitrix\Disk\BizProcDocument` ||
 || **DOCUMENT_TYPE**
-[`integer`](../../data-types.md) | Тип документа. Возможные значения:
+[`string`](../../data-types.md) | Тип документа. Возможные значения:
 crm:
 - `LEAD` — лиды
 - `CONTACT` — контакты
@@ -168,117 +171,56 @@ crm:
     https://**put_your_bitrix24_address**/rest/bizproc.workflow.template.list
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    // Shape of each WorkflowTemplateItem returned in result[]
-    type WorkflowTemplateItem = {
-      ID: string
-      NAME: string
-      USER_ID: string
-      SYSTEM_CODE: string
-    }
-
-    try {
-      // bizproc.workflow.template.list returns a single page (max 50 records). For the whole result set
-      // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-      // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-      // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-      // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-      const response = await $b24.actions.v2.call.make<WorkflowTemplateItem[]>({
-        method: 'bizproc.workflow.template.list',
-        params: {
-          select: [
+    ```js
+    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
+    
+    const parameters = {
+        select: [
             'ID',
             'NAME',
             'USER_ID',
-            'SYSTEM_CODE',
-          ],
-          filter: {
+            'SYSTEM_CODE'
+        ],
+        filter: {
             MODULE_ID: 'lists',
-            AUTO_EXECUTE: 0,
-          },
-          order: {
-            ID: 'DESC',
-          },
-          start: 0,
+            AUTO_EXECUTE: 0
         },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Templates on this page:', result.length, result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function fetchWorkflowTemplateList() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          // bizproc.workflow.template.list returns a single page (max 50 records). For the whole result set
-          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.workflow.template.list',
-            params: {
-              select: [
-                'ID',
-                'NAME',
-                'USER_ID',
-                'SYSTEM_CODE',
-              ],
-              filter: {
-                MODULE_ID: 'lists',
-                AUTO_EXECUTE: 0,
-              },
-              order: {
-                ID: 'DESC',
-              },
-              start: 0,
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Templates on this page:', result.length, result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
+        order: {
+            ID: 'DESC'
         }
-      }
-
-      document.addEventListener('DOMContentLoaded', fetchWorkflowTemplateList)
-    </script>
+    };
+    
+    try {
+        const response = await $b24.callListMethod('bizproc.workflow.template.list', parameters);
+        const items = response.getData() || [];
+        for (const entity of items) { console.log('Entity:', entity); }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
+    
+    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
+    
+    try {
+        const generator = $b24.fetchListMethod('bizproc.workflow.template.list', parameters, 'ID');
+        for await (const page of generator) {
+            for (const entity of page) { console.log('Entity:', entity); }
+        }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
+    
+    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
+    
+    try {
+        const response = await $b24.callMethod('bizproc.workflow.template.list', parameters, 0);
+        const result = response.getData().result || [];
+        for (const entity of result) { console.log('Entity:', entity); }
+    } catch (error) {
+        console.error('Request failed', error);
+    }
     ```
 
 - PHP
@@ -373,6 +315,29 @@ crm:
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.workflow.template.list", b24.Params{
+    	"SELECT": []string{"ID", "NAME", "USER_ID", "SYSTEM_CODE"},
+    	"FILTER": b24.Params{
+    		"MODULE_ID":    "lists",
+    		"AUTO_EXECUTE": 0,
+    	},
+    	"ORDER": b24.Params{
+    		"ID": "DESC",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("bizproc.workflow.template.list: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -390,9 +355,10 @@ HTTP-статус: **200**
         },
         {
            "ID": "379",
-           ... 
+           "NAME": "App template",
+           "USER_ID": "503",
+           "SYSTEM_CODE": "rest_app_5"
         }
-        ...
     ],
     "total": 34,
     "time": {
@@ -414,9 +380,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../data-types.md) | Корневой элемент ответа. 
+[`array`](../../data-types.md) | Корневой элемент ответа.
 
-Cодержит массив объектов с информацией о шаблонах бизнес-процессов.
+Содержит массив объектов с информацией о шаблонах бизнес-процессов.
 
 Каждый объект содержит [поля](#fields) шаблона, указанные в параметре `SELECT` ||
 || **total**
@@ -432,7 +398,7 @@ HTTP-статус: **400**
 ```json
 {
     "error": "ACCESS_DENIED",
-    "error_description": "Access denied!",
+    "error_description": "Access denied!"
 }
 ```
 

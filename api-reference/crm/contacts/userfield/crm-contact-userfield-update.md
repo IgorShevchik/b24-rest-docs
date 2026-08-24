@@ -11,23 +11,23 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: администратор
+> Кто может выполнять метод: администратор CRM
 
 Метод `crm.contact.userfield.update` обновляет существующее пользовательское поле контактов.
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id***
-[`integer`][1] | Идентификатор пользовательского поля.
+[`integer`](../../../data-types.md) | Идентификатор пользовательского поля.
 
 Идентификатор можно получить с помощью методов [`crm.contact.userfield.add`](./crm-contact-userfield-add.md) и [`crm.contact.userfield.list`](./crm-contact-userfield-list.md) ||
 || **fields***
-[`object`][1] | Объект формата:
+[`object`](../../../data-types.md) | Объект формата:
 
 ```
 {
@@ -55,27 +55,27 @@
 || **Параметр**
 `тип` | **Описание** ||
 || **MANDATORY**
-[`boolean`][1] | Является ли поле обязательным. Возможные значения:
+[`boolean`](../../../data-types.md) | Является ли поле обязательным. Возможные значения:
 - `Y` — да
 - `N` — нет
 ||
 || **SHOW_FILTER**
-[`boolean`][1] | Показывать ли поле в фильтре. Возможные значения:
+[`boolean`](../../../data-types.md) | Показывать ли поле в фильтре. Возможные значения:
 - `Y` — да
 - `N` — нет
 ||
 || **XML_ID**
-[`string`][1] | Внешний код ||
+[`string`](../../../data-types.md) | Внешний код ||
 || **SETTINGS**
-[`object`][1] | Дополнительные параметры поля. Для каждого типа поля (`USER_TYPE_ID`) существует свой пул доступных настроек, они описаны [ниже](#settings).
+[`object`](../../../data-types.md) | Дополнительные параметры поля. Для каждого типа поля (`USER_TYPE_ID`) существует свой пул доступных настроек, они описаны [ниже](#settings).
 
 Поле перезаписывает лишь переданные значения ||
 || **LIST**
 [`uf_enum_element[]`](#uf_enum_element) | Список возможных значений для пользовательского поля типа `enumeration`. Для пользовательских полей другого типа данный параметр не несет смысла ||
 || **SORT**
-[`integer`][1] | Индекс сортировки. Обязательно больше нуля ||
+[`integer`](../../../data-types.md) | Индекс сортировки. Обязательно больше нуля ||
 || **SHOW_IN_LIST**
-[`boolean`][1] | Показывать ли пользовательское поле в списке.
+[`boolean`](../../../data-types.md) | Показывать ли пользовательское поле в списке.
 
 Данный параметр ни на что не влияет в рамках `crm`.
 
@@ -84,12 +84,12 @@
 - `N` — нет
 ||
 || **EDIT_IN_LIST**
-[`boolean`][1] | Разрешать ли редактирование пользователем. Возможные значения:
+[`boolean`](../../../data-types.md) | Разрешать ли редактирование пользователем. Возможные значения:
 - `Y` — да
 - `N` — нет
 ||
 || **IS_SEARCHABLE**
-[`boolean`][1] | Участвуют ли значения поля в поиске.
+[`boolean`](../../../data-types.md) | Участвуют ли значения поля в поиске.
 
 Данный параметр ни на что не влияет в рамках `crm`.
 
@@ -98,7 +98,7 @@
 - `N` — нет
 ||
 || **LIST_FILTER_LABEL**
-[`string`][1]\|[`lang_map`](../../data-types.md) | Подпись фильтра в списке.
+[`string`](../../../data-types.md)\|[`lang_map`](../../data-types.md) | Подпись фильтра в списке.
 
 При передаче строки она устанавливается для каждого языка.
 
@@ -106,7 +106,7 @@
 
 Поле полностью перезаписывает предыдущее значение ||
 || **LIST_COLUMN_LABEL**
-[`string`][1]\|[`lang_map`](../../data-types.md) | Заголовок в списке.
+[`string`](../../../data-types.md)\|[`lang_map`](../../data-types.md) | Заголовок в списке.
 
 При передаче строки она устанавливается для каждого языка.
 
@@ -114,7 +114,7 @@
 
 Поле полностью перезаписывает предыдущее значение ||
 || **EDIT_FORM_LABEL**
-[`string`][1]\|[`lang_map`](../../data-types.md) | Подпись в форме редактирования.
+[`string`](../../../data-types.md)\|[`lang_map`](../../data-types.md) | Подпись в форме редактирования.
 
 При передаче строки она устанавливается для каждого языка.
 
@@ -122,7 +122,7 @@
 
 Поле полностью перезаписывает предыдущее значение ||
 || **ERROR_MESSAGE**
-[`string`][1]\|[`lang_map`](../../data-types.md) | Сообщение об ошибке.
+[`string`](../../../data-types.md)\|[`lang_map`](../../data-types.md) | Сообщение об ошибке.
 
 При передаче строки она устанавливается для каждого языка.
 
@@ -130,7 +130,7 @@
 
 Поле полностью перезаписывает предыдущее значение ||
 || **HELP_MESSAGE**
-[`string`][1]\|[`lang_map`](../../data-types.md) | Помощь.
+[`string`](../../../data-types.md)\|[`lang_map`](../../data-types.md) | Помощь.
 
 При передаче строки она устанавливается для каждого языка.
 
@@ -151,9 +151,9 @@
     || **Название**
     `тип` | **Описание** ||
     || **DEFAULT_VALUE**
-    [`string`][1] | Значение по умолчанию ||
+    [`string`](../../../data-types.md) | Значение по умолчанию ||
     || **ROWS**
-    [`integer`][1] | Количество строк в поле ввода. Обязательно больше 0 и меньше 50.
+    [`integer`](../../../data-types.md) | Количество строк в поле ввода. Обязательно больше 0 и меньше 50.
 
     Если передавать значение <= 0, то выставится значение `1`.
 
@@ -167,7 +167,7 @@
     || **Название**
     `тип` | **Описание** ||
     || **DEFAULT_VALUE**
-    [`integer`][1] | Значение по умолчанию ||
+    [`integer`](../../../data-types.md) | Значение по умолчанию ||
     |#
 
 - double
@@ -176,9 +176,9 @@
     || **Название**
     `тип` | **Описание** ||
     || **DEFAULT_VALUE**
-    [`double`][1] | Значение по умолчанию ||
+    [`double`](../../../data-types.md) | Значение по умолчанию ||
     || **PRECISION**
-    [`integer`][1] | Точность числа. Обязательно больше или равно 0.
+    [`integer`](../../../data-types.md) | Точность числа. Обязательно больше или равно 0.
 
     Если передавать невалидное значение, выставится значение `2` ||
     |#
@@ -189,14 +189,14 @@
     || **Название**
     `тип` | **Описание** ||
     || **DEFAULT_VALUE**
-    [`integer`][1] | Значение по умолчанию, где `1` — да, `0` — нет.
+    [`integer`](../../../data-types.md) | Значение по умолчанию, где `1` — да, `0` — нет.
 
     При передаче значения выставится значение по правилу:
     - `>= 1` -> 1
     - `<= 0` -> 0
     ||
     || **DISPLAY**
-    [`string`][1] | Внешний вид. Возможные значения:
+    [`string`](../../../data-types.md) | Внешний вид. Возможные значения:
     - `CHECKBOX` — флажок
     - `RADIO` — радиокнопки
     - `DROPDOWN` — выпадающий список
@@ -209,7 +209,7 @@
     || **Название**
     `тип` | **Описание** ||
     || **DEFAULT_VALUE**
-    [`object`][1]  | Значение по умолчанию. Объект формата:
+    [`object`](../../../data-types.md)  | Значение по умолчанию. Объект формата:
     ```
     {
         VALUE: datetime,
@@ -238,11 +238,11 @@
     || **Название**
     `тип` | **Описание** ||
     || **DISPLAY**
-    [`string`][1] | Внешний вид. Возможные значения:
+    [`string`](../../../data-types.md) | Внешний вид. Возможные значения:
     - `LIST` — список
     - `UI` — набираемый список
     - `CHECKBOX` — флажки
-    - `DIALOG` — диалог выбора сущностей
+    - `DIALOG` — диалог выбора объектов
     ||
     || **LIST_HEIGHT** | Высота списка. Обязано быть больше 0 ||
     |#
@@ -253,23 +253,23 @@
     || **Название**
     `тип` | **Описание** ||
     || **IBLOCK_TYPE_ID**
-    [`string`][1] | Идентификатор типа инфоблока ||
+    [`string`](../../../data-types.md) | Идентификатор типа инфоблока ||
     || **IBLOCK_ID**
-    [`string`][1] | Идентификатор инфоблока ||
+    [`string`](../../../data-types.md) | Идентификатор инфоблока ||
     || **DEFAULT_VALUE**
-    [`string`][1] | Значение по умолчанию ||
+    [`string`](../../../data-types.md) | Значение по умолчанию ||
     || **DISPLAY**
-    [`string`][1] | Внешний вид. Возможные значения:
+    [`string`](../../../data-types.md) | Внешний вид. Возможные значения:
     - `DIALOG` — диалог
     - `UI` — набираемый список
     - `LIST` — список
     - `CHECKBOX` — флажки
     ||
     || **LIST_HEIGHT**
-    [`integer`][1] | Высота списка. Обязательно больше 0
+    [`integer`](../../../data-types.md) | Высота списка. Обязательно больше 0
     ||
     || **ACTIVE_FILTER**
-    [`boolean`][1] | Показывать ли элементы с включенным флагом активности. Возможные значения:
+    [`boolean`](../../../data-types.md) | Показывать ли элементы с включенным флагом активности. Возможные значения:
     - `Y` — да
     - `N` — нет
     ||
@@ -281,7 +281,7 @@
     || **Название**
     `тип` | **Описание** ||
     || **ENTITY_TYPE**
-    [`string`][1] | Идентификатор типа справочника.
+    [`string`](../../../data-types.md) | Идентификатор типа справочника.
 
     Используйте [`crm.status.entity.types`](../../status/crm-status-entity-types.md), чтобы узнать возможные значения ||
     |#
@@ -294,22 +294,22 @@
     || **Название**
     `тип` | **Описание** ||
     || **LEAD**
-    [`boolean`][1] | Включена ли привязка к [Лидам](../../leads/index.md). Возможные значения:
+    [`boolean`](../../../data-types.md) | Включена ли привязка к [Лидам](../../leads/index.md). Возможные значения:
     - `Y` — да
     - `N` — нет
     ||
     || **CONTACT**
-    [`boolean`][1] | Включена ли привязка к [Контактам](../index.md). Возможные значения:
+    [`boolean`](../../../data-types.md) | Включена ли привязка к [Контактам](../index.md). Возможные значения:
     - `Y` — да
     - `N` — нет
     ||
     || **COMPANY**
-    [`boolean`][1] | Включена ли привязка к [Компаниям](../../companies/index.md). Возможные значения:
+    [`boolean`](../../../data-types.md) | Включена ли привязка к [Компаниям](../../companies/index.md). Возможные значения:
     - `Y` — да
     - `N` — нет
     ||
     || **DEAL**
-    [`boolean`][1] | Включена ли привязка к [Сделкам](../../deals/index.md). Возможные значения:
+    [`boolean`](../../../data-types.md) | Включена ли привязка к [Сделкам](../../deals/index.md). Возможные значения:
     - `Y` — да
     - `N` — нет
     ||
@@ -323,12 +323,12 @@
 || **Название**
 `тип` | **Описание** ||
 || **ID**
-[`string`][1] | Идентификатор элемента списка. При передаче данного параметра будет изменен соответствующий элемент списка, иначе будет добавлен новый элемент списка.
+[`string`](../../../data-types.md) | Идентификатор элемента списка. При передаче данного параметра будет изменен соответствующий элемент списка, иначе будет добавлен новый элемент списка.
 
 Идентификатор можно узнать с помощью метода [`crm.contact.userfield.get`](./crm-contact-userfield-get.md#uf_enum_element)
 ||
 || **DEL**
-[`boolean`][1] | Флаг, необходимый для удаления элемента списка. Имеет смысл лишь при передаче `ID`. 
+[`boolean`](../../../data-types.md) | Флаг, необходимый для удаления элемента списка. Имеет смысл лишь при передаче `ID`.
 
 Возможные значения:
 `Y` — удалить
@@ -337,17 +337,17 @@
 По умолчанию `N`
 ||
 || **VALUE**
-[`string`][1] | Значение элемента списка ||
+[`string`](../../../data-types.md) | Значение элемента списка ||
 || **SORT**
-[`integer`][1] | Индекс сортировки. Обязательно больше или равно 0 ||
+[`integer`](../../../data-types.md) | Индекс сортировки. Обязательно больше или равно 0 ||
 || **DEF**
-[`boolean`][1] | Является ли элемент списка значением по умолчанию. Возможные значения:
+[`boolean`](../../../data-types.md) | Является ли элемент списка значением по умолчанию. Возможные значения:
 - `Y` — да
 - `N` — нет
 
 Для множественного поля допустимо несколько `DEF = Y`. Для не множественного значением по умолчанию будет считаться первый переданный элемент списка с `DEF = Y` ||
 || **XML_ID**
-[`string`][1] | Внешний код значения. Обязательно уникальный в рамках элементов списка пользовательского поля ||
+[`string`](../../../data-types.md) | Внешний код значения. Обязательно уникальный в рамках элементов списка пользовательского поля ||
 |#
 
 ## Примеры кода
@@ -378,138 +378,94 @@
     https://**put_your_bitrix24_address**/rest/crm.contact.userfield.update
     ```
 
-- JS (TS)
+- BX24.js
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'crm.contact.userfield.update',
-        params: {
-          id: 536,
-          fields: {
-            MANDATORY: 'N',
-            SHOW_FILTER: 'N',
-            SETTINGS: {
-              DEFAULT_VALUE: 'Hello, World! Default value (changed)',
-              ROWS: 10,
-            },
-            SORT: 2000,
-            EDIT_IN_LIST: 'N',
-            LIST_FILTER_LABEL: 'Hello, World! Filter (changed)',
-            LIST_COLUMN_LABEL: {
-              en: 'Hello, World! Column (changed)',
-              ru: 'Hello, World! Column (changed)',
-              de: 'Hello, World! Column (changed)',
-            },
-            EDIT_FORM_LABEL: {
-              en: 'Hello, World! Edit (changed)',
-              ru: 'Hello, World! Edit (changed)',
-              de: 'Hello, World! Edit (changed)',
-            },
-            ERROR_MESSAGE: {
-              en: 'Hello, World! Error (changed)',
-              ru: 'Hello, World! Error (changed)',
-              de: 'Hello, World! Error (changed)',
-            },
-            HELP_MESSAGE: {
-              en: 'Hello, World! Help (changed)',
-              ru: 'Hello, World! Help (changed)',
-              de: 'Hello, World! Help (changed)',
-            },
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Update successful:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateContactUserfield() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'crm.contact.userfield.update',
-            params: {
-              id: 536,
-              fields: {
-                MANDATORY: 'N',
-                SHOW_FILTER: 'N',
+    ```js
+    BX24.callMethod(
+        'crm.contact.userfield.update',
+        {
+            id: 536,
+            fields: {
+                MANDATORY: "N",
+                SHOW_FILTER: "N",
                 SETTINGS: {
-                  DEFAULT_VALUE: 'Hello, World! Default value (changed)',
-                  ROWS: 10,
+                    DEFAULT_VALUE: "Привет, мир! Значение по умолчанию (изменено)",
+                    ROWS: 10,
                 },
                 SORT: 2000,
-                EDIT_IN_LIST: 'N',
-                LIST_FILTER_LABEL: 'Hello, World! Filter (changed)',
+                EDIT_IN_LIST: "N",
+                LIST_FILTER_LABEL: "Привет, мир! Фильтр (изменено)",
                 LIST_COLUMN_LABEL: {
-                  en: 'Hello, World! Column (changed)',
-                  ru: 'Hello, World! Column (changed)',
-                  de: 'Hello, World! Column (changed)',
+                    "en": "Hello, World! Column (changed)",
+                    "ru": "Привет, мир! Колонка (изменено)",
+                    "de": "Hallo, Welt! Spalte (geändert)"
                 },
                 EDIT_FORM_LABEL: {
-                  en: 'Hello, World! Edit (changed)',
-                  ru: 'Hello, World! Edit (changed)',
-                  de: 'Hello, World! Edit (changed)',
+                    "en": "Hello, World! Edit (changed)",
+                    "ru": "Привет, мир! Редактировать (изменено)",
+                    "de": "Hallo, Welt! Bearbeiten (geändert)"
                 },
                 ERROR_MESSAGE: {
-                  en: 'Hello, World! Error (changed)',
-                  ru: 'Hello, World! Error (changed)',
-                  de: 'Hello, World! Error (changed)',
+                    "en": "Hello, World! Error (changed)",
+                    "ru": "Привет, мир! Ошибка (изменено)",
+                    "de": "Hallo, Welt! Fehler (geändert)"
                 },
                 HELP_MESSAGE: {
-                  en: 'Hello, World! Help (changed)',
-                  ru: 'Hello, World! Help (changed)',
-                  de: 'Hello, World! Help (changed)',
+                    "en": "Hello, World! Help (changed)",
+                    "ru": "Привет, мир! Помощь (изменено)",
+                    "de": "Hallo, Welt! Hilfe (geändert)"
                 },
-              },
             },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Update successful:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateContactUserfield)
-    </script>
+        },
+        (result) => {
+            result.error()
+                ? console.error(result.error())
+                : console.info(result.data())
+            ;
+        },
+    );
     ```
 
 - PHP
+
+    ```php
+    try {
+        $contactUserfieldItemId = 123; // Example ID
+        $userfieldFieldsToUpdate = [
+            'FIELD_NAME' => 'New Field Name',
+            'USER_TYPE_ID' => 'string',
+            'SORT' => '100',
+            'MULTIPLE' => 'N',
+            'MANDATORY' => 'N',
+            'SHOW_FILTER' => 'Y',
+            'SHOW_IN_LIST' => 'Y',
+            'EDIT_IN_LIST' => 'Y',
+            'IS_SEARCHABLE' => 'Y',
+            'EDIT_FORM_LABEL' => 'New Label',
+            'LIST_COLUMN_LABEL' => 'Column Label',
+            'LIST_FILTER_LABEL' => 'Filter Label',
+            'ERROR_MESSAGE' => 'Error Message',
+            'HELP_MESSAGE' => 'Help Message',
+            'LIST' => '',
+            'SETTINGS' => '',
+        ];
+
+        $result = $serviceBuilder
+            ->getCRMScope()
+            ->contactUserfield()
+            ->update($contactUserfieldItemId, $userfieldFieldsToUpdate);
+
+        if ($result->isSuccess()) {
+            print($result->getCoreResponse()->getResponseData()->getResult()[0]);
+        } else {
+            print("Update failed.");
+        }
+    } catch (Throwable $e) {
+        print("Error: " . $e->getMessage());
+    }
+    ```
+
+- PHP CRest
 
     ```php
     require_once('crest.php');
@@ -557,43 +513,109 @@
     echo '</PRE>';
     ```
 
-- PHP (B24PhpSdk)
+- Python
 
-    ```php
-    try {
-        $contactUserfieldItemId = 123; // Example ID
-        $userfieldFieldsToUpdate = [
-            'FIELD_NAME' => 'New Field Name',
-            'USER_TYPE_ID' => 'string',
-            'SORT' => '100',
-            'MULTIPLE' => 'N',
-            'MANDATORY' => 'N',
-            'SHOW_FILTER' => 'Y',
-            'SHOW_IN_LIST' => 'Y',
-            'EDIT_IN_LIST' => 'Y',
-            'IS_SEARCHABLE' => 'Y',
-            'EDIT_FORM_LABEL' => 'New Label',
-            'LIST_COLUMN_LABEL' => 'Column Label',
-            'LIST_FILTER_LABEL' => 'Filter Label',
-            'ERROR_MESSAGE' => 'Error Message',
-            'HELP_MESSAGE' => 'Help Message',
-            'LIST' => '',
-            'SETTINGS' => '',
-        ];
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
 
-        $result = $serviceBuilder
-            ->getCRMScope()
-            ->contactUserfield()
-            ->update($contactUserfieldItemId, $userfieldFieldsToUpdate);
+    client: BaseClient
 
-        if ($result->isSuccess()) {
-            print($result->getCoreResponse()->getResponseData()->getResult()[0]);
-        } else {
-            print("Update failed.");
-        }
-    } catch (Throwable $e) {
-        print("Error: " . $e->getMessage());
+    try:
+        bitrix_response = client.crm.contact.userfield.update(
+            bitrix_id=536,
+            fields={
+                "MANDATORY": "N",
+                "SHOW_FILTER": "N",
+                "SETTINGS": {
+                    "DEFAULT_VALUE": "Привет, мир! Значение по умолчанию (изменено)",
+                    "ROWS": 10,
+                },
+                "SORT": 2000,
+                "EDIT_IN_LIST": "N",
+                "LIST_FILTER_LABEL": "Привет, мир! Фильтр (изменено)",
+                "LIST_COLUMN_LABEL": {
+                    "en": "Hello, World! Column (changed)",
+                    "ru": "Привет, мир! Колонка (изменено)",
+                    "de": "Hallo, Welt! Spalte (geändert)",
+                },
+                "EDIT_FORM_LABEL": {
+                    "en": "Hello, World! Edit (changed)",
+                    "ru": "Привет, мир! Редактировать (изменено)",
+                    "de": "Hallo, Welt! Bearbeiten (geändert)",
+                },
+                "ERROR_MESSAGE": {
+                    "en": "Hello, World! Error (changed)",
+                    "ru": "Привет, мир! Ошибка (изменено)",
+                    "de": "Hallo, Welt! Fehler (geändert)",
+                },
+                "HELP_MESSAGE": {
+                    "en": "Hello, World! Help (changed)",
+                    "ru": "Привет, мир! Помощь (изменено)",
+                    "de": "Hallo, Welt! Hilfe (geändert)",
+                },
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.userfield.update", b24.Params{
+    	"id": 536,
+    	"fields": b24.Params{
+    		"MANDATORY":   "N",
+    		"SHOW_FILTER": "N",
+    		"SETTINGS": b24.Params{
+    			"DEFAULT_VALUE": "Привет, мир! Значение по умолчанию (изменено)",
+    			"ROWS":          10,
+    		},
+    		"SORT":              2000,
+    		"EDIT_IN_LIST":      "N",
+    		"LIST_FILTER_LABEL": "Привет, мир! Фильтр (изменено)",
+    		"LIST_COLUMN_LABEL": b24.Params{
+    			"en": "Hello, World! Column (changed)",
+    			"ru": "Привет, мир! Колонка (изменено)",
+    			"de": "Hallo, Welt! Spalte (geändert)",
+    		},
+    		"EDIT_FORM_LABEL": b24.Params{
+    			"en": "Hello, World! Edit (changed)",
+    			"ru": "Привет, мир! Редактировать (изменено)",
+    			"de": "Hallo, Welt! Bearbeiten (geändert)",
+    		},
+    		"ERROR_MESSAGE": b24.Params{
+    			"en": "Hello, World! Error (changed)",
+    			"ru": "Привет, мир! Ошибка (изменено)",
+    			"de": "Hallo, Welt! Fehler (geändert)",
+    		},
+    		"HELP_MESSAGE": b24.Params{
+    			"en": "Hello, World! Help (changed)",
+    			"ru": "Привет, мир! Помощь (изменено)",
+    			"de": "Hallo, Welt! Hilfe (geändert)",
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.contact.userfield.update: %w", err)
     }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}
@@ -664,132 +686,52 @@
     https://**put_your_bitrix24_address**/rest/crm.contact.userfield.update
     ```
 
-- JS (TS)
+- BX24.js
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'crm.contact.userfield.update',
-        params: {
-          fields: {
-            MANDATORY: 'N',
-            SHOW_FILTER: 'Y',
-            LIST: [
-              {
-                ID: 115,
-                DEL: 'Y',
-              },
-              {
-                ID: 116,
-                DEL: 'Y',
-              },
-              {
-                ID: 117,
-                VALUE: 'List item #3 (changed)',
-                SORT: 50,
-              },
-              {
-                VALUE: 'List item #5',
-                XML_ID: 'XML_ID_5',
-                SORT: 500,
-              },
-            ],
-            SETTINGS: {
-              DISPLAY: 'DIALOG',
-              LIST_HEIGHT: 3,
-            },
-            SORT: 1000,
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Update successful:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateContactUserfieldList() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'crm.contact.userfield.update',
-            params: {
-              fields: {
-                MANDATORY: 'N',
-                SHOW_FILTER: 'Y',
+    ```js
+    BX24.callMethod(
+        'crm.contact.userfield.update',
+        {
+            fields: {
+                MANDATORY: "N",
+                SHOW_FILTER: "Y",
                 LIST: [
-                  {
-                    ID: 115,
-                    DEL: 'Y',
-                  },
-                  {
-                    ID: 116,
-                    DEL: 'Y',
-                  },
-                  {
-                    ID: 117,
-                    VALUE: 'List item #3 (changed)',
-                    SORT: 50,
-                  },
-                  {
-                    VALUE: 'List item #5',
-                    XML_ID: 'XML_ID_5',
-                    SORT: 500,
-                  },
+                    {
+                        ID: 115,
+                        DEL: "Y"
+                    },
+                    {
+                        ID: 116,
+                        DEL: "Y",
+                    },
+                    {
+                        ID: 117,
+                        VALUE: "Элемент списка #3 (изменено)",
+                        SORT: 50,
+                    },
+                    {
+                        VALUE: "Элемент списка #5",
+                        XML_ID: "XML_ID_5",
+                        SORT: 500,
+                    },
                 ],
                 SETTINGS: {
-                  DISPLAY: 'DIALOG',
-                  LIST_HEIGHT: 3,
+                    DISPLAY: "DIALOG",
+                    LIST_HEIGHT: 3,
                 },
                 SORT: 1000,
-              },
             },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Update successful:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateContactUserfieldList)
-    </script>
+        },
+        (result) => {
+            result.error()
+                ? console.error(result.error())
+                : console.info(result.data())
+            ;
+        },
+    );
     ```
 
-- PHP
+- PHP CRest
 
     ```php
     require_once('crest.php');
@@ -834,6 +776,108 @@
     echo '</PRE>';
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.contact.userfield.update(
+            bitrix_id=536,
+            fields={
+                "MANDATORY": "N",
+                "SHOW_FILTER": "Y",
+                "SETTINGS": {
+                    "DISPLAY": "DIALOG",
+                    "LIST_HEIGHT": 3,
+                },
+                "SORT": 1000,
+            },
+            list=[
+                {
+                    "ID": 115,
+                    "DEL": "Y",
+                },
+                {
+                    "ID": 116,
+                    "DEL": "Y",
+                },
+                {
+                    "ID": 117,
+                    "VALUE": "Элемент списка #3 (изменено)",
+                    "SORT": 50,
+                },
+                {
+                    "VALUE": "Элемент списка #5",
+                    "XML_ID": "XML_ID_5",
+                    "SORT": 500,
+                },
+            ],
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.userfield.update", b24.Params{
+    	"fields": b24.Params{
+    		"MANDATORY":   "N",
+    		"SHOW_FILTER": "Y",
+    		"LIST": []b24.Params{
+    			{
+    				"ID":  115,
+    				"DEL": "Y",
+    			},
+    			{
+    				"ID":  116,
+    				"DEL": "Y",
+    			},
+    			{
+    				"ID":    117,
+    				"VALUE": "Элемент списка #3 (изменено)",
+    				"SORT":  50,
+    			},
+    			{
+    				"VALUE":  "Элемент списка #5",
+    				"XML_ID": "XML_ID_5",
+    				"SORT":   500,
+    			},
+    		},
+    		"SETTINGS": b24.Params{
+    			"DISPLAY":     "DIALOG",
+    			"LIST_HEIGHT": 3,
+    		},
+    		"SORT": 1000,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.contact.userfield.update: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -861,7 +905,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`boolean`][1] | Корневой элемент ответа, содержит `true` в случае успеха ||
+[`boolean`](../../../data-types.md) | Корневой элемент ответа, содержит `true` в случае успеха ||
 || **time**
 [`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
@@ -883,9 +927,9 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-`     | `Parameter 'fields' must be array` | Переданный `fields` не является объектом ||
-|| `-`     | `ID is not defined or invalid`     | Переданный `id` меньше нуля или не передан вовсе ||
-|| `-`     | `Access denied`                    | Возникает в случаях, когда:
+|| Пустое значение | `Parameter 'fields' must be array` | Переданный `fields` не является объектом ||
+|| Пустое значение | `ID is not defined or invalid`     | Переданный `id` меньше нуля или не передан вовсе ||
+|| Пустое значение | `Access denied`                    | Возникает в случаях, когда:
 - у пользователя нет административных прав
 - пользователь пытается удалить пользовательское поле, не привязанное к контактам ||
 || `ERROR_NOT_FOUND` | `The entity with ID 'id' is not found` | Пользовательского поля с переданным `id` не существует ||
@@ -900,5 +944,3 @@ HTTP-статус: **400**
 - [{#T}](./crm-contact-userfield-get.md)
 - [{#T}](./crm-contact-userfield-list.md)
 - [{#T}](./crm-contact-userfield-delete.md)
-
-[1]: ../../../data-types.md

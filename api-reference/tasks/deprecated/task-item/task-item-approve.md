@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод переводит задачу, ожидающую контроля, в статус «завершена».
+Метод `task.item.approve` переводит задачу, ожидающую контроля, в статус «завершена».
 
 {% note warning "DEPRECATED" %}
 
@@ -64,6 +64,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type ApproveResult = boolean
 
@@ -181,6 +182,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.approve", b24.Params{
+    	"TASKID": 13,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.approve: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

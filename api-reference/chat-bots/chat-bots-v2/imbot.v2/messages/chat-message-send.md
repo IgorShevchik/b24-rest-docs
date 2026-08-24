@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -87,93 +87,26 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Chat.Message.send
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type ChatMessageSendResult = {
-      id: number
-      uuidMap: Record<string, number>
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<ChatMessageSendResult>({
-        method: 'imbot.v2.Chat.Message.send',
-        params: {
-          botId: 456,
-          dialogId: 'chat5',
-          fields: {
-            message: 'Hello from bot!',
-            keyboard: [
-              { TEXT: 'Open', LINK: 'https://example.com', BG_COLOR_TOKEN: 'primary' },
-            ],
-          },
+      const response = await $b24.callMethod('imbot.v2.Chat.Message.send', {
+        botId: 456,
+        dialogId: 'chat5',
+        fields: {
+          message: 'Hello from bot!',
+          keyboard: [
+            { TEXT: 'Open', LINK: 'https://example.com', BG_COLOR_TOKEN: 'primary' },
+          ],
         },
-        requestId: Text.getUuidRfc4122()
-      })
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Message sent, id:', result.id, 'uuidMap:', result.uuidMap)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function sendChatMessage() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.Chat.Message.send',
-            params: {
-              botId: 456,
-              dialogId: 'chat5',
-              fields: {
-                message: 'Hello from bot!',
-                keyboard: [
-                  { TEXT: 'Open', LINK: 'https://example.com', BG_COLOR_TOKEN: 'primary' },
-                ],
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Message sent, id:', result.id, 'uuidMap:', result.uuidMap)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', sendChatMessage)
-    </script>
     ```
 
 - PHP
@@ -253,6 +186,38 @@
     } else {
         echo 'Message ID: ' . $result['result']['id'];
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.Chat.Message.send", b24.Params{
+    	"botId":    456,
+    	"botToken": "my_bot_token",
+    	"dialogId": "chat5",
+    	"fields": b24.Params{
+    		"message": "Hello from bot!",
+    		"keyboard": []b24.Params{
+    			{
+    				"TEXT":           "Open",
+    				"LINK":           "https://example.com",
+    				"BG_COLOR_TOKEN": "primary",
+    			},
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.Chat.Message.send: %w", err)
+    }
+
+    var item struct {
+    	ID b24.ID `json:"id"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID)
     ```
 
 {% endlist %}

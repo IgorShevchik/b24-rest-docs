@@ -97,17 +97,17 @@
          -H "Content-Type: application/json" \
          -H "Accept: application/json" \
          -d '{
-             "SELECT": [
+             "select": [
                  "id",
                  "title",
                  "urlCheck",
                  "dateCreate"
              ],
-             "FILTER": {
+             "filter": {
                  "%=title": "MyConnector%",
                  "!description": ""
              },
-             "ORDER": {
+             "order": {
                  "dateCreate": "DESC"
              }
              }' \
@@ -121,17 +121,17 @@
          -H "Content-Type: application/json" \
          -H "Accept: application/json" \
          -d '{
-             "SELECT": [
+             "select": [
                  "id",
                  "title",
                  "urlCheck",
                  "dateCreate"
              ],
-             "FILTER": {
+             "filter": {
                  "%=title": "MyConnector%",
                  "!description": ""
              },
-             "ORDER": {
+             "order": {
                  "dateCreate": "DESC"
              },
              "auth": "**put_access_token_here**"
@@ -351,6 +351,44 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "biconnector.connector.list", b24.Params{
+    	"select": []string{"id", "title", "urlCheck", "dateCreate"},
+    	"filter": b24.Params{
+    		"%=title":      "MyConnector%",
+    		"!description": "",
+    	},
+    	"order": b24.Params{
+    		"dateCreate": "DESC",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("biconnector.connector.list: %w", err)
+    }
+
+    var items []struct {
+    	ID         b24.ID `json:"id"`
+    	Title      string `json:"title"`
+    	UrlCheck   string `json:"urlCheck"`
+    	DateCreate string `json:"dateCreate"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID, it.Title)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -388,7 +426,7 @@ HTTP-статус: **200**
 
 #|
 || **result**
-[`object`](../../data-types.md) | Корневой элемент ответа. Содержит массив из объектов, содержащих информацию о полях коннекторов. 
+[`array`](../../data-types.md) | Корневой элемент ответа. Содержит массив объектов с информацией о коннекторах.
 
 Стоит учитывать, что структура полей может быть изменена из-за параметра `select` ||
 || **time**
@@ -412,9 +450,9 @@ HTTP-статус: **200**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `VALIDATION_SELECT_TYPE` | Parameter "select" must be array. | В параметр `select` передан не объект ||
-|| `VALIDATION_FILTER_TYPE` | Parameter "filter" must be array. | В параметр `filter` передан не объект ||
-|| `VALIDATION_ORDER_TYPE` | Parameter "order" must be array. | В параметр `order` передан не объект ||
+|| `VALIDATION_SELECT_TYPE` | Parameter "select" must be array. | Параметр `select` должен быть массивом ||
+|| `VALIDATION_FILTER_TYPE` | Parameter "filter" must be array. | Параметр `filter` должен быть массивом ||
+|| `VALIDATION_ORDER_TYPE` | Parameter "order" must be array. | Параметр `order` должен быть массивом ||
 || `VALIDATION_FIELD_NOT_ALLOWED_IN_SELECT` | Field "#TITLE#" is not allowed in the "select". | Данные поля недопустимы в выборке ||
 || `VALIDATION_FIELD_NOT_ALLOWED_IN_FILTER` | Field "#TITLE#" is not allowed in the "filter". | Данные поля недопустимы в фильтре ||
 || `VALIDATION_FIELD_NOT_ALLOWED_IN_ORDER` | Field "#TITLE#" is not allowed in the "order". | Данные поля недопустимы для сортировки ||

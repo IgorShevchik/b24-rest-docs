@@ -29,7 +29,7 @@
 
 Для полного удаления трейса нужны права на изменение всех связанных с ним объектов.
 
-`id` можно получить методом [crm.tracking.trace.add](./crm-tracking-trace-add.md) ||
+Идентификатор можно получить в ответе метода [crm.tracking.trace.add](./crm-tracking-trace-add.md) ||
 |#
 
 ## Примеры кода
@@ -179,6 +179,35 @@
     );
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.tracking.trace.delete(
+            bitrix_id=125,
+        )
+        result = bitrix_response.response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - PHP CRest
 
     ```php
@@ -192,6 +221,22 @@
     echo '<pre>';
     print_r($result);
     echo '</pre>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.tracking.trace.delete", b24.Params{
+    	"id": 125,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.tracking.trace.delete: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

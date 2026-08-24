@@ -9,7 +9,7 @@
 
 {% endnote %}
 
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: администратор
 
 Метод `event.offline.list` для чтения текущей очереди без внесения изменений в ее состояние в отличие от [event.offline.get](./event-offline-get.md). Доступность офлайн-событий можно проверить через метод [feature.get](../common/system/feature-get.md).
 
@@ -27,7 +27,7 @@
 || **filter**
 [`array`](../data-types.md) | Фильтр записей. По умолчанию отдаются все записи, без фильтрации. Поддерживается фильтрация по полям: `ID`, `TIMESTAMP_X`, `EVENT_NAME`, `MESSAGE_ID`. `PROCESS_ID`, `ERROR` со стандартными операциями типа `=`, `>`, `<`, `<=` и так далее ||
 || **order**
-[`array`](../data-types.md) | Сортировка записей. Поддерживается сортировка по тем же полям, что и в фильтре, на вход принимается массив вида `[поле=>ASC\|DESC]`. По умолчанию — `[ID:ASC]` ||
+[`array`](../data-types.md) | Сортировка записей. Поддерживается сортировка по тем же полям, что и в фильтре, на вход принимается массив вида ```[поле=>ASC|DESC]```. По умолчанию — `[ID:ASC]` ||
 || **start**
 [`integer`](../data-types.md) | Параметр используется для управления постраничной навигацией.
 
@@ -250,6 +250,44 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "event.offline.list", b24.Params{
+    	"filter": b24.Params{
+    		"ERROR": 0,
+    	},
+    	"order": b24.Params{
+    		"ID": "DESC",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("event.offline.list: %w", err)
+    }
+
+    var items []struct {
+    	ID              b24.ID `json:"ID"`
+    	TimestampX      string `json:"TIMESTAMP_X"`
+    	EventName       string `json:"EVENT_NAME"`
+    	EventData       bool   `json:"EVENT_DATA"`
+    	EventAdditional bool   `json:"EVENT_ADDITIONAL"`
+    	MessageID       b24.ID `json:"MESSAGE_ID"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID, it.TimestampX)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -307,6 +345,24 @@ HTTP-статус: **200**
 |#
 
 ## Обработка ошибок
+
+HTTP-статус: **403**
+
+```json
+{
+    "error": "ACCESS_DENIED",
+    "error_description": "Access denied!"
+}
+```
+
+{% include notitle [обработка ошибок](../../_includes/error-info.md) %}
+
+### Возможные коды ошибок
+
+#|
+|| **Статус** | **Код** | **Описание** | **Значение** ||
+|| `403` | `ACCESS_DENIED` | Access denied! | Метод запустил не администратор ||
+|#
 
 {% include [системные ошибки](../../_includes/system-errors.md) %}
 

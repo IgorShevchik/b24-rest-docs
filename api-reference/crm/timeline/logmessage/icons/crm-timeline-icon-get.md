@@ -179,6 +179,35 @@
     );
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.icon.get(
+            code="info",
+        )
+        result = bitrix_response.response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - PHP CRest
 
     ```php
@@ -194,6 +223,34 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.icon.get", b24.Params{
+    	"code": "info",
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.icon.get: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "icon".
+    raw, ok := b24.Unwrap(res.Result, "icon")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа icon")
+    }
+
+    var item struct {
+    	Code     string `json:"code"`
+    	IsSystem bool   `json:"isSystem"`
+    	FileUri  string `json:"fileUri"`
+    }
+    if err := json.Unmarshal(raw, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.Code, item.IsSystem)
     ```
 
 {% endlist %}
@@ -234,7 +291,7 @@ HTTP-статус: **200**
 
 Поле `result` содержит объект [icon](./crm-timeline-icon-add.md#icon) ||
 || **time**
-[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
+[`time`](../../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок

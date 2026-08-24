@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на чтение реквизитов
 
 Метод возвращает пользовательское поле реквизита по идентификатору.
 
@@ -173,6 +173,35 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.userfield.get(
+            bitrix_id=235,
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -206,6 +235,31 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.requisite.userfield.get", b24.Params{
+    	"id": 235,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.requisite.userfield.get: %w", err)
+    }
+
+    var item struct {
+    	ID         b24.ID `json:"ID"`
+    	EntityID   string `json:"ENTITY_ID"`
+    	FieldName  string `json:"FIELD_NAME"`
+    	UserTypeID string `json:"USER_TYPE_ID"`
+    	Sort       string `json:"SORT"`
+    	Multiple   string `json:"MULTIPLE"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.EntityID)
     ```
 
 {% endlist %}
@@ -287,7 +341,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **ID**
-[`int`](../../../data-types.md) | Идентификатор пользовательского поля ||
+[`integer`](../../../data-types.md) | Идентификатор пользовательского поля ||
 || **ENTITY_ID**
 [`string`](../../../data-types.md) | Идентификатор сущности, к которой относится пользовательское поле. Для реквизитов это всегда `CRM_REQUISITE` ||
 || **FIELD_NAME**
@@ -299,7 +353,7 @@ HTTP-статус: **200**
 
 Назначение поля может меняться конечным разработчиком ||
 || **SORT**
-[`int`](../../../data-types.md) | Сортировка ||
+[`integer`](../../../data-types.md) | Сортировка ||
 || **MULTIPLE**
 [`char`](../../../data-types.md) | Признак множественности. Возможные значения:
 - `Y` — да
@@ -343,7 +397,7 @@ HTTP-статус: **200**
 || **HELP_MESSAGE**
 [`string`](../../../data-types.md) | Помощь ||
 || **LIST**
-[`uf_enum_element`](../../../data-types.md) | Элементы списка. Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-enumeration-fields.md) ||
+[`uf_enum_element`](../../../data-types.md#uf_enum_element) | Элементы списка. Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-enumeration-fields.md) ||
 || **SETTINGS**
 [`object`](../../../data-types.md) | Дополнительные настройки (зависят от типа). Для получения подробной информации смотрите раздел [{#T}](../../universal/user-defined-fields/crm-userfield-settings-fields.md) ||
 |#
@@ -361,7 +415,7 @@ HTTP-статус: **40x**, **50x**
 
 {% include notitle [обработка ошибок](../../../../_includes/error-info.md) %}
 
-### Возможные ошибки
+### Возможные коды ошибок
 
 #|  
 || **Код** | **Текст ошибки** | **Описание** ||

@@ -17,13 +17,13 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id***
-[`integer`](../../data-types.md) | Идентификатор нумератора ||
+[`integer`](../../../data-types.md) | Идентификатор нумератора ||
 |#
 
 ## Примеры кода
@@ -169,6 +169,31 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.documentgenerator.numerator.get(bitrix_id=45).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -201,6 +226,34 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.documentgenerator.numerator.get", b24.Params{
+    	"id": 45,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.documentgenerator.numerator.get: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "numerator".
+    raw, ok := b24.Unwrap(res.Result, "numerator")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа numerator")
+    }
+
+    var item struct {
+    	ID       b24.ID `json:"id"`
+    	Name     string `json:"name"`
+    	Template string `json:"template"`
+    }
+    if err := json.Unmarshal(raw, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.Name)
     ```
 
 {% endlist %}
@@ -249,9 +302,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../data-types.md) | Корневой элемент ответа. Содержит объект [`numerator`](#numerator) ||
+[`object`](../../../data-types.md) | Корневой элемент ответа. Содержит объект [`numerator`](#numerator) ||
 || **time**
-[`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 #### Тип numerator {#numerator}
@@ -260,15 +313,15 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **id**
-[`string`](../../data-types.md) | Идентификатор нумератора ||
+[`string`](../../../data-types.md) | Идентификатор нумератора ||
 || **name**
-[`string`](../../data-types.md) | Название нумератора ||
+[`string`](../../../data-types.md) | Название нумератора ||
 || **template**
-[`string`](../../data-types.md) | Шаблон номера ||
+[`string`](../../../data-types.md) | Шаблон номера ||
 || **code**
-[`string`](../../data-types.md) | Символьный код нумератора. Может быть `null` ||
+[`string`](../../../data-types.md) | Символьный код нумератора. Может быть `null` ||
 || **settings**
-[`object`](../../data-types.md) | Сохраненные настройки последовательной нумерации типа [`settings`](#settings) ||
+[`object`](../../../data-types.md) | Сохраненные настройки последовательной нумерации типа [`settings`](#settings) ||
 |#
 
 #### Тип settings {#settings}
@@ -277,19 +330,19 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **start**
-[`integer`](../../data-types.md) | Начальное значение счетчика ||
+[`integer`](../../../data-types.md) | Начальное значение счетчика ||
 || **step**
-[`integer`](../../data-types.md) | Шаг увеличения счетчика ||
+[`integer`](../../../data-types.md) | Шаг увеличения счетчика ||
 || **length**
-[`integer`](../../data-types.md) | Минимальная длина номера ||
+[`integer`](../../../data-types.md) | Минимальная длина номера ||
 || **padString**
-[`string`](../../data-types.md) | Символ добивки слева ||
+[`string`](../../../data-types.md) | Символ добивки слева ||
 || **periodicBy**
-[`string`](../../data-types.md) | Период сброса счетчика: `null`, `day`, `month` или `year` ||
+[`string`](../../../data-types.md) | Период сброса счетчика: `null`, `day`, `month` или `year` ||
 || **timezone**
-[`string`](../../data-types.md) | Идентификатор часового пояса для периодического сброса. Может быть `null` ||
+[`string`](../../../data-types.md) | Идентификатор часового пояса для периодического сброса. Может быть `null` ||
 || **isDirectNumeration**
-[`boolean`](../../data-types.md) | Признак прямой нумерации ||
+[`boolean`](../../../data-types.md) | Признак прямой нумерации ||
 |#
 
 ## Обработка ошибок

@@ -217,6 +217,33 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.note.get", b24.Params{
+    	"ownerTypeId": 1,
+    	"ownerId":     1,
+    	"itemType":    1,
+    	"itemId":      2,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.note.get: %w", err)
+    }
+
+    var item struct {
+    	Text        string `json:"text"`
+    	CreatedByID b24.ID `json:"createdById"`
+    	CreatedTime string `json:"createdTime"`
+    	UpdatedByID b24.ID `json:"updatedById"`
+    	UpdatedTime string `json:"updatedTime"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.Text, item.CreatedByID)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -251,15 +278,26 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../../data-types.md) | Информация о найденной заметке:
-
-- **text** — текст заметки
-- **createdById** — идентификатор пользователя, создавшего заметку
-- **createdTime** — дата и время создания заметки
-- **updatedById** — идентификатор пользователя, изменившего заметку
-- **updatedTime** — дата и время изменения заметки ||
+[`object`](../../../data-types.md) | Информация о найденной заметке [(подробное описание)](#result) ||
 || **time**
-[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
+|#
+
+#### Объект result {#result}
+
+#|
+|| **Название**
+`тип` | **Описание** ||
+|| **text**
+[`string`](../../../data-types.md) | Текст заметки ||
+|| **createdById**
+[`integer`](../../../data-types.md) | Идентификатор пользователя, создавшего заметку ||
+|| **createdTime**
+[`datetime`](../../../data-types.md) | Дата и время создания заметки ||
+|| **updatedById**
+[`integer`](../../../data-types.md) | Идентификатор пользователя, изменившего заметку ||
+|| **updatedTime**
+[`datetime`](../../../data-types.md) | Дата и время изменения заметки ||
 |#
 
 ## Обработка ошибок

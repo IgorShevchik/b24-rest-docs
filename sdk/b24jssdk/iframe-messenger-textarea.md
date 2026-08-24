@@ -25,7 +25,7 @@ $b24.parent.message.send(method, params)
 ## Что нужно перед вызовами
 
 1. Приложение должно быть запущено внутри фрейма Битрикс24.
-2. SDK должен быть инициализирован через [initializeB24Frame()](https://bitrix-tools.github.io/b24jssdk/reference/frame-initialize-b24-frame.html).
+2. SDK должен быть инициализирован через [initializeB24Frame()](https://bitrix-tools.github.io/b24jssdk/docs/working-with-the-rest-api/frame-initialize-b24-frame/).
 
 Пример:
 
@@ -40,12 +40,12 @@ const $b24 = await B24Js.initializeB24Frame()
 
 ### Параметры
 
-{% include [Сноска о параметрах](../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../_includes/required.md) %}
 
 #|
 || **Параметр** | **Описание** ||
 || **requestId***  
-`string` | Уникальный ID запроса. Создайте через [B24Js.Text.getUuidRfc4122()](https://bitrix-tools.github.io/b24jssdk/reference/tools-text.html#getuuidrfc4122) ||
+`string` | Уникальный ID запроса. Создайте через [B24Js.Text.getUuidRfc4122()](https://bitrix-tools.github.io/b24jssdk/docs/working-with-the-rest-api/tools-text#identifiers) ||
 || **isSafely**  
 `boolean` | Если `true`, применяется таймаут ожидания ответа. Используйте вместе с `safelyTime`. 
 Если `false`, таймаут по этому параметру не применяется ||
@@ -83,14 +83,14 @@ const responseGet = await $b24.parent.message.send(
 
 ### Параметры
 
-{% include [Сноска о параметрах](../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../_includes/required.md) %}
 
 #|
 || **Параметр** | **Описание** ||
 || **text***  
 `string` | Текст для вставки в поле ввода ||
 || **requestId***  
-`string` | Уникальный ID запроса. Создайте через [`B24Js.Text.getUuidRfc4122()`](https://bitrix-tools.github.io/b24jssdk/reference/tools-text.html#getuuidrfc4122) ||
+`string` | Уникальный ID запроса. Создайте через [B24Js.Text.getUuidRfc4122()](https://bitrix-tools.github.io/b24jssdk/docs/working-with-the-rest-api/tools-text#identifiers) ||
 || **withNewLine**  
 `boolean` | Если `true`, текст добавится с новой строки ||
 || **replace**  

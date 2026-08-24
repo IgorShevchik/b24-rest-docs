@@ -15,7 +15,7 @@
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.chat.message.send](../../rest-v3/tasks/tasks-task-chat-message-send.md).
+Развитие метода остановлено. Используйте [tasks.task.chat.message.send](../tasks-task-chat-message-send.md).
 
 {% endnote %}
 
@@ -67,6 +67,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version
     // Shape of the payload returned in result (comment ID)
     type TaskCommentAddResult = number
 

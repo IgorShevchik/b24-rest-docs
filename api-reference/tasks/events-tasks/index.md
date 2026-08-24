@@ -19,8 +19,8 @@
 
 Подписаться на события задач можно через:
 
--  [исходящий вебхук](../../../local-integrations/local-webhooks.md)
--  [приложение](../../../settings/app-installation/index.md) и метод [event.bind](../../events/event-bind.md)
+- [исходящий вебхук](../../../local-integrations/local-webhooks.md)
+- [приложение](../../../settings/app-installation/index.md) и метод [event.bind](../../events/event-bind.md)
 
 Пример кода обработчика для события описан в статье [Как проверить свой обработчик для обработки событий Битрикс24](../../events/test-handler.md).
 
@@ -39,10 +39,10 @@
 || [OnTaskAdd](./on-task-add.md) | При добавлении задачи вручную или методом [task.task.add](../tasks-task-add.md) ||
 || [OnTaskUpdate](./on-task-update.md) | При обновлении задачи вручную или методами:
 - [изменения задачи](../tasks-task-update.md)
-- обновления статуса, например, методом [установки статуса Завершена](../tasks-task-complete.md)
+- обновления статуса, например, методом [установки статуса Завершена](../status/tasks-task-complete.md)
 - [делегирования](../tasks-task-delegate.md)
 - [прикрепления файла к задаче](../tasks-task-files-attach.md)
-- наблюдения за задачей, например, методом [включения наблюдения](../tasks-task-start-watch.md)
+- наблюдения за задачей, например, методом [включения наблюдения](../user-actions/tasks-task-start-watch.md)
 - управления связими между задачами, например, методом [создания связи](../task-dependence-add.md)
 - [перемещения задачи по стадиям](../stages/task-stages-move-task.md) ||
 || [OnTaskDelete](./on-task-delete.md) | При удалении задачи вручную или методом [task.task.delete](../tasks-task-delete.md) ||

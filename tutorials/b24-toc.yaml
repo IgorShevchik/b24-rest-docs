@@ -11,6 +11,10 @@ items:
     include:
       path: sale/b24-toc.yaml
       mode: link
+  - name: Торговый каталог
+    include:
+      path: catalog/b24-toc.yaml
+      mode: link
   - name: Бизнес-процессы
     include:
       path: bizproc/b24-toc.yaml
@@ -18,6 +22,10 @@ items:
   - name: Чат-боты
     include:
       path: chat-bots/b24-toc.yaml
+      mode: link
+  - name: Провайдеры сообщений, СМС-провайдеры
+    include:
+      path: messageservice/b24-toc.yaml
       mode: link
   - name: Телефония
     include:

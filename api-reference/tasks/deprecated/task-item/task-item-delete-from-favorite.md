@@ -13,11 +13,11 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод удаляет задачу из Избранного.
+Метод `task.item.deletefromfavorite` удаляет задачу из Избранного.
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.favorite.remove](../../tasks-task-favorite-remove.md).
+Развитие метода остановлено. Используйте [tasks.task.favorite.remove](../../user-actions/tasks-task-favorite-remove.md).
 
 {% endnote %}
 
@@ -68,6 +68,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type DeleteFromFavoriteResult = boolean
 
@@ -207,6 +208,25 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.deletefromfavorite", b24.Params{
+    	"TASK_ID": 10,
+    	"PARAMS": b24.Params{
+    		"AFFECT_CHILDREN": "Y",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.deletefromfavorite: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

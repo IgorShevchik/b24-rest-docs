@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -161,6 +161,35 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.company.contact.items.get(
+            bitrix_id=32,
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -193,6 +222,31 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.company.contact.items.get", b24.Params{
+    	"id": 32,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.company.contact.items.get: %w", err)
+    }
+
+    var items []struct {
+    	ContactID b24.ID `json:"CONTACT_ID"`
+    	Sort      int    `json:"SORT"`
+    	RoleID    b24.ID `json:"ROLE_ID"`
+    	IsPrimary string `json:"IS_PRIMARY"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ContactID, it.Sort)
+    }
     ```
 
 {% endlist %}
@@ -257,7 +311,7 @@ HTTP-статус: **200**
 || **ROLE_ID**
 [`integer`](../../../data-types.md) | Идентификатор роли, служебное поле ||
 || **IS_PRIMARY**
-[`char`](../../../data-types.md#char) | Является ли привязка первичной. Возможные значения:
+[`char`](../../../data-types.md#standart-types) | Является ли привязка первичной. Возможные значения:
 - `Y` — да
 - `N` — нет ||
 |#
@@ -279,7 +333,7 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-` | `The parameter ownerEntityID is invalid or not defined` | Передан `id` меньше или равен 0 или не передан вовсе ||
+|| Пустое значение | `The parameter ownerEntityID is invalid or not defined` | Передан `id` меньше или равен 0 или не передан вовсе ||
 || `ACCESS_DENIED` | `Access denied!` | У пользователя нет прав на чтение компаний ||
 |#
 

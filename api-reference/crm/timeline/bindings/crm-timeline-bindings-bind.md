@@ -44,17 +44,17 @@ fields: {
 || **Название**
 `тип` | **Описание** ||
 || **OWNER_ID***
-[`integer`](../../../data-types.md) | Идентфикатор записи таймлайна  ||
+[`integer`](../../../data-types.md) | Идентификатор записи таймлайна ||
 || **ENTITY_ID***
-[`integer`](../../../data-types.md) | Идентификатор `ID` элемента CRM, к которому привязан комментарий  ||
+[`integer`](../../../data-types.md) | Идентификатор элемента CRM, к которому привязана запись таймлайна ||
 || **ENTITY_TYPE***
-[`string`](../../../data-types.md) | Тип элемента, к которому привязан комментарий. Возможные значения: 
+[`string`](../../../data-types.md) | Тип элемента CRM, к которому привязана запись таймлайна. Возможные значения:
 - `lead` — лид
 - `deal` — сделка
 - `contact` — контакт
 - `company` — компания
 - `order` — заказ  
- ||
+||
 |#
 
 ## Примеры кода
@@ -194,6 +194,39 @@ fields: {
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.bindings.bind(
+            fields={
+                "OWNER_ID": 1110,
+                "ENTITY_ID": 10,
+                "ENTITY_TYPE": "deal",
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -235,6 +268,28 @@ fields: {
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.bindings.bind", b24.Params{
+    	"fields": b24.Params{
+    		"OWNER_ID":    1110,
+    		"ENTITY_ID":   10,
+    		"ENTITY_TYPE": "deal",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.bindings.bind: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -263,9 +318,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`boolean`](../../../data-types.md) | Результат операции. Возвращает `true` если связь успешно создана, иначе — `false` ||
+[`boolean`](../../../data-types.md) | Возвращает `true`, если связь создана. Возвращает `false`, если связь не создана ||
 || **time**
-[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок
@@ -284,11 +339,11 @@ HTTP-статус: **400**
 ### Возможные коды ошибок
 
 #|
-|| **Код** | **Cообщение об ошибке** | **Описание** ||
-|| Пустая строка | OWNER_ID is not defined or invalid | Не передан обязательный параметр `OWNER_ID` или переданный `OWNER_ID` некорректный ||
-|| Пустая строка | ENTITY_ID is not defined or invalid. | Не передан обязательный параметр `ENTITY_ID` или переданный `ENTITY_ID` некорректный ||
-|| Пустая строка | ENTITY_TYPE is not defined or invalid. | Не передан обязательный параметр `ENTITY_TYPE` или переданный `ENTITY_TYPE` некорректный ||
-|| Пустая строка | Access denied. | Отсутствуют права на редактирование сущности в CRM ||
+|| **Код** | **Сообщение об ошибке** | **Описание** ||
+|| Пустое значение | OWNER_ID is not defined or invalid | Не передан обязательный параметр `OWNER_ID` или переданный `OWNER_ID` некорректный ||
+|| Пустое значение | ENTITY_ID is not defined or invalid. | Не передан обязательный параметр `ENTITY_ID` или переданный `ENTITY_ID` некорректный ||
+|| Пустое значение | ENTITY_TYPE is not defined or invalid. | Не передан обязательный параметр `ENTITY_TYPE` или переданный `ENTITY_TYPE` некорректный ||
+|| Пустое значение | Access denied. | Отсутствуют права на редактирование объекта CRM ||
 |#
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}

@@ -23,17 +23,17 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **entityTypeId***
-[`integer`][1] | Идентификатор [системного](../data-types.md#object_type) или [пользовательского типа](./user-defined-object-types/index.md), чьи поля мы хотим получить.
+[`integer`](../../data-types.md) | Идентификатор [системного](../data-types.md#object_type) или [пользовательского типа](./user-defined-object-types/index.md), чьи поля мы хотим получить.
 
 Числовые значения для системных типов (Лид — 1, Сделка — 2, Контакт — 3, Компания — 4, Счёт — 31 и др.) приведены в [справочнике типов объектов CRM](../data-types.md#object_type). Идентификатор смарт-процесса можно узнать методом [crm.type.list](./user-defined-object-types/crm-type-list.md) ||
 || **useOriginalUfNames**
-[`boolean`][1] | Параметр используется для управления форматом имен пользовательских полей в ответе.   
+[`boolean`](../../data-types.md) | Параметр используется для управления форматом имен пользовательских полей в ответе.   
 Возможные значения:
 
 - `Y` — оригинальные имена пользовательских полей, например `UF_CRM_2_1639669411830`
@@ -194,6 +194,36 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.fields(
+            entity_type_id=1268,
+            use_original_uf_names=False,
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -232,6 +262,27 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.item.fields", b24.Params{
+    	"entityTypeId":       1268,
+    	"useOriginalUfNames": "N",
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.item.fields: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "fields".
+    raw, ok := b24.Unwrap(res.Result, "fields")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа fields")
+    }
+
+    fmt.Printf("%s\n", raw)
     ```
 
 {% endlist %}
@@ -625,9 +676,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`][1] | Корневой элемент ответа. Содержит единственный ключ `fields` ||
+[`object`](../../data-types.md) | Корневой элемент ответа. Содержит единственный ключ `fields` ||
 || **fields**
-[`object`][1] | Объект в формате:
+[`object`](../../data-types.md) | Объект в формате:
 ```
 {
     field_1: value_1,
@@ -643,7 +694,7 @@ HTTP-статус: **200**
 
 ||
 || **time**
-[`time`][1]   | Информация о времени выполнения запроса ||
+[`time`](../../data-types.md)   | Информация о времени выполнения запроса ||
 |#
 
 {% note info " " %}
@@ -686,5 +737,3 @@ HTTP-статус: **400**, **403**
 - [{#T}](crm-item-list.md)
 - [{#T}](crm-item-delete.md)
 - [{#T}](./object-fields.md)
-
-[1]: ../../data-types.md

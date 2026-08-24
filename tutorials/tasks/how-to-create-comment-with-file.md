@@ -1,8 +1,12 @@
 # Как создать комментарий в задаче и прикрепить к нему файл
 
-> Scope: [`disk`, `tasks`](../../api-reference/scopes/permissions.md)
+> Scope: [`task`, `im`](../../api-reference/scopes/permissions.md)
 >
-> Кто может выполнять метод: пользователи с доступом к разделам диск и задачи
+> Кто может выполнять методы: пользователь с доступом к задаче и чату задачи
+>
+> - [tasks.task.get](../../api-reference/tasks/tasks-task-get.md) — любой пользователь с доступом к задаче
+> - [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md) — пользователь с доступом к чату задачи
+> - [im.v2.File.download](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-download.md) — пользователь с доступом к чату задачи
 
 {% note tip "" %}
 
@@ -13,25 +17,41 @@
 
 {% endnote %}
 
-В Битрикс24 есть два типа файловых полей: 
+Комментарии задачи хранятся в чате задачи. Чтобы добавить комментарий с файлом, сначала получим идентификатор чата задачи, затем загрузим файл в этот чат методом [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md).
 
-* **Файл.** Поле не связано с диском, в него файлы загружаются напрямую, через [строку формата Base64](../../api-reference/files/how-to-upload-files.md)
-* **Файл (диск).** Поле связано с диском, в поле хранится ID объекта диска. Формат Bаse64 в поле не обрабатывается, поэтому сначала файл необходимо загрузить на диск Битрикс24
+Метод [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md) загружает файл, прикрепляет его к чату и отправляет сообщение за один вызов. Загружать файл на Диск отдельным методом не нужно.
 
-Чтобы создать комментарий в задаче и прикрепить к нему файл, последовательно выполним два метода:
+Сценарий состоит из двух шагов.
 
-1. [disk.folder.uploadfile](../../api-reference/disk/folder/disk-folder-upload-file.md) — метод загружает файл на диск
-2. [task.commentitem.add](../../api-reference/tasks/comment-item/task-comment-item-add.md) — метод создает комментарий
+1. Получить `chatId` чата задачи методом [tasks.task.get](../../api-reference/tasks/tasks-task-get.md)
+2. Отправить сообщение с файлом методом [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md)
 
-## 1. Загружаем файл на диск Битрикс24
+В результате в чате задачи появится комментарий с прикрепленным файлом. Успешность операции подтверждают поля `messageId`, `chatId`, `dialogId` и `file.id` в ответе метода [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md).
 
-Для загрузки файла на диск используем метод [disk.folder.uploadfile](../../api-reference/disk/folder/disk-folder-upload-file.md) с параметрами:
+## Перед началом
 
-* `id` — укажем значение `1739` — идентификатор папки диска, в которую загружаем файл
-* `data` — укажем имя файла `NAME`, с этим именем файл сохранится на диске Битрикс24
-* `fileContent` — передаем файл в формате ['имя_файла.расширение', 'файл в виде строки, закодированной в Base64']
+Для выполнения примера нужны:
 
-Загрузка файла на диск — необходимый шаг, так как поле `UF_FORUM_MESSAGE_DOC` в комментариях принимает только ID файлов диска.
+- входящий вебхук со scope `task` и `im`
+- `taskId` задачи. Получить идентификатор можно методом [tasks.task.list](../../api-reference/tasks/tasks-task-list.md)
+- файл, который нужно прикрепить к комментарию
+- имя файла с расширением, например `file.pdf`
+- содержимое файла в формате Base64 без префикса `data:*/*;base64,`
+
+Вебхук выполняет запросы с правами пользователя, который его создал. Не публикуйте секретный код вебхука в клиентском коде и репозиториях — храните его в переменных окружения.
+
+Для серверных JS-примеров с `B24Hook` нужен Node.js 18, 20, 22 или новее, для новых проектов — 22 или новее. B24JsSDK — ES module: сохраните код в файле `.mjs` или добавьте `"type": "module"` в `package.json`.
+
+Для примеров с b24pysdk нужен Python 3.9 или новее.
+
+## 1. Получаем chatId чата задачи
+
+Чтобы отправить сообщение с файлом в чат задачи, нужен идентификатор диалога в формате `chat{chatId}`. Получим `chatId` методом [tasks.task.get](../../api-reference/tasks/tasks-task-get.md).
+
+Используем параметры:
+
+- `taskId` — идентификатор задачи
+- `select` — массив полей, которые нужно вернуть. Укажем `ID` и `CHAT_ID`
 
 {% include [Сноска о примерах](../../_includes/examples.md) %}
 
@@ -40,317 +60,55 @@
 - JS
 
     ```javascript
-    BX24.callMethod(
-        "disk.folder.uploadfile",
-        {
-            id: 1739,
-            data: {
-                NAME: "file.pdf"
-            },
-            fileContent: [
-                'file555.pdf',
-                '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAQDAwQDAwQEAwQ///+dAYq6YFKoAv/AFnAa6ArKv8AAtFJVppxCEAulxQ2DWgfMR//2Q=='
-            ]
-        }
-    );
-    ```
+    import { B24Hook } from '@bitrix24/b24jssdk'
 
-- PHP
+    const $b24 = B24Hook.fromWebhookUrl(process.env.B24_HOOK)
+    // B24_HOOK = 'https://your-domain.bitrix24.com/rest/USER_ID/TOKEN/'
 
-    ```php
-    require_once('crest.php');
-
-    $result = CRest::call(
-        'disk.folder.uploadfile',
-        [
-            'id' => 1739,
-            'data' => [
-                'NAME' => 'file.pdf'
-            ],
-            'fileContent' => [
-                'file555.pdf',
-                '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAQDAwQDAwQEAwQ///+dAYq6YFKoAv/AFnAa6ArKv8AAtFJVppxCEAulxQ2DWgfMR//2Q=='
-            ]
-        ]
-    );
-    ```
-
-- Python
-
-    ```python
-    from b24pysdk import BitrixWebhook, Client
-
-
-    client = Client(
-        BitrixWebhook(
-            domain="your-domain.bitrix24.com",
-            webhook_token="user_id/webhook_key",
-        )
-    )
-
-    response = client.disk.folder.uploadfile(
-        bitrix_id=1739,
-        data={
-            "NAME": "file.pdf",
+    const taskResponse = await $b24.actions.v2.call.make({
+        method: 'tasks.task.get',
+        params: {
+            taskId: 3711,
+            select: ['ID', 'CHAT_ID']
         },
-        file_content=[
-            "file555.pdf",
-            "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAQDAwQDAwQEAwQ///+dAYq6YFKoAv/AFnAa6ArKv8AAtFJVppxCEAulxQ2DWgfMR//2Q==",
-        ],
-    ).response
-    ```
+        requestId: 'task-get-chat'
+    })
 
-{% endlist %}
-
-В результате загрузки файла на диск получили два разных значения ID файла:
-
-* `FILE_ID`: `28073` —  внутреннее значение ID файла
-* `ID`: `6687` —  ID объекта диска, это значение используем в методах для работы с полями типа «файл (диск)»
-Если в запросе для изменения поля «файл (диск)» передать значение `FILE_ID`, файл либо не прикрепится к задаче, поскольку нет объекта диска с таким ID, либо прикрепится не тот файл
-
-```json
-{
-    "result": {
-        "ID": 6687,
-        "NAME": "file.pdf",
-        "CODE": null,
-        "STORAGE_ID": "1",
-        "TYPE": "file",
-        "PARENT_ID": "1739",
-        "DELETED_TYPE": 0,
-        "GLOBAL_CONTENT_VERSION": 1,
-        "FILE_ID": 28073,
-        "SIZE": "405559",
-        "CREATE_TIME": "2024-11-01T17:00:55+03:00",
-        "UPDATE_TIME": "2024-11-01T17:00:55+03:00",
-        "DELETE_TIME": null,
-        "CREATED_BY": "1",
-        "UPDATED_BY": "1",
-        "DELETED_BY": null,
-        "DOWNLOAD_URL": "https://your-domain.bitrix24.com/rest/download.json?sessid=9dd90ed5a58ccc41af81f5f0043739db&token=disk%7CaWQ9NjY4NyZfPTJ5ZXdvN2Fsb09SMGw1b0FHTkRMSGR5MFJkN1pLTjNS%7CImRvd25sb2FkfGRpc2t8YVdROU5qWTROeVpmUFRKNVpYZHZOMkZzYjA5U01HdzFiMEZIVGtSTVNHUjVNRkprTjFwTFRqTlN8OWRkOTBlZDVhNThjY2M0MWFmODFmNWYwMDQzNzM5ZGIi.Lup1vDbibL6twiCPfCMFnLSoDLleNX0cfMHGv5PFaJw%3D",
-        "DETAIL_URL": "https://your-domain.bitrix24.com/company/personal/user/1/disk/file/Созданные файлы/Новая папка для теста процесса/file.pdf"
+    if (!taskResponse.isSuccess) {
+        throw new Error(taskResponse.getErrorMessages().join('; '))
     }
-}
-```
 
-## 2.  Создаем комментарий и прикрепляем к нему файл
-
-Для создания комментария в задаче используем метод [task.commentitem.add](../../api-reference/tasks/comment-item/task-comment-item-add.md) с параметрами:
-
-* `TASKID`  — ID задачи, обязательное поле. Без ID задачи комментарий не будет создан. Для получения ID задачи используем метод [tasks.task.list](../../api-reference/tasks/tasks-task-list.md)
-* `AUTHOR_ID`  —  ID автора комментария. Параметр можно не передавать, тогда автором автоматически будет сотрудник, с аккаунта которого выполняется запрос
-* `POST_MESSAGE`  —  текст комментария
-* `UF_FORUM_MESSAGE_DOC`  —   укажем значение `n6687`. Это ID файла диска из результата предыдущего метода, к которому добавляем префикс `n` для загрузки файла в поле
-
-{% list tabs %}
-
-- JS
-
-    ```javascript
-    BX24.callMethod(
-        'task.commentitem.add',
-        {
-            TASKID: 3711,
-            FIELDS: {
-                POST_MESSAGE: 'comment for test',
-                AUTHOR_ID: 29,
-                UF_FORUM_MESSAGE_DOC: [
-                    "n6687"
-                ]
-            }
-        }
-    );
+    const chatId = taskResponse.getData().result.task.chatId
+    const dialogId = `chat${chatId}`
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
+    require_once 'vendor/autoload.php';
 
-    $result = CRest::call(
-        'task.commentitem.add',
-        [
-            'TASKID' => 3711,
-            'FIELDS' => [
-                'POST_MESSAGE' => 'comment for test',
-                'AUTHOR_ID' => 29,
-                'UF_FORUM_MESSAGE_DOC' => [
-                    'n6687'
-                ]
-            ]
-        ]
-    );
-    ```
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Bitrix24\SDK\Core\Exceptions\BaseException;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
 
-- Python
+    $serviceBuilder = (new ServiceBuilderFactory(new EventDispatcher(), $log))
+        ->initFromWebhook(getenv('B24_HOOK'));
 
-    ```python
-    response = client.task.commentitem.add(
-        task_id=3711,
-        fields={
-            "POST_MESSAGE": "comment for test",
-            "AUTHOR_ID": 29,
-            "UF_FORUM_MESSAGE_DOC": [
-                "n6687",
-            ],
-        },
-    ).response
-    ```
-
-{% endlist %}
-
-Мы создали комментарий с ID `9393`. 
-
-```json
-{
-    "result": 9393
-}
-```
-
-В полученном результате нет информации о файле, прикрепленном к комментарию. Чтобы проверить, успешно ли прикрепился файл, выполним метод  [task.commentitem.get](../../api-reference/tasks/comment-item/task-comment-item-get.md).
-
-## Пример кода
-
-{% list tabs %}
-
-- JS
-
-    ```javascript
-    // Функция для загрузки файла
-    function uploadFileToDisk() {
-        // ID папки, в которую нужно загрузить файл
-        var folderId = 'ID_папки';
-        // Имя файла и его содержимое в формате Base64
-        var fileName = 'имя_файла';
-        var fileContentBase64 = 'содержимое_файла_Base64';
-
-        // Вызываем метод disk.folder.uploadfile
-        BX24.callMethod(
-            'disk.folder.uploadfile',
-            {
-                id: folderId,
-                data: {
-                    NAME: fileName
-                },
-                fileContent: [
-                    fileName,
-                    fileContentBase64
-                ]
-            },
-            function(result) {
-                if (result.error()) {
-                    console.error('Ошибка при загрузке файла:', result.error());
-                } else {
-                    console.log('Файл успешно загружен!', result.data());
-                    var fileId = result.data().ID; // Используем ID из результата
-                    createCommentWithFile(fileId);
-                }
-            }
-        );
-    }
-
-    // Функция для создания комментария с файлом
-    function createCommentWithFile(fileId) {
-        // Параметры комментария
-        var taskID = 'ID_задачи';
-        var commentMessage = 'текст_комментария';
-        var authorId = 'ID_автора_комментария';
-
-        // Вызываем метод task.commentitem.add
-        BX24.callMethod(
-            'task.commentitem.add',
-            {
-                TASKID: taskID,
-                FIELDS: {
-                    POST_MESSAGE: commentMessage,
-                    AUTHOR_ID: authorId,
-                    UF_FORUM_MESSAGE_DOC: ['n' + fileId] // Добавляем префикс 'n' к ID файла
-                }
-            },
-            function(result) {
-                if (result.error()) {
-                    console.error('Ошибка при создании комментария:', result.error());
-                } else {
-                    console.log('Комментарий успешно создан!', result.data());
-                }
-            }
-        );
-    }
-
-    // Вызов функции для загрузки файла и создания комментария
-    uploadFileToDisk();
-    ```
-
-- PHP
-
-    ```php
-    require_once('crest.php');
-
-    // Функция для загрузки файла
-    function uploadFileToDisk() {
-        // ID папки, в которую нужно загрузить файл
-        $folderId = 'ID_папки';
-        // Имя файла, который вы хотите загрузить
-        $fileName = 'имя_файла';
-        // Путь к файлу на вашей файловой системе
-        $filePath = '/путь/к/вашему/файлу';
-
-        // Чтение содержимого файла и его кодирование в Base64
-        $fileContentBase64 = base64_encode(file_get_contents($filePath));
-
-        // Вызываем метод disk.folder.uploadfile
-        $result = CRest::call(
-            'disk.folder.uploadfile',
+    try {
+        $task = $serviceBuilder->core->call(
+            'tasks.task.get',
             [
-                'id' => $folderId,
-                'data' => [
-                    'NAME' => $fileName
-                ],
-                'fileContent' => [
-                    $fileName,
-                    $fileContentBase64
-                ]
+                'taskId' => 3711,
+                'select' => ['ID', 'CHAT_ID']
             ]
-        );
-
-        if (isset($result['error'])) {
-            echo 'Ошибка при загрузке файла: ' . $result['error'];
-        } else {
-            echo 'Файл успешно загружен!';
-            $fileId = $result['result']['ID']; // Используем ID из результата
-            createCommentWithFile($fileId);
-        }
+        )->getResponseData()->getResult()['task'];
+    } catch (BaseException $e) {
+        echo 'Ошибка при получении задачи: ' . $e->getMessage();
+        return;
     }
 
-    // Функция для создания комментария с файлом
-    function createCommentWithFile($fileId) {
-        // Параметры комментария
-        $taskID = 'ID_задачи';
-        $commentMessage = 'текст_комментария';
-        $authorId = 'ID_автора_комментария';
-
-        // Вызываем метод task.commentitem.add
-        $result = CRest::call(
-            'task.commentitem.add',
-            [
-                'TASKID' => $taskID,
-                'FIELDS' => [
-                    'POST_MESSAGE' => $commentMessage,
-                    'AUTHOR_ID' => $authorId,
-                    'UF_FORUM_MESSAGE_DOC' => ['n' . $fileId] // Добавляем префикс 'n' к ID файла
-                ]
-            ]
-        );
-
-        if (isset($result['error'])) {
-            echo 'Ошибка при создании комментария: ' . $result['error'];
-        } else {
-            echo 'Комментарий успешно создан!';
-        }
-    }
-
-    // Вызов функции для загрузки файла и создания комментария
-    uploadFileToDisk();
+    $chatId = $task['chatId'];
+    $dialogId = 'chat' . $chatId;
     ```
 
 - Python
@@ -359,54 +117,278 @@
     from b24pysdk import BitrixWebhook, Client
     from b24pysdk.errors import BitrixAPIError
 
-
-    def upload_file_to_drive(client):
-        folder_id = 1739
-        file_name = "имя_файла"
-        file_content_base64 = "содержимое_файла_Base64"
-
-        try:
-            result = client.disk.folder.uploadfile(
-                bitrix_id=folder_id,
-                data={"NAME": file_name},
-                file_content=[file_name, file_content_base64],
-            ).response.result
-        except BitrixAPIError as error:
-            print(f"Ошибка загрузки файла: {error}")
-        else:
-            print("Файл успешно загружен!")
-            file_id = result["ID"]
-            create_comment_with_file(client, file_id)
-
-
-    def create_comment_with_file(client, file_id):
-        task_id = "ID_задачи"
-        comment_message = "текст_комментария"
-        author_id = "ID_автора_комментария"
-
-        try:
-            client.task.commentitem.add(
-                task_id=task_id,
-                fields={
-                    "POST_MESSAGE": comment_message,
-                    "AUTHOR_ID": author_id,
-                    "UF_FORUM_MESSAGE_DOC": [f"n{file_id}"],
-                },
-            ).response
-        except BitrixAPIError as error:
-            print(f"Ошибка создания комментария: {error}")
-        else:
-            print("Комментарий успешно создан!")
-
-
-    client = Client(
-        BitrixWebhook(
-            domain="your-domain.bitrix24.com",
-            webhook_token="user_id/webhook_key",
-        )
+    token = BitrixWebhook(
+        domain="your-domain.bitrix24.com",
+        webhook_token="user_id/webhook_key",
     )
+    client = Client(token)
 
-    upload_file_to_drive(client)
+    try:
+        task = client.tasks.task.get(
+            bitrix_id=3711,
+            select=["ID", "CHAT_ID"],
+        ).response.result["task"]
+    except BitrixAPIError as error:
+        print(f"Ошибка получения задачи: {error}")
+        raise
+
+    chat_id = task["chatId"]
+    dialog_id = f"chat{chat_id}"
     ```
 
 {% endlist %}
+
+В результате получили `chatId` чата задачи. Значение `861` преобразуем в `dialogId`: `chat861`.
+
+```json
+{
+    "result": {
+        "task": {
+            "id": "3711",
+            "chatId": 861
+        }
+    }
+}
+```
+
+## 2. Отправляем комментарий с файлом
+
+Чтобы отправить файл в чат задачи, используем метод [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md).
+
+Используем параметры:
+
+- `dialogId` — идентификатор диалога в формате `chat{chatId}`. Для примера из предыдущего шага это `chat861`
+- `fields.name` — имя файла с расширением
+- `fields.content` — содержимое файла в формате Base64
+- `fields.message` — текст комментария
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const uploadResponse = await $b24.actions.v2.call.make({
+        method: 'im.v2.File.upload',
+        params: {
+            dialogId,
+            fields: {
+                name: 'file.pdf',
+                content: 'SGVsbG8gV29ybGQh',
+                message: 'Комментарий с файлом'
+            }
+        },
+        requestId: 'file-upload-to-task-chat'
+    })
+
+    if (!uploadResponse.isSuccess) {
+        throw new Error(uploadResponse.getErrorMessages().join('; '))
+    }
+
+    const result = uploadResponse.getData().result
+    console.log(result.messageId, result.file.id)
+
+    $b24.destroy()
+    ```
+
+- PHP
+
+    ```php
+    try {
+        $response = $serviceBuilder->core->call(
+            'im.v2.File.upload',
+            [
+                'dialogId' => $dialogId,
+                'fields' => [
+                    'name' => 'file.pdf',
+                    'content' => base64_encode(file_get_contents('/path/to/file.pdf')),
+                    'message' => 'Комментарий с файлом',
+                ],
+            ]
+        );
+    } catch (BaseException $e) {
+        echo 'Ошибка при отправке комментария с файлом: ' . $e->getMessage();
+        return;
+    }
+
+    $result = $response->getResponseData()->getResult();
+    echo 'Комментарий создан, MESSAGE_ID: ' . $result['messageId'];
+    ```
+
+- Python
+
+    ```python
+    import base64
+    from pathlib import Path
+
+    file_content = base64.b64encode(Path("file.pdf").read_bytes()).decode()
+
+    try:
+        result = token.call_method(
+            "im.v2.File.upload",
+            {
+                "dialogId": dialog_id,
+                "fields": {
+                    "name": "file.pdf",
+                    "content": file_content,
+                    "message": "Комментарий с файлом",
+                },
+            },
+        )["result"]
+    except BitrixAPIError as error:
+        print(f"Ошибка отправки комментария с файлом: {error}")
+        raise
+
+    print(result["messageId"], result["file"]["id"])
+    ```
+
+{% endlist %}
+
+Метод возвращает идентификатор сообщения `messageId`, идентификатор чата `chatId`, идентификатор диалога `dialogId` и данные файла в объекте `file`.
+
+```json
+{
+    "result": {
+        "file": {
+            "id": 9817,
+            "chatId": 861,
+            "type": "file",
+            "name": "file.pdf",
+            "extension": "pdf",
+            "size": 35341,
+            "status": "done",
+            "progress": 100,
+            "authorId": 1
+        },
+        "messageId": 38655,
+        "chatId": 861,
+        "dialogId": "chat861"
+    }
+}
+```
+
+## Проверим результат
+
+Откройте задачу с `id` `3711` и перейдите в комментарии. В чате задачи должно появиться сообщение `Комментарий с файлом` с прикрепленным файлом `file.pdf`.
+
+Через REST проверьте, что задача связана с тем же чатом, в который отправлен файл, а файл доступен для скачивания.
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const checkResponse = await $b24.actions.v2.call.make({
+        method: 'tasks.task.get',
+        params: {
+            taskId: 3711,
+            select: ['ID', 'CHAT_ID']
+        },
+        requestId: 'task-get-check'
+    })
+
+    if (!checkResponse.isSuccess) {
+        throw new Error(checkResponse.getErrorMessages().join('; '))
+    }
+
+    const task = checkResponse.getData().result.task
+    console.log(task.chatId)
+
+    const fileResponse = await $b24.actions.v2.call.make({
+        method: 'im.v2.File.download',
+        params: {
+            dialogId: result.dialogId,
+            fileId: result.file.id
+        },
+        requestId: 'file-download-check'
+    })
+
+    if (!fileResponse.isSuccess) {
+        throw new Error(fileResponse.getErrorMessages().join('; '))
+    }
+
+    console.log(fileResponse.getData().result)
+    ```
+
+- PHP
+
+    ```php
+    $task = $serviceBuilder->core->call(
+        'tasks.task.get',
+        [
+            'taskId' => 3711,
+            'select' => ['ID', 'CHAT_ID']
+        ]
+    )->getResponseData()->getResult()['task'];
+
+    echo 'CHAT_ID: ' . $task['chatId'];
+
+    $file = $serviceBuilder->core->call(
+        'im.v2.File.download',
+        [
+            'dialogId' => $result['dialogId'],
+            'fileId' => $result['file']['id'],
+        ]
+    )->getResponseData()->getResult();
+
+    print_r($file);
+    ```
+
+- Python
+
+    ```python
+    task = client.tasks.task.get(
+        bitrix_id=3711,
+        select=["ID", "CHAT_ID"],
+    ).response.result["task"]
+
+    print(task["chatId"])
+
+    file = token.call_method(
+        "im.v2.File.download",
+        {
+            "dialogId": result["dialogId"],
+            "fileId": result["file"]["id"],
+        },
+    )["result"]
+
+    print(file)
+    ```
+
+{% endlist %}
+
+Сценарий выполнен успешно, если `chatId` задачи совпадает с `result.chatId` ответа [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md), а в ответе загрузки есть поля:
+
+- `result.messageId` — идентификатор сообщения в чате задачи
+- `result.dialogId` — идентификатор диалога задачи
+- `result.file.id` — идентификатор файла на Диске
+- `result.file.status` — статус загрузки файла. Значение `done` означает, что файл загружен
+- ответ [im.v2.File.download](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-download.md) содержит ссылку на скачивание файла в поле `result.downloadUrl`
+
+## Ошибки и диагностика
+
+Если метод вернул ошибку, проверьте данные запроса.
+
+#|
+|| **Ошибка** | **Причина и решение** ||
+|| `FILE_EMPTY` | Не передано имя файла или содержимое файла. Проверьте `fields.name` и `fields.content` ||
+|| `FILE_INVALID_CONTENT` | В `fields.content` передана не строка Base64 или строка с префиксом `data:*/*;base64,` ||
+|| `FILE_TOO_LARGE` | Файл больше 100 МБ. Уменьшите файл или выберите другой способ передачи данных ||
+|| `CHAT_NOT_FOUND` | Чат из `dialogId` не найден. Проверьте, что `chatId` получен из нужной задачи и передан с префиксом `chat` ||
+|| `ACCESS_DENIED` | Пользователь вебхука не имеет доступа к задаче или чату задачи ||
+|#
+
+Повторяйте сценарий с того шага, который вернул ошибку. Если ошибку вернул [tasks.task.get](../../api-reference/tasks/tasks-task-get.md), проверьте `taskId` и права пользователя. Если ошибку вернул [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md), повторите только второй шаг.
+
+## Что важно учитывать
+
+- [im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md) заменяет устаревшую цепочку `im.disk.folder.get` + загрузка через Диск + `im.disk.file.commit`
+- Файл передается в `fields.content` строкой Base64 без префикса `data:*/*;base64,`
+- `dialogId` для чата задачи собирается из `chatId`: если `chatId` равен `861`, передайте `chat861`
+- Повторный запуск примера создаст новое сообщение с файлом в чате задачи
+
+## Продолжите изучение
+
+- [Загрузить файл в чат im.v2.File.upload](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-upload.md)
+- [Скачать файл из чата im.v2.File.download](../../api-reference/chat-bots/chat-bots-v2/im.v2/files/file-download.md)
+- [Получить задачу по идентификатору tasks.task.get](../../api-reference/tasks/tasks-task-get.md)
+- [Как создать задачу с прикрепленным файлом](./how-to-create-task-with-file.md)

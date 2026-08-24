@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -134,108 +134,23 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Bot.update
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type BotUpdateResult = {
-      bot: {
-        id: number
-        code: string
-        type: string
-        isHidden: boolean
-        isSupportOpenline: boolean
-        isReactionsEnabled: boolean
-        backgroundId: string | null
-        language: string
-        moduleId: string
-        eventMode: string
-        countMessage: number
-        countCommand: number
-        countChat: number
-        countUser: number
-      }
-      users: Array<{
-        id: number
-        active: boolean
-        name: string
-        bot: boolean
-        type: string
-      }>
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<BotUpdateResult>({
-        method: 'imbot.v2.Bot.update',
-        params: {
-          botId: 456,
-          fields: {
-            properties: { name: 'Updated Bot' },
-            isHidden: true,
-          },
+      const response = await $b24.callMethod('imbot.v2.Bot.update', {
+        botId: 456,
+        fields: {
+          properties: { name: 'Updated Bot' },
+          isHidden: true,
         },
-        requestId: Text.getUuidRfc4122()
-      })
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Updated bot:', result.bot.id, result.bot.isHidden, result.users.length)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateBot() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.Bot.update',
-            params: {
-              botId: 456,
-              fields: {
-                properties: { name: 'Updated Bot' },
-                isHidden: true,
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Updated bot:', result.bot.id, result.bot.isHidden, result.users.length)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateBot)
-    </script>
     ```
 
 - PHP
@@ -309,6 +224,28 @@
     } else {
         echo 'Success';
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.Bot.update", b24.Params{
+    	"botId":    456,
+    	"botToken": "my_bot_token",
+    	"fields": b24.Params{
+    		"properties": b24.Params{
+    			"name": "Updated Bot",
+    		},
+    		"isHidden": true,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.Bot.update: %w", err)
+    }
+
+    // Форма ответа показана ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}
@@ -390,7 +327,7 @@ HTTP-статус: **200**
 || **isReactionsEnabled**
 [`boolean`](../../../../data-types.md) | Для сообщений бота включены реакции ||
 || **backgroundId**
-[`string|null`](../../../../data-types.md) | ID фона чата или `null` ||
+[```string|null```](../../../../data-types.md) | ID фона чата или `null` ||
 || **language**
 [`string`](../../../../data-types.md) | Язык бота ||
 || **moduleId**

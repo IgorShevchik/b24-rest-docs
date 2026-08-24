@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на удаление контакта или компании — владельца реквизита
 
 Метод удаляет банковский реквизит.
 
@@ -182,6 +182,49 @@
     echo '</PRE>';
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.requisite.bankdetail.delete(bitrix_id=357).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.requisite.bankdetail.delete", b24.Params{
+    	"id": 357,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.requisite.bankdetail.delete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -230,7 +273,7 @@ HTTP-статус: **40x**, **50x**
 
 {% include notitle [обработка ошибок](../../../../_includes/error-info.md) %}
 
-### Возможные ошибки
+### Возможные коды ошибок
 
 #|  
 || **Текст ошибки** | **Описание** ||

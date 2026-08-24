@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: `любой пользователь`
+> Кто может выполнять метод: администратор
 
 Метод `crm.activity.type.add` регистрирует пользовательский тип дела с указанием названия и иконки.
 
@@ -23,7 +23,7 @@
 || **Название**
 `тип` | **Описание** ||
 || **fields***
-[`object`](../../../../data-types.md#object_type) | Значения полей для добавления нового пользовательского типа дела в виде структуры:
+[`object`](../../../data-types.md#object_type) | Значения полей для добавления нового пользовательского типа дела в виде структуры:
 
 ```json
 fields:
@@ -50,7 +50,7 @@ fields:
 || **NAME**
 [`string`](../../../../data-types.md) | Название типа дела, например `Дело 1с` для сделки. По умолчанию пустая строка ||
 || **ICON_FILE**
-[`attached_diskfile`](../../../../data-types.md) | Файл иконки типа дела, описанный по [правилам](../../../../files/how-to-upload-files.md) ||
+[`attached_diskfile`](../../../data-types.md#attached_diskfile) | Файл иконки типа дела, описанный по [правилам](../../../../files/how-to-upload-files.md) ||
 || **IS_CONFIGURABLE_TYPE**
 [`string`](../../../../data-types.md) | Значение по умолчанию - `N`. Значение `Y` - признак того, что тип будет использоваться для [конфигурируемых дел](../configurable/crm-activity-configurable-add.md) ||
 |#
@@ -330,6 +330,30 @@ fields:
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.type.add", b24.Params{
+    	"fields": b24.Params{
+    		"TYPE_ID":              "1C",
+    		"NAME":                 "Дело 1C",
+    		"ICON_FILE":            "@type-icon",
+    		"IS_CONFIGURABLE_TYPE": "N",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.activity.type.add: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -384,6 +408,7 @@ HTTP-статус: **400**
 || **Код** | **Описание** ||
 || `ACCESS_DENIED` | Недостаточно прав для выполнения операции ||
 || `Access denied! Application context required` | Метод работает только в контексте приложений ||
+|| `Admin permissions required` | Метод доступен только администратору ||
 || `INVALID_ARG_VALUE` | Не заполнено обязательное поле `TYPE_ID` ||
 || `INVALID_ARG_VALUE` | Пользовательский тип дела с указанным `TYPE_ID` уже существует ||
 |#

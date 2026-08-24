@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: администратор
 
-Метод обновляет поля робота, зарегистрированного приложением.
+Метод `bizproc.robot.update` обновляет поля робота, зарегистрированного приложением.
 
 Работает только в контексте [приложения](../../../settings/app-installation/index.md).
 
@@ -32,10 +32,12 @@
 
 ### Параметр FIELDS {#parametr-fields}
 
+Передайте в `FIELDS` хотя бы одно поле для обновления.
+
 #|
 || **Название**
 `тип` | **Описание**||
-|| **HANDLER***
+|| **HANDLER**
 [`string`](../../data-types.md) | URL, на который робот будет отправлять данные через сервер очередей bitrix24.
 
 В ссылке должен быть тот же домен, на котором установлено приложение  ||
@@ -46,7 +48,7 @@
 - `Y` — да
 - `N` — нет
 ||
-|| **NAME***
+|| **NAME**
 [`string` \| `object`](../../data-types.md) | Название робота.
 
 Может быть строкой или ассоциативным массивом локализированных строк вида:
@@ -134,8 +136,8 @@
 [`boolean`](../../data-types.md) | Дает возможность открывать дополнительные настройки робота в слайдере приложения. Возможные значения:
 - `Y` — да
 - `N` — нет  ||
-|| **PLACEMENT_HANDLER***
-[`string`](../../data-types.md) | URL обработчика встройки на стороне приложения. Обязательное, если `USE_PLACEMENT = 'Y'` ||
+|| **PLACEMENT_HANDLER**
+[`string`](../../data-types.md) | URL обработчика встройки на стороне приложения ||
 |#
 
 ### Объект PROPERTY {#property}
@@ -277,91 +279,35 @@
     https://**put_your_bitrix24_address**/rest/bizproc.robot.update
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'bizproc.robot.update',
-        params: {
-          CODE: 'test_robot',
-          FIELDS: {
-            NAME: 'Send a message to the author',
-            USE_SUBSCRIPTION: 'N',
-            FILTER: {
-              INCLUDE: [
-                ['crm', 'CCrmDocumentDeal'],
-              ],
-            },
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Robot updated:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		'bizproc.robot.update',
+    		{
+    			'CODE': 'test_robot',
+    			'FIELDS': {
+    				'NAME': 'Отправить сообщение автору',
+    				'USE_SUBSCRIPTION': 'N',
+    				'FILTER': {
+    					INCLUDE: [
+    						['crm', 'CCrmDocumentDeal']
+    					]
+    				}
+    			}
+    		}
+    	);
+    	
+    	const result = response.getData().result;
+    	alert("Успешно: " + result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateRobot() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.robot.update',
-            params: {
-              CODE: 'test_robot',
-              FIELDS: {
-                NAME: 'Send a message to the author',
-                USE_SUBSCRIPTION: 'N',
-                FILTER: {
-                  INCLUDE: [
-                    ['crm', 'CCrmDocumentDeal'],
-                  ],
-                },
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Robot updated:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateRobot)
-    </script>
+    catch( error )
+    {
+    	alert("Error: " + error);
+    }
     ```
 
 - PHP
@@ -444,6 +390,33 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.robot.update", b24.Params{
+    	"CODE": "test_robot",
+    	"FIELDS": b24.Params{
+    		"NAME":             "Отправить сообщение автору",
+    		"USE_SUBSCRIPTION": "N",
+    		"FILTER": b24.Params{
+    			"INCLUDE": []any{
+    				[]string{"crm", "CCrmDocumentDeal"},
+    			},
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("bizproc.robot.update: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

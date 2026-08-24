@@ -261,6 +261,112 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.productrow.list(
+            filter={
+                "=ownerType": "D",
+                "=ownerId": 13142,
+                ">price": 5000,
+            },
+            order={
+                "price": "desc",
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.productrow.list(
+            filter={
+                "=ownerType": "D",
+                "=ownerId": 13142,
+                ">price": 5000,
+            },
+            order={
+                "price": "desc",
+            },
+        ).as_list().response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list_fast`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.productrow.list(
+            filter={
+                "=ownerType": "D",
+                "=ownerId": 13142,
+                ">price": 5000,
+            },
+            order={
+                "price": "desc",
+            },
+        ).as_list_fast(descending=True).response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -307,6 +413,46 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.item.productrow.list", b24.Params{
+    	"filter": b24.Params{
+    		"=ownerType": "D",
+    		"=ownerId":   13142,
+    		">price":     5000,
+    	},
+    	"order": b24.Params{
+    		"price": "desc",
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.item.productrow.list: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "productRows".
+    raw, ok := b24.Unwrap(res.Result, "productRows")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа productRows")
+    }
+
+    var items []struct {
+    	ID          b24.ID `json:"id"`
+    	OwnerID     b24.ID `json:"ownerId"`
+    	OwnerType   string `json:"ownerType"`
+    	ProductID   b24.ID `json:"productId"`
+    	ProductName string `json:"productName"`
+    	Price       int    `json:"price"`
+    }
+    if err := json.Unmarshal(raw, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
     ```
 
 {% endlist %}

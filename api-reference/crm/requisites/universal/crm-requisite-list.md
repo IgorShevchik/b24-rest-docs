@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на чтение контактов и компаний
 
 Метод получает список реквизитов по фильтру.
 
@@ -220,6 +220,98 @@
         echo '</PRE>';
         ```
 
+    - Python
+
+        Пример
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.requisite.list(
+                order={"DATE_CREATE": "ASC"},
+                filter={"PRESET_ID": "1"},
+                select=["ENTITY_TYPE_ID", "ENTITY_ID", "ID", "NAME"],
+                start=0,
+            ).response
+            result = bitrix_response.result
+            print(result)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
+        Пример `as_list`
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.requisite.list(
+                order={"DATE_CREATE": "ASC"},
+                filter={"PRESET_ID": "1"},
+                select=["ENTITY_TYPE_ID", "ENTITY_ID", "ID", "NAME"],
+            ).as_list().response
+            result = bitrix_response.result
+            for item in result:
+                print(item)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
+        Пример `as_list_fast`
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.requisite.list(
+                filter={"PRESET_ID": "1"},
+                select=["ENTITY_TYPE_ID", "ENTITY_ID", "ID", "NAME"],
+                order={"ID": "DESC"},
+            ).as_list_fast(descending=True).response
+            result = bitrix_response.result
+            for item in result:
+                print(item)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
     {% endlist %}
 
 2. Получение значения пользовательского поля в реквизитах
@@ -355,9 +447,38 @@
         echo '</PRE>';
         ```
 
+    - Python
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.requisite.list(
+                order={},
+                filter={"ID": "51"},
+                select=["UF_CRM_1707997209"],
+            ).response
+            result = bitrix_response.result
+            print(result)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
     {% endlist %}
 
-## Ответ в случае успеха
+## Обработка ответа
 
 HTTP-статус: **200**
 
@@ -433,7 +554,7 @@ HTTP-статус: **200**
 [`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
-## Ответ в случае ошибки
+## Обработка ошибок
 
 HTTP-статус: **400**
 
@@ -446,7 +567,7 @@ HTTP-статус: **400**
 
 {% include notitle [обработка ошибок](../../../../_includes/error-info.md) %}
 
-### Возможные ошибки
+### Возможные коды ошибок
 
 #|  
 || **Код** | **Текст ошибки** | **Описание** ||

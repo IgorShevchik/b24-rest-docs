@@ -29,7 +29,7 @@
 || **Название**
 `тип` | **Описание** ||
 || **ownerTypeId***
-[`integer`](../../../../data-types.md) | Целочисленный идентификатор [типа собъекта CRM](../../../data-types.md#object_type), в котором создаем дело, например `2` для сделки ||
+[`integer`](../../../../data-types.md) | Целочисленный идентификатор [типа объекта CRM](../../../data-types.md#object_type), в котором создаем дело, например `2` для сделки ||
 || **ownerId***
 [`integer`](../../../../data-types.md) | Целочисленный идентификатор элемента CRM, в котором создаем дело, например `1` ||
 || **fields***
@@ -61,7 +61,7 @@ fields:
 || **Название**
 `тип` | **Описание** ||
 || **typeId**
-[`string`](../../../../data-types.md) | Тип конфигурируемого дела. Если значение не указано, то оно устанавливается в значение по умолчанию `CONFIGURABLE`. Если указано, то значение должно соответствовать одному из типов, созданных методом [crm.activity.type.add](../types/crm-activity-type-add.md) с полем `IS_CONFIGURABLE_TYP0` равным `Y` в контексте того же приложения ||
+[`string`](../../../../data-types.md) | Тип конфигурируемого дела. Если значение не указано, то оно устанавливается в значение по умолчанию `CONFIGURABLE`. Если указано, то значение должно соответствовать одному из типов, созданных методом [crm.activity.type.add](../types/crm-activity-type-add.md) с полем `IS_CONFIGURABLE_TYPE` равным `Y` в контексте того же приложения ||
 || **completed**
 [`boolean`](../../../../data-types.md) | Флаг, говорящий закрыто ли дело. Для установки значения можно использовать `Y/N`, `1/0`, `true/false` ||
 || **deadline**
@@ -615,6 +615,86 @@ fields:
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.configurable.add", b24.Params{
+    	"ownerTypeId": 1,
+    	"ownerId":     999,
+    	"fields": b24.Params{
+    		"typeId":            "CONFIGURABLE",
+    		"completed":         true,
+    		"deadline":          "**put_current_date_time_here**",
+    		"pingOffsets":       []int{60, 300},
+    		"isIncomingChannel": "N",
+    		"responsibleId":     1,
+    		"badgeCode":         "CUSTOM",
+    	},
+    	"layout": b24.Params{
+    		"icon": b24.Params{
+    			"code": "call-completed",
+    		},
+    		"header": b24.Params{
+    			"title": "Входящий звонок",
+    		},
+    		"body": b24.Params{
+    			"logo": b24.Params{
+    				"code": "call-incoming",
+    			},
+    			"blocks": b24.Params{
+    				"responsible": b24.Params{
+    					"type": "lineOfBlocks",
+    					"properties": b24.Params{
+    						"blocks": b24.Params{
+    							"client": b24.Params{
+    								"type": "link",
+    								"properties": b24.Params{
+    									"text": "Сергей Востриков",
+    									"bold": true,
+    									"action": b24.Params{
+    										"type": "redirect",
+    										"uri":  "/crm/lead/details/789/",
+    									},
+    								},
+    							},
+    							"phone": b24.Params{
+    								"type": "text",
+    								"properties": b24.Params{
+    									"value": "+7 999 888 7777",
+    								},
+    							},
+    						},
+    					},
+    				},
+    			},
+    		},
+    		"footer": b24.Params{
+    			"buttons": b24.Params{
+    				"startCall": b24.Params{
+    					"title": "О клиенте",
+    					"action": b24.Params{
+    						"type": "openRestApp",
+    						"actionParams": b24.Params{
+    							"clientId": 456,
+    						},
+    					},
+    					"type": "primary",
+    				},
+    			},
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.activity.configurable.add: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -646,7 +726,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../../../data-types.md) | Корневой элемент ответа, содержащий информацию о добавленном идентифокаторе дела `id` в случае успеха. В случае неудачи вернет `null` ||
+[`object`](../../../../data-types.md) | Корневой элемент ответа, содержащий информацию о добавленном идентификаторе дела `id` в случае успеха. В случае неудачи вернет `null` ||
 || **time**
 [`time`](../../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
@@ -664,7 +744,7 @@ HTTP-статус: **400**
 
 {% include notitle [обработка ошибок](../../../../../_includes/error-info.md) %}
 
-### Возможные коды ошибок
+### Возможные коды ошибок {#errors}
 
 #|
 || **Код** | **Описание** ||
@@ -675,6 +755,12 @@ HTTP-статус: **400**
 || `WRONG_FIELD_VALUE` | Некорректное значение поля ||
 || `INCOMING_ACTIVITY_CAN_NOT_BE_WITH_DEADLINE` | Входящее дело не может иметь крайний срок ||
 || `ERROR_EMPTY_LAYOUT` | Поле layout должно быть заполнено ||
+|| `FIELD_IS_REQUIRED` | В объекте структуры не передано обязательное поле ||
+|| `FIELD_IS_REDUNDANT` | В объекте структуры передано поле, которого нет в его описании ||
+|| `ENUM_FIELD` | Значение поля не входит в список допустимых, например неизвестный тип тега ||
+|| `TOO_MANY_ITEMS` | Превышено количество элементов массива, например больше двух тегов или кнопок ||
+|| `KEY_CONTAIN_WRONG_SYMBOLS` | Ключ в ассоциативном массиве структуры содержит недопустимые символы. Допустимы только латинские буквы, цифры, дефис и подчеркивание ||
+|| `WRONG_LANG` | В мультиязычном значении передан код языка, не установленного на портале ||
 |#
 
 {% include [системные ошибки](../../../../../_includes/system-errors.md) %}

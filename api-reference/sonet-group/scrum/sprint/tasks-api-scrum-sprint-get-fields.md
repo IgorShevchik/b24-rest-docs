@@ -15,6 +15,8 @@
 
 Метод `tasks.api.scrum.sprint.getFields` возвращает доступные поля спринта.
 
+## Параметры метода
+
 Без параметров.
 
 ## Примеры кода
@@ -23,7 +25,7 @@
 
 {% list tabs %}
 
-- cUrl (Webhook)
+- cURL (Webhook)
 
     ```bash
     curl -X POST \
@@ -33,7 +35,7 @@
     https://your-domain.bitrix24.com/rest/_USER_ID_/_CODE_/tasks.api.scrum.sprint.getFields
     ```
 
-- cURL (oAuth)
+- cURL (OAuth)
 
     ```bash
     curl -X POST \
@@ -172,6 +174,24 @@
     } else {
     print_r($result['result']);
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "tasks.api.scrum.sprint.getFields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("tasks.api.scrum.sprint.getFields: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "fields".
+    raw, ok := b24.Unwrap(res.Result, "fields")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа fields")
+    }
+
+    fmt.Printf("%s\n", raw)
     ```
 
 {% endlist %}

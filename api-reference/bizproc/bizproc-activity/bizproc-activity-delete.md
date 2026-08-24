@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: администратор
 
-Метод удаляет действие для бизнес-процессов, добавленное приложением.
+Метод `bizproc.activity.delete` удаляет действие для бизнес-процессов, добавленное приложением.
 
 Работает только в контексте [приложения](../../../settings/app-installation/index.md).
 
@@ -44,73 +44,29 @@
     https://**put_your_bitrix24_address**/rest/bizproc.activity.delete
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'bizproc.activity.delete',
-        params: {
-          code: 'md5_action',
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Activity deleted:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		'bizproc.activity.delete',
+    		{
+    			code: 'md5_action'
+    		}
+    	);
+    	
+    	const result = response.getData().result;
+    	if(result.error())
+    		alert('Error: ' + result.error());
+    	else
+    		alert("Success: " + result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function deleteActivity() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.activity.delete',
-            params: {
-              code: 'md5_action',
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Activity deleted:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', deleteActivity)
-    </script>
+    catch( error )
+    {
+    	console.error('Error:', error);
+    }
     ```
 
 - PHP
@@ -175,6 +131,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.activity.delete", b24.Params{
+    	"CODE": "md5_action",
+    })
+    if err != nil {
+    	return fmt.Errorf("bizproc.activity.delete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

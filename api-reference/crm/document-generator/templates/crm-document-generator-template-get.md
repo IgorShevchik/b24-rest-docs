@@ -17,13 +17,13 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id**^*^
-[`integer`](../../data-types.md) | Идентификатор шаблона ||
+[`integer`](../../../data-types.md) | Идентификатор шаблона ||
 |#
 
 ## Примеры кода
@@ -173,6 +173,31 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.documentgenerator.template.get(bitrix_id=41).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -205,6 +230,37 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.documentgenerator.template.get", b24.Params{
+    	"id": 41,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.documentgenerator.template.get: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "template".
+    raw, ok := b24.Unwrap(res.Result, "template")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа template")
+    }
+
+    var item struct {
+    	ID              b24.ID `json:"id"`
+    	Name            string `json:"name"`
+    	Region          string `json:"region"`
+    	Download        string `json:"download"`
+    	DownloadMachine string `json:"downloadMachine"`
+    	Active          string `json:"active"`
+    }
+    if err := json.Unmarshal(raw, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.Name)
     ```
 
 {% endlist %}
@@ -258,9 +314,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../data-types.md) | Корневой элемент ответа. Содержит объект [`template`](#template) ||
+[`object`](../../../data-types.md) | Корневой элемент ответа. Содержит объект [`template`](#template) ||
 || **time**
-[`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 #### Тип template {#template}
@@ -269,37 +325,37 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **id**
-[`string`](../../data-types.md) | Идентификатор шаблона ||
+[`string`](../../../data-types.md) | Идентификатор шаблона ||
 || **name**
-[`string`](../../data-types.md) | Название шаблона ||
+[`string`](../../../data-types.md) | Название шаблона ||
 || **region**
-[`string`](../../data-types.md) | Регион шаблона ||
+[`string`](../../../data-types.md) | Регион шаблона ||
 || **code**
-[`string`](../../data-types.md) \| [`null`](../../data-types.md) | Символьный код шаблона ||
+[`string`](../../../data-types.md) \| [`null`](../../../data-types.md) | Символьный код шаблона ||
 || **download**
-[`string`](../../data-types.md) | Ссылка на скачивание файла шаблона ||
+[`string`](../../../data-types.md) | Ссылка на скачивание файла шаблона ||
 || **downloadMachine**
-[`string`](../../data-types.md) | Ссылка на скачивание файла шаблона для приложения ||
+[`string`](../../../data-types.md) | Ссылка на скачивание файла шаблона для приложения ||
 || **active**
-[`char`](../../data-types.md) | Активность шаблона: `Y` или `N` ||
+[`char`](../../../data-types.md) | Активность шаблона: `Y` или `N` ||
 || **moduleId**
-[`string`](../../data-types.md) | Идентификатор модуля ||
+[`string`](../../../data-types.md) | Идентификатор модуля ||
 || **numeratorId**
-[`string`](../../data-types.md) | Идентификатор нумератора ||
+[`string`](../../../data-types.md) | Идентификатор нумератора ||
 || **withStamps**
-[`char`](../../data-types.md) | Подставлять печать и подпись: `Y` или `N` ||
+[`char`](../../../data-types.md) | Подставлять печать и подпись: `Y` или `N` ||
 || **users**
-[`object`](../../data-types.md) | Объект кодов прав доступа в формате `{"UA":"UA"}` ||
+[`object`](../../../data-types.md) | Объект кодов прав доступа в формате `{"UA":"UA"}` ||
 || **isDeleted**
-[`char`](../../data-types.md) | Признак удаления шаблона: `Y` или `N` ||
+[`char`](../../../data-types.md) | Признак удаления шаблона: `Y` или `N` ||
 || **sort**
-[`string`](../../data-types.md) | Индекс сортировки ||
+[`string`](../../../data-types.md) | Индекс сортировки ||
 || **entityTypeId**
-[`array`](../../data-types.md) | Массив идентификаторов CRM-элементов, для которых доступен шаблон ||
+[`array`](../../../data-types.md) | Массив идентификаторов CRM-элементов, для которых доступен шаблон ||
 || **createTime**
-[`datetime`](../../data-types.md) | Дата и время создания шаблона ||
+[`datetime`](../../../data-types.md) | Дата и время создания шаблона ||
 || **updateTime**
-[`datetime`](../../data-types.md) | Дата и время последнего обновления шаблона ||
+[`datetime`](../../../data-types.md) | Дата и время последнего обновления шаблона ||
 |#
 
 ## Обработка ошибок

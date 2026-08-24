@@ -336,6 +336,34 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "im.recent.list", b24.Params{
+    	"LAST_MESSAGE_DATE":            "2026-02-25T18:30:00+03:00",
+    	"SKIP_OPENLINES":               "N",
+    	"SKIP_DIALOG":                  "N",
+    	"SKIP_CHAT":                    "N",
+    	"UNREAD_ONLY":                  "Y",
+    	"PARSE_TEXT":                   "Y",
+    	"GET_ORIGINAL_TEXT":            "N",
+    	"SKIP_UNDISTRIBUTED_OPENLINES": "Y",
+    	"ONLY_COPILOT":                 "N",
+    	"ONLY_CHANNEL":                 "N",
+    	"CAN_MANAGE_MESSAGES":          "Y",
+    	"OFFSET":                       0,
+    	"LIMIT":                        20,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("im.recent.list: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -574,8 +602,7 @@ HTTP-статус: **200**
                             "isNew": false
                         }
                     ]
-                },
-                ... // описание других ролей
+                }
             },
             "recommendedRoles": [
                 "copilot_assistant",
@@ -902,7 +929,7 @@ HTTP-статус: **200**
 [`string`](../data-types.md) | Право на отправку сообщений ||
 |#
 
-### Объект copilot {#copilot}
+#### Объект copilot {#copilot}
 
 #|
 || **Название**
@@ -919,6 +946,17 @@ HTTP-статус: **200**
 
 ## Обработка ошибок
 
+HTTP-статус: **401**
+
+```json
+{
+    "error": "INVALID_CREDENTIALS",
+    "error_description": "Invalid request credentials"
+}
+```
+
+У метода нет собственных кодов ошибок — возможны только системные ошибки REST API.
+
 {% include notitle [обработка ошибок](../../_includes/error-info.md) %}
 
 {% include [системные ошибки](../../_includes/system-errors.md) %}
@@ -928,11 +966,4 @@ HTTP-статус: **200**
 - [{#T}](./im-recent-get.md)
 - [{#T}](./im-dialog-get.md)
 - [{#T}](./im-counters-get.md)
-
-
-
-
-
-
-
 
