@@ -9,12 +9,11 @@
 
 {% endnote %}
 
-> Scope: [`documentgenerator, crm`](../../../../scopes/permissions.md)
+> Scope: [`crm`](../../../../scopes/permissions.md)
 >
 > Кто может подписаться: любой пользователь
 
 Событие `ONCRMDOCUMENTGENERATORDOCUMENTDELETE` сработает при удалении документа.
-
 
 {% note info "" %}
 

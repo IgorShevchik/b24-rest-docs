@@ -29,30 +29,7 @@
 
 ## Параметры метода
 
-Метод не требует `botId` и `botToken`. Параметров нет.
-
-## Как использовать
-
-Типичный сценарий — проверка перед использованием метода или поля, которое появилось в определенной ревизии:
-
-```js
-const revision = await BX.rest.callMethod('imbot.v2.Revision.get', {});
-const restRevision = revision.data().rest;
-
-if (restRevision >= 33)
-{
-    await BX.rest.callMethod('imbot.v2.Chat.Message.send', {
-        botId: 456,
-        botToken: '...',
-        dialogId: 'chat5',
-        fields: { message: 'Hello', system: true }
-    });
-}
-else
-{
-    // system может не работать корректно в более ранней ревизии
-}
-```
+Без параметров. Метод не требует `botId` и `botToken`.
 
 ## Примеры кода
 
@@ -62,121 +39,105 @@ else
 
 - cURL (Webhook)
 
-  ```bash
-  curl -X POST \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json" \
-    https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/imbot.v2.Revision.get
-  ```
+    ```bash
+    curl -X POST \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/imbot.v2.Revision.get
+    ```
 
 - cURL (OAuth)
 
-  ```bash
-  curl -X POST \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json" \
-    -d '{"auth":"**put_access_token_here**"}' \
-    https://**put_your_bitrix24_address**/rest/imbot.v2.Revision.get
-  ```
-
-- JS (TS)
-
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type RevisionResult = {
-      rest: number
-      web: number
-      mobile: number
-      desktop: number
-    }
-
-    try {
-      const response = await $b24.actions.v2.call.make<RevisionResult>({
-        method: 'imbot.v2.Revision.get',
-        params: {},
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('rest:', result.rest, 'web:', result.web, 'mobile:', result.mobile, 'desktop:', result.desktop)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
+    ```bash
+    curl -X POST \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -d '{"auth":"**put_access_token_here**"}' \
+      https://**put_your_bitrix24_address**/rest/imbot.v2.Revision.get
     ```
 
-- JS (UMD)
+- JS
 
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function getRevision() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
+    ```js
+    try {
+      const response = await $b24.callMethod('imbot.v2.Revision.get', {});
 
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.Revision.get',
-            params: {},
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('rest:', result.rest, 'web:', result.web, 'mobile:', result.mobile, 'desktop:', result.desktop)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', getRevision)
-    </script>
+      const { result } = response.getData();
+      console.log('result:', result);
+    } catch (error) {
+      console.error('Error:', error);
+    }
     ```
 
 - PHP
 
-  ```php
-  $result = $b24Service->core->call('imbot.v2.Revision.get');
-  print_r($result->getResponseData()->getResult());
-  ```
+    ```php
+    try {
+        $response = $b24Service
+            ->core
+            ->call('imbot.v2.Revision.get');
+
+        $result = $response
+            ->getResponseData()
+            ->getResult();
+
+        echo 'result: ' . print_r($result, true);
+    } catch (Throwable $exception) {
+        error_log($exception->getMessage());
+        echo 'Error: ' . $exception->getMessage();
+    }
+    ```
 
 - BX24.js
 
-  ```js
-  BX24.callMethod('imbot.v2.Revision.get', {}, function(result) {
-      if (result.error()) {
-          console.error(result.error().ex);
-      } else {
-          console.log(result.data());
-      }
-  });
-  ```
+    ```js
+    BX24.callMethod(
+        'imbot.v2.Revision.get',
+        {},
+        function(result) {
+            if (result.error()) {
+                console.error(result.error().ex);
+            } else {
+                console.log(result.data());
+            }
+        }
+    );
+    ```
 
 - PHP CRest
 
-  ```php
-  $result = CRest::call('imbot.v2.Revision.get');
-  print_r($result['result']);
-  ```
+    ```php
+    require_once('crest.php');
+
+    $result = CRest::call('imbot.v2.Revision.get');
+
+    if (!empty($result['error'])) {
+        echo 'Error: ' . $result['error_description'];
+    } else {
+        echo 'REST revision: ' . $result['result']['rest'];
+    }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.Revision.get", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.Revision.get: %w", err)
+    }
+
+    var item struct {
+    	Rest    int `json:"rest"`
+    	Web     int `json:"web"`
+    	Mobile  int `json:"mobile"`
+    	Desktop int `json:"desktop"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.Rest, item.Web)
+    ```
 
 {% endlist %}
 
@@ -209,9 +170,9 @@ HTTP-статус: **200**
 || **Название**
 `Тип` | **Описание** ||
 || **result**
-[object](../../../data-types.md) | Номера ревизий API и клиентских протоколов [(подробное описание)](#revision-object) ||
+[`object`](../../../data-types.md) | Номера ревизий API и клиентских протоколов [(подробное описание)](#revision-object) ||
 || **time**
-[time](../../../data-types.md#time) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 ### Поля объекта Revision {#revision-object}
@@ -228,6 +189,28 @@ HTTP-статус: **200**
 || **desktop**
 [`integer`](../../../data-types.md) | Ревизия протокола десктоп-приложения ||
 |#
+
+## Проверка совместимости перед вызовом
+
+Типичный сценарий — сверить ревизию перед использованием метода или поля, которое появилось не сразу:
+
+```js
+const response = await $b24.callMethod('imbot.v2.Revision.get', {});
+const restRevision = response.getData().result.rest;
+
+if (restRevision >= 33) {
+    // поле fields.system поддерживается — отправляем системное сообщение
+    await $b24.callMethod('imbot.v2.Chat.Message.send', {
+        botId: 456,
+        dialogId: 'chat5',
+        fields: { message: 'Hello', system: true }
+    });
+} else {
+    // в более ранней ревизии поле fields.system может обрабатываться некорректно
+}
+```
+
+Номер ревизии, начиная с которой доступно конкретное изменение, указан в [Журнале изменений API imbot.v2](../change-log.md).
 
 ## Обработка ошибок
 

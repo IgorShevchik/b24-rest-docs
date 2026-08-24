@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: `любой пользователь`
+> Кто может выполнять метод: администратор
 
 Метод `crm.activity.type.delete` удаляет пользовательский тип дел.
 
@@ -202,6 +202,25 @@
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.type.delete", b24.Params{
+    	"TYPE_ID": "1C",
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.activity.type.delete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -256,6 +275,7 @@ HTTP-статус: **400**
 || **Код** | **Описание** ||
 || `ACCESS_DENIED` | Недостаточно прав для выполнения операции ||
 || `Access denied! Application context required` | Метод работает только в контексте приложений ||
+|| `Admin permissions required` | Метод доступен только администратору ||
 || `INVALID_ARG_VALUE` | Пользовательский тип дела с указанным `TYPE_ID` не существует ||
 |#
 

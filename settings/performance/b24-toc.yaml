@@ -1,11 +1,11 @@
 title: Производительность
 href: index.md
 items: 
-  - name: Общие рекомендации
+  - name: Рекомендации по производительности
     href: index.md
   - name: Лимиты
     href: limits.md
   - name: Входящая очередь
     href: queue.md
-  - name: Получить большие объемы данных
+  - name: Как получить большие объемы данных
     href: huge-data.md

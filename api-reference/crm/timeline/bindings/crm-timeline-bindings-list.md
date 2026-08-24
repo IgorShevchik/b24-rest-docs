@@ -181,6 +181,97 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.bindings.list(
+            filter={
+                "OWNER_ID": 999,
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.bindings.list(
+            filter={
+                "OWNER_ID": 999,
+            },
+        ).as_list().response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+    Пример `as_list_fast`
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.bindings.list(
+            filter={
+                "OWNER_ID": 999,
+            },
+        ).as_list_fast(descending=True).response
+        result = bitrix_response.result
+        for item in result:
+            print(item)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -220,6 +311,38 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.bindings.list", b24.Params{
+    	"filter": b24.Params{
+    		"OWNER_ID": 999,
+    	},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.bindings.list: %w", err)
+    }
+
+    var items []struct {
+    	OwnerID    b24.ID `json:"OWNER_ID"`
+    	EntityID   b24.ID `json:"ENTITY_ID"`
+    	EntityType string `json:"ENTITY_TYPE"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.OwnerID, it.EntityID)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
     ```
 
 {% endlist %}
@@ -265,11 +388,24 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../../data-types.md) | Корневой элемент ответа, содержащий массив объектов с [информацией](crm-timeline-bindings-bind.md#parametr-fields) о найденных связях ||
+[`array`](../../../data-types.md) | Массив объектов с найденными связями [(подробное описание)](#result) ||
 || **total**
 [`integer`](../../../data-types.md) | Общее количество найденных записей ||
 || **time**
-[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
+|#
+
+#### Объект result {#result}
+
+#|
+|| **Название**
+`тип` | **Описание** ||
+|| **OWNER_ID**
+[`string`](../../../data-types.md) | Идентификатор записи таймлайна ||
+|| **ENTITY_ID**
+[`string`](../../../data-types.md) | Идентификатор элемента CRM ||
+|| **ENTITY_TYPE**
+[`string`](../../../data-types.md) | Тип элемента CRM. Возможные значения: `lead`, `deal`, `contact`, `company`, `order` ||
 |#
 
 ## Обработка ошибок
@@ -288,8 +424,8 @@ HTTP-статус: **400**
 ### Возможные коды ошибок
 
 #|
-|| **Код** | **Cообщение об ошибке** | **Описание** ||
-|| Пустая строка | OWNER_ID is not defined or invalid | Не передан обязательный параметр `OWNER_ID` или переданный `OWNER_ID` некорректный ||
+|| **Код** | **Сообщение об ошибке** | **Описание** ||
+|| Пустое значение | OWNER_ID is not defined or invalid | Не передан обязательный параметр `OWNER_ID` или переданный `OWNER_ID` некорректный ||
 |#
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}

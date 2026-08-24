@@ -2,7 +2,11 @@
 
 > Scope: [`crm`](../../../api-reference/scopes/permissions.md)
 >
-> Кто может выполнять метод: пользователи с правом на чтение лидов, контактов, компаний и правом на создание лидов
+> Кто может выполнять методы: чтобы пройти сценарий целиком, нужно самое строгое из перечисленных прав — «право на создание лидов»
+>
+> - [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) — пользователь с правом на чтение элементов CRM
+> - [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md) — пользователь с правом на чтение лидов
+> - [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) — пользователь с правом на создание лидов
 
 {% note tip "" %}
 
@@ -15,6 +19,8 @@
 
 Когда клиент заполняет форму на сайте, его данные передаются в обработчик. Скрипт ищет в CRM совпадения по телефону или электронной почте среди лидов, контактов и компаний. Если совпадения найдены, лид помечается как повторный и привязывается к имеющейся записи. Такой подход помогает избежать дублей и повышает эффективность работы менеджеров.
 
+В результате сценария в CRM появится новый лид. Если клиент уже обращался, у лида будут заполнены поля `COMPANY_ID` и `CONTACT_ID` — связь с компанией и контактом, которые получились из предыдущего обращения.
+
 {% note info "" %}
 
 В Битрикс24 должен быть включен режим работы с повторными лидами. Подробнее читайте в статье [Повторные лиды и сделки](https://helpdesk.bitrix24.ru/open/17707848/).
@@ -23,87 +29,216 @@
 
 Настройка состоит из двух этапов:
 
-1. Подготавливаем поля и размещаем форму на странице.
+1. Подготавливаем поля и размещаем форму на странице
 
-2. Создаем файл-обработчик, который вызывает последовательно методы [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md), [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md), [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md).
+2. Создаем файл-обработчик, который вызывает последовательно методы [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md), [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md), [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md)
+
+## Что нужно до начала
+
+- в Битрикс24 включен режим работы с повторными лидами. Без него лид создастся, но повторным не станет
+
+- вебхук создан от имени пользователя с правом на создание лидов и на чтение элементов CRM
+
+- есть сервер, который отдает страницу с формой и принимает данные формы методом `POST`. В примерах это Express для JS, PHP-скрипт и Flask для Python
+
+- путь вебхука хранится в окружении, а не в коде страницы. Форма находится на публичной странице, и попадать в нее секрет не должен
 
 ## 1\. Создаем веб-форму
 
 Создаем HTML-форму с полями:
 
-- `NAME` — имя клиента, обязательное поле,
+- `NAME` — имя клиента, обязательное поле
 
-- `LAST_NAME` — фамилия,
+- `LAST_NAME` — фамилия
 
-- `PHONE` — телефон,
+- `PHONE` — телефон
 
-- `EMAIL` — электронная почта.
+- `EMAIL` — электронная почта
 
-Форма передает данные методом `POST` в файл `form.php`.
+Форма передает данные методом `POST` в обработчик.
 
-```html
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('#form_to_crm').on( 'submit', function(el) {//event submit form
-        el.preventDefault();//the default action of the event will not be triggered
-        var formData = $(this).serialize();
-        $.ajax({
-            'method': 'POST',
-            'dataType': 'json',
-            'url': 'form.php', // файл для сохранения заполненных форм
-            'data': formData,
-            success: function(data){//success callback
-                alert(data.message);
-            }
+{% include [Сноска о примерах](../../../_includes/examples.md) %}
+
+{% list tabs %}
+
+- JS
+
+    ```html
+    <form id="form_to_crm">
+        <input type="text" name="NAME" placeholder="Name" required>
+        <input type="text" name="LAST_NAME" placeholder="Last name">
+        <input type="text" name="PHONE" placeholder="Phone">
+        <input type="text" name="EMAIL" placeholder="E-mail">
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        document.getElementById('form_to_crm').addEventListener('submit', async (el) => {
+            el.preventDefault();
+            const formData = Object.fromEntries(new FormData(el.currentTarget).entries());
+            const response = await fetch('/form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            const data = await response.json();
+            alert(data.message);
+        });
+    </script>
+    ```
+
+- PHP
+
+    ```html
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#form_to_crm').on( 'submit', function(el) {//event submit form
+            el.preventDefault();//the default action of the event will not be triggered
+            var formData = $(this).serialize();
+            $.ajax({
+                'method': 'POST',
+                'dataType': 'json',
+                'url': 'form.php', // файл для сохранения заполненных форм
+                'data': formData,
+                success: function(data){//success callback
+                    alert(data.message);
+                }
+            });
         });
     });
-});
-</script>
-    
-<form id="form_to_crm">
-    <input type="text" name="NAME" placeholder="Name" required>
-    <input type="text" name="LAST_NAME" placeholder="Last name">
-    <input type="text" name="PHONE" placeholder="Phone">
-    <input type="text" name="EMAIL" placeholder="E-mail">
-    <input type="submit" value="Submit">
-</form>
-```
+    </script>
+
+    <form id="form_to_crm">
+        <input type="text" name="NAME" placeholder="Name" required>
+        <input type="text" name="LAST_NAME" placeholder="Last name">
+        <input type="text" name="PHONE" placeholder="Phone">
+        <input type="text" name="EMAIL" placeholder="E-mail">
+        <input type="submit" value="Submit">
+    </form>
+    ```
+
+- Python
+
+    ```html
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#form_to_crm').on( 'submit', function(el) {//event submit form
+            el.preventDefault();//the default action of the event will not be triggered
+            var formData = $(this).serialize();
+            $.ajax({
+                'method': 'POST',
+                'dataType': 'json',
+                'url': '/form', // маршрут обработчика на Flask
+                'data': formData,
+                success: function(data){//success callback
+                    alert(data.message);
+                }
+            });
+        });
+    });
+    </script>
+
+    <form id="form_to_crm">
+        <input type="text" name="NAME" placeholder="Name" required>
+        <input type="text" name="LAST_NAME" placeholder="Last name">
+        <input type="text" name="PHONE" placeholder="Phone">
+        <input type="text" name="EMAIL" placeholder="E-mail">
+        <input type="submit" value="Submit">
+    </form>
+    ```
+
+{% endlist %}
 
 ## 2\. Создаем обработчик формы
 
-Создаем файл `form.php`. Обработчик будет обрабатывать данные, проверять дубликаты и создавать лид.
+Создаем обработчик. Он будет обрабатывать данные, проверять дубликаты и создавать лид.
 
 ### Получаем данные из формы
 
 Получаем и безопасно обрабатываем данные из полей `NAME`, `LAST_NAME`, `PHONE`, `EMAIL`, чтобы избежать XSS-атак.
 
-```php
-$sName = htmlspecialchars($_POST["NAME"]);    
-$sLastName = htmlspecialchars($_POST["LAST_NAME"]);
-$sPhone = htmlspecialchars($_POST["PHONE"]);
-$sEmail = htmlspecialchars($_POST["EMAIL"]);
-```
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const sName = String(req.body.NAME ?? '')
+    const sLastName = String(req.body.LAST_NAME ?? '')
+    const sPhone = String(req.body.PHONE ?? '')
+    const sEmail = String(req.body.EMAIL ?? '')
+    ```
+
+- PHP
+
+    ```php
+    $sName = htmlspecialchars($_POST["NAME"]);
+    $sLastName = htmlspecialchars($_POST["LAST_NAME"]);
+    $sPhone = htmlspecialchars($_POST["PHONE"]);
+    $sEmail = htmlspecialchars($_POST["EMAIL"]);
+    ```
+
+- Python
+
+    ```python
+    s_name = request.form.get("NAME", "")
+    s_last_name = request.form.get("LAST_NAME", "")
+    s_phone = request.form.get("PHONE", "")
+    s_email = request.form.get("EMAIL", "")
+    ```
+
+{% endlist %}
 
 Формируем массив `$arFields` с данными нового лида.
 
-```php
-$arFields = [
-    'TITLE' => 'From the site: ' . implode(' ', [$sName, $sLastName]),
-    'NAME' => (!empty($sName)) ? $sName : 'Empty name',
-    'LAST_NAME' => $sLastName,
-    'PHONE' => (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'HOME')) : array(),
-    'EMAIL' => (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array()
-];
-```
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const arFields = {
+        TITLE: 'From the site: ' + [sName, sLastName].join(' '),
+        NAME: sName || 'Empty name',
+        LAST_NAME: sLastName,
+        PHONE: sPhone ? [{ VALUE: sPhone, VALUE_TYPE: 'HOME' }] : [],
+        EMAIL: sEmail ? [{ VALUE: sEmail, VALUE_TYPE: 'HOME' }] : [],
+    }
+    ```
+
+- PHP
+
+    ```php
+    $arFields = [
+        'TITLE' => 'From the site: ' . implode(' ', [$sName, $sLastName]),
+        'NAME' => (!empty($sName)) ? $sName : 'Empty name',
+        'LAST_NAME' => $sLastName,
+        'PHONE' => (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'HOME')) : array(),
+        'EMAIL' => (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array()
+    ];
+    ```
+
+- Python
+
+    ```python
+    ar_fields = {
+        "TITLE": "From the site: " + " ".join([s_name, s_last_name]),
+        "NAME": s_name or "Empty name",
+        "LAST_NAME": s_last_name,
+        "PHONE": [{"VALUE": s_phone, "VALUE_TYPE": "HOME"}] if s_phone else [],
+        "EMAIL": [{"VALUE": s_email, "VALUE_TYPE": "HOME"}] if s_email else [],
+    }
+    ```
+
+{% endlist %}
 
 Заголовок лида формируем как `From the site: Имя Фамилия`.
 
 Система хранит телефон и электронную почту как массивы объектов [crm_multifield](../../../api-reference/crm/data-types.md#crm_multifield), поэтому формируем массивы `PHONE` и `EMAIL` с помощью значений `$sPhone` и `$sEmail`.
 
-- В поля `VALUE` записываем `$sPhone` и `$sEmail`.
+- В поля `VALUE` записываем `$sPhone` и `$sEmail`
 
-- В поля `VALUE_TYPE` передаем [типы](../../../api-reference/crm/data-types.md#crm_multifield), например, `HOME`.
+- В поля `VALUE_TYPE` передаем [типы](../../../api-reference/crm/data-types.md#crm_multifield), например, `HOME`
 
 Если в переменных `$sPhone` и `$sEmail` нет значений, указываем пустые массивы.
 
@@ -111,39 +246,133 @@ $arFields = [
 
 Чтобы найти повторяющиеся лиды по телефону и электронной почте, используем метод [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) дважды. В него нужно передать следующие данные:
 
-- `entity_type` — тип объекта. Передаем `LEAD` — лид.
+- `entity_type` — тип объекта. Передаем `LEAD` — лид
 
-- `type` — тип коммуникации. При первом вызове указываем `PHONE`, при втором — `EMAIL`.
+- `type` — тип коммуникации. При первом вызове указываем `PHONE`, при втором — `EMAIL`
 
-- `PHONE` — массив с телефоном `$arPhone`, который получили из формы.
+- `values` — массив значений для поиска. В вызове с `type`: `PHONE` передаем телефон `$sPhone`, в вызове с `type`: `EMAIL` — электронную почту `$sEmail`. Оба значения получены из формы
+
+Идентификаторы найденных дубликатов будем накапливать в массиве `$arLeadDuplicate`. Заводим его до первого вызова.
 
 Поиск по телефону,  `"type" => "PHONE"`.
 
-```php
-if(!empty($sPhone)){
-    $arResultDuplicate = CRest::call('crm.duplicate.findbycomm',[
-        "entity_type" => "LEAD",
-        "type" => "PHONE",
-        "values" => array($sPhone)
-    ]);
-    if(!empty($arResultDuplicate['result']['LEAD'])){
-        $arLeadDuplicate = array_merge ($arLeadDuplicate,$arResultDuplicate['result']['LEAD']);
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    let arLeadDuplicate = []
+
+    if (sPhone) {
+        const resultDuplicate = await $b24.actions.v2.call.make({
+            method: 'crm.duplicate.findbycomm',
+            params: { entity_type: 'LEAD', type: 'PHONE', values: [sPhone] },
+            requestId: 'dup-phone'
+        })
+        const found = resultDuplicate.getData()?.result?.LEAD
+        if (found) arLeadDuplicate = arLeadDuplicate.concat(found)
+    }
+    ```
+
+- PHP
+
+    ```php
+    $arLeadDuplicate = [];
+
+    if (!empty($sPhone)) {
+        $result = $sb->getCRMScope()->duplicate()->findByPhone(
+            [$sPhone],
+            \Bitrix24\SDK\Services\CRM\Duplicates\Service\EntityType::Lead
+        )->getCoreResponse()->getResponseData()->getResult();
+        if (!empty($result['LEAD'])) {
+            $arLeadDuplicate = array_merge($arLeadDuplicate, $result['LEAD']);
+        }
+    }
+    ```
+
+- Python
+
+    ```python
+    ar_lead_duplicate = []
+
+    if s_phone:
+        result_duplicate = client.crm.duplicate.findbycomm(
+            type="PHONE", values=[s_phone], entity_type="LEAD",
+        ).result
+        # если совпадений нет, метод возвращает пустой массив, а не объект,
+        # поэтому приводим результат к словарю перед обращением по ключу
+        found = (result_duplicate or {}).get("LEAD")
+        if found:
+            ar_lead_duplicate += found
+    ```
+
+{% endlist %}
+
+Поиск дубликатов по электронной почте, `"type" => "EMAIL"`.
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    if (sEmail) {
+        const resultDuplicate = await $b24.actions.v2.call.make({
+            method: 'crm.duplicate.findbycomm',
+            params: { entity_type: 'LEAD', type: 'EMAIL', values: [sEmail] },
+            requestId: 'dup-email'
+        })
+        const found = resultDuplicate.getData()?.result?.LEAD
+        if (found) arLeadDuplicate = arLeadDuplicate.concat(found)
+    }
+    ```
+
+- PHP
+
+    ```php
+    if (!empty($sEmail)) {
+        $result = $sb->getCRMScope()->duplicate()->findByEmail(
+            [$sEmail],
+            \Bitrix24\SDK\Services\CRM\Duplicates\Service\EntityType::Lead
+        )->getCoreResponse()->getResponseData()->getResult();
+        if (!empty($result['LEAD'])) {
+            $arLeadDuplicate = array_merge($arLeadDuplicate, $result['LEAD']);
+        }
+    }
+    ```
+
+- Python
+
+    ```python
+    if s_email:
+        result_duplicate = client.crm.duplicate.findbycomm(
+            type="EMAIL", values=[s_email], entity_type="LEAD",
+        ).result
+        found = (result_duplicate or {}).get("LEAD")
+        if found:
+            ar_lead_duplicate += found
+    ```
+
+{% endlist %}
+
+Если совпадения найдены, метод возвращает объект с ключом `LEAD` и массивом идентификаторов.
+
+```json
+{
+    "result": {
+        "LEAD": [3277, 3281]
     }
 }
 ```
 
-Поиск дубликатов по электронной почте, `"type" => "EMAIL"`.
+{% note warning "" %}
 
-```php
-if(!empty($sEmail)){
-    $arResultDuplicate = CRest::call('crm.duplicate.findbycomm',[
-        "entity_type" => "LEAD",
-        "type" => "EMAIL",
-        "values" => array($sEmail)
-    ]);
-    if(!empty($arResultDuplicate['result']['LEAD'])){
-        $arLeadDuplicate = array_merge ($arLeadDuplicate,$arResultDuplicate['result']['LEAD']);
-    }
+Если совпадений нет, метод возвращает пустой массив, а не пустой объект. Обращаться по ключу `LEAD` напрямую нельзя — сначала проверьте тип результата, иначе код упадет на первом же обращении без дублей.
+
+{% endnote %}
+
+```json
+{
+    "result": []
 }
 ```
 
@@ -153,36 +382,99 @@ if(!empty($sEmail)){
 
 Если дубликаты найдены, вызываем метод [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md).
 
-1. Применяем фильтр по идентификатору и статусу `CONVERTED`.
+1. Применяем фильтр по идентификатору и статусу `CONVERTED`
 
-2. Выбираем поля: `ID`, `COMPANY_ID,` `CONTACT_ID`.
+2. Выбираем поля: `ID`, `COMPANY_ID`, `CONTACT_ID`
 
-3. Сохраняем результат в массиве `$arDuplicateLead`.
+3. Сохраняем результат в массиве `$arDuplicateLead`
 
-4. Заполняем поля `COMPANY_ID` и `CONTACT_ID` в массиве `$arFields` значениями из `$arDuplicateLead`.
+4. Заполняем поля `COMPANY_ID` и `CONTACT_ID` в массиве `$arFields` значениями из `$arDuplicateLead`
 
-```php
-if(!empty($arLeadDuplicate)){
-    $arDuplicateLead = CRest::call('crm.lead.list',[
-        "filter" => [
-            '=ID' => $arLeadDuplicate,
-            'STATUS_ID' => 'CONVERTED'
-        ],
-        "select" => ['ID', 'COMPANY_ID', 'CONTACT_ID']
-    ]);
+Статус `CONVERTED` отбирает только те лиды, которые уже превратились в контакт или компанию. У остальных лидов поля `COMPANY_ID` и `CONTACT_ID` пустые, привязывать новый лид не к чему.
 
-    if(!empty($arDuplicateLead['result'])){
-        $sCompany = reset(array_diff(array_column($arDuplicateLead['result'],'COMPANY_ID','ID'),['']));
-        $sContact = reset(array_diff(array_column($arDuplicateLead['result'],'CONTACT_ID','ID'),['']));
-        if($sCompany > 0) $arFields['COMPANY_ID'] = $sCompany;
-        if($sContact > 0) $arFields['CONTACT_ID'] = $sContact;
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    if (arLeadDuplicate.length) {
+        const duplicateLead = await $b24.actions.v2.callList.make({
+            method: 'crm.lead.list',
+            params: {
+                filter: { '=ID': arLeadDuplicate, STATUS_ID: 'CONVERTED' },
+                select: ['ID', 'COMPANY_ID', 'CONTACT_ID']
+            },
+            requestId: 'dup-lead-list'
+        })
+        const arDuplicateLead = duplicateLead.getData()?.result ?? []
+        const company = arDuplicateLead.map(r => r.COMPANY_ID).find(v => v > 0)
+        const contact = arDuplicateLead.map(r => r.CONTACT_ID).find(v => v > 0)
+        if (company) arFields.COMPANY_ID = company
+        if (contact) arFields.CONTACT_ID = contact
     }
+    ```
+
+- PHP
+
+    ```php
+    if (!empty($arLeadDuplicate)) {
+        $arDuplicateLead = [];
+        foreach ($sb->getCRMScope()->lead()->batch->list(
+            order: [],
+            filter: ['=ID' => $arLeadDuplicate, 'STATUS_ID' => 'CONVERTED'],
+            select: ['ID', 'COMPANY_ID', 'CONTACT_ID']
+        ) as $lead) {
+            $arDuplicateLead[] = $lead;
+        }
+
+        foreach ($arDuplicateLead as $lead) {
+            if ($lead->COMPANY_ID > 0 && empty($arFields['COMPANY_ID'])) {
+                $arFields['COMPANY_ID'] = $lead->COMPANY_ID;
+            }
+            if ($lead->CONTACT_ID > 0 && empty($arFields['CONTACT_ID'])) {
+                $arFields['CONTACT_ID'] = $lead->CONTACT_ID;
+            }
+        }
+    }
+    ```
+
+- Python
+
+    ```python
+    if ar_lead_duplicate:
+        ar_duplicate_lead = client.crm.lead.list(
+            filter={"=ID": ar_lead_duplicate, "STATUS_ID": "CONVERTED"},
+            select=["ID", "COMPANY_ID", "CONTACT_ID"],
+        ).as_list().result
+
+        company = next((r["COMPANY_ID"] for r in ar_duplicate_lead if int(r["COMPANY_ID"] or 0) > 0), None)
+        contact = next((r["CONTACT_ID"] for r in ar_duplicate_lead if int(r["CONTACT_ID"] or 0) > 0), None)
+        if company:
+            ar_fields["COMPANY_ID"] = company
+        if contact:
+            ar_fields["CONTACT_ID"] = contact
+    ```
+
+{% endlist %}
+
+Метод возвращает идентификаторы строками, а незаполненные связи — значением `null`. Поэтому проверяем значения перед тем, как переложить их в `$arFields`.
+
+```json
+{
+    "result": [
+        {
+            "ID": "3277",
+            "COMPANY_ID": "1789",
+            "CONTACT_ID": "2431"
+        }
+    ],
+    "total": 1
 }
 ```
 
 ### Добавляем новый лид
 
-Чтобы добавить лид, используем метод [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md). В него передаем массив `$arFields`.
+Чтобы добавить лид, используем метод [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md). В него передаем массив `$arFields` — с полями из формы и с `COMPANY_ID` и `CONTACT_ID`, если дубликаты нашлись.
 
 {% note warning "" %}
 
@@ -190,98 +482,349 @@ if(!empty($arLeadDuplicate)){
 
 {% endnote %}
 
-```php
-$result = CRest::call('crm.lead.add', [
-    'fields' => $arFields
-]);
-```
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    await $b24.actions.v2.call.make({
+        method: 'crm.lead.add',
+        params: { fields: arFields },
+        requestId: 'repeat-lead-add'
+    })
+    ```
+
+- PHP
+
+    ```php
+    $sb->getCRMScope()->lead()->add($arFields);
+    ```
+
+- Python
+
+    ```python
+    client.crm.lead.add(fields=ar_fields)
+    ```
+
+{% endlist %}
 
 Если лид создан успешно, метод вернет его идентификатор. Если вы получили ошибку `error`, изучите описание возможных ошибок в документации метода [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md).
 
 ```json
 {
-    "result": 3289,
+    "result": 3289
 }
 ```
+
+## Проверим результат
+
+Откройте созданный лид в Битрикс24. У повторного лида в карточке заполнен блок «Клиент»: там отображаются компания и контакт из предыдущего обращения.
+
+Через REST лид проверяет метод [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md) с идентификатором из ответа предыдущего шага.
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const checkResponse = await $b24.actions.v2.call.make({
+        method: 'crm.lead.get',
+        params: { id: 3289 },
+        requestId: 'lead-get'
+    })
+
+    console.dir(checkResponse.getData().result)
+    ```
+
+- PHP
+
+    ```php
+    $lead = $sb->getCRMScope()->lead()->get(3289)->lead();
+    ```
+
+- Python
+
+    ```python
+    lead = client.crm.lead.get(bitrix_id=3289).result
+    ```
+
+{% endlist %}
+
+Сценарий выполнен, если в ответе:
+
+- `TITLE` начинается с `From the site:` — лид пришел из формы
+
+- `PHONE` и `EMAIL` совпадают с тем, что отправила форма
+
+- `COMPANY_ID` и `CONTACT_ID` заполнены, когда клиент уже обращался. Для первого обращения эти поля остаются пустыми, и это тоже верный результат — привязывать лид не к чему
+
+Проверить, что сценарий отработал именно как поиск дубликатов, проще всего так: отправьте форму дважды с одним телефоном. Между отправками сконвертируйте первый лид в контакт или компанию, иначе фильтр по статусу `CONVERTED` не найдет его и второй лид создастся без связей.
+
+## Ошибки и диагностика
+
+Если метод вернул ошибку, проверьте данные запроса.
+
+#|
+|| **Код** | **Причина и действие** ||
+|| `403` `Access denied` | У пользователя нет прав на чтение элементов CRM или на создание лидов. Проверьте, от имени какого пользователя создан вебхук ||
+|| `400` `Communication type is not defined` | В [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) не передан обязательный параметр `type`. Он нужен в каждом из двух вызовов ||
+|| `400` `Communication values is not defined` | В [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) не передан обязательный параметр `values`. Если поле формы пустое, вызов нужно пропустить, а не отправлять с пустым массивом ||
+|| `400` `Communication type '{type}' is not supported in current context` | В `type` передано значение, отличное от `PHONE` и `EMAIL` ||
+|#
+
+Лид может создаться без ошибки, но без связей с компанией и контактом. Это не сбой сценария, а один из его исходов. Проверьте по порядку:
+
+- [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) вернул пустой результат. Совпадений по телефону и почте в CRM нет, клиент обращается впервые
+
+- дубликаты нашлись, но [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md) вернул пустой список. Ни один из найденных лидов не имеет статус `CONVERTED` — они еще не превращены в контакт или компанию
+
+- поиск не учитывает добавочный номер телефона, но чувствителен к формату записи. Если в CRM телефон сохранен как `+7 900 123-45-67`, а форма прислала `89001234567`, совпадения не будет
+
+Повторяйте сценарий с того шага, который вернул ошибку. Поиск дубликатов и получение списка ничего не создают, их можно выполнять сколько угодно раз. Если ошибку вернул [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md), лид не создан: исправьте `fields` и повторите только этот вызов.
+
+## Что важно учитывать
+
+- метод [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md) принимает не больше 20 значений в `values` за вызов
+
+- если по одному типу объекта найдено 20 и более дублей, остальные типы в ответе не возвращаются. В сценарии это не мешает: мы ищем только по `LEAD`
+
+- сценарий связывает новый лид с компанией и контактом, но сам старый лид не изменяет и дубли не объединяет. Для слияния используйте метод [crm.entity.mergeBatch](../../../api-reference/crm/duplicates/crm-entity-merge-batch.md)
+
+- повторный запуск формы с теми же данными каждый раз создает новый лид. Дубли не отсеиваются, поиск нужен только для привязки
+
+- поиск идет только среди лидов, потому что в `entity_type` передан `LEAD`. Чтобы найти совпадения еще и среди контактов и компаний, уберите `entity_type` — тогда метод вернет объект с ключами `LEAD`, `CONTACT` и `COMPANY`
 
 ### Полный пример кода обработчика
 
-```php
-<?
-$sName = htmlspecialchars($_POST["NAME"]);    
-$sLastName = htmlspecialchars($_POST["LAST_NAME"]);
-$sPhone = htmlspecialchars($_POST["PHONE"]);
-$sEmail = htmlspecialchars($_POST["EMAIL"]);
-        
-$arFields = [
-    'TITLE' => (!empty($sName)) ? $sName : 'Empty name',
-    'LAST_NAME' => $sLastName,
-    'PHONE' => (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'HOME')) : array(),
-    'EMAIL' => (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array()
-];
-    
-$arLeadDuplicate = [];
-if(!empty($sPhone)){ // поиск дубликатов по телефону
-    $arResultDuplicate = CRest::call('crm.duplicate.findbycomm',[
-        "entity_type" => "LEAD",
-        "type" => "PHONE",
-        "values" => array($sPhone)
-    ]);
-    if(!empty($arResultDuplicate['result']['LEAD'])){
-        $arLeadDuplicate = array_merge ($arLeadDuplicate,$arResultDuplicate['result']['LEAD']);
-    }
-}
-    
-if(!empty($sEmail)) { // поиск дубликатов по email
-    $arResultDuplicate = CRest::call('crm.duplicate.findbycomm', [
-        "entity_type" => "LEAD",
-        "type" => "EMAIL",
-        "values" => [$sEmail]
-    ]);
-    if(!empty($arResultDuplicate[ 'result' ][ 'LEAD' ])) {
-        $arLeadDuplicate = array_merge($arLeadDuplicate, $arResultDuplicate[ 'result' ][ 'LEAD' ]);
-    }
-}
-    
-if(!empty($arLeadDuplicate)){ // получение дубликата лида с выбором полей связанных контакта и компании
-    $arDuplicateLead = CRest::call('crm.lead.list',[
-        "filter" => [
-            '=ID' => $arLeadDuplicate,
-            'STATUS_ID' => 'CONVERTED',
-        ],
-        'select' => [
-            'ID', 'COMPANY_ID', 'CONTACT_ID'
-        ]
-    ]);
-        
-    if(!empty($arDuplicateLead['result'])){
-        $sCompany = reset(array_diff(array_column($arDuplicateLead['result'],'COMPANY_ID','ID'),['']));
-        $sContact = reset(array_diff(array_column($arDuplicateLead['result'],'CONTACT_ID','ID'),['']));
-        if($sCompany > 0)
-            $arFields['COMPANY_ID'] = $sCompany;
-        if($sContact > 0)
-            $arFields['CONTACT_ID'] = $sContact;
-    }
-}
-    
-$result = CRest::call('crm.lead.add', // создание повторного лида
-    [
-        'fields'    => $arFields
-    ]
-);
-if(!empty($result['result'])){
-    echo json_encode(['message' => 'Lead add']);
-}elseif(!empty($result['error_description'])){
-    echo json_encode(['message' => 'Lead not added: '.$result['error_description']]);
-}else{
-    echo json_encode(['message' => 'Lead not added']);
-}
-?>
-```
+{% list tabs %}
 
-## Продолжите изучение 
+- JS
+
+    ```javascript
+    import express from 'express'
+    import { B24Hook } from '@bitrix24/b24jssdk'
+
+    const $b24 = B24Hook.fromWebhookUrl(process.env.B24_HOOK)
+    // B24_HOOK = 'https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/'
+
+    const app = express()
+    app.use(express.json())
+
+    // Обработчик принимает данные формы по маршруту /form
+    app.post('/form', async (req, res) => {
+        const sName = String(req.body.NAME ?? '')
+        const sLastName = String(req.body.LAST_NAME ?? '')
+        const sPhone = String(req.body.PHONE ?? '')
+        const sEmail = String(req.body.EMAIL ?? '')
+
+        const arFields = {
+            TITLE: 'From the site: ' + [sName, sLastName].join(' '),
+            NAME: sName || 'Empty name',
+            LAST_NAME: sLastName,
+            PHONE: sPhone ? [{ VALUE: sPhone, VALUE_TYPE: 'HOME' }] : [],
+            EMAIL: sEmail ? [{ VALUE: sEmail, VALUE_TYPE: 'HOME' }] : [],
+        }
+
+        let arLeadDuplicate = []
+        if (sPhone) { // поиск дубликатов по телефону
+            const r = await $b24.actions.v2.call.make({
+                method: 'crm.duplicate.findbycomm',
+                params: { entity_type: 'LEAD', type: 'PHONE', values: [sPhone] },
+                requestId: 'dup-phone'
+            })
+            const found = r.getData()?.result?.LEAD
+            if (found) arLeadDuplicate = arLeadDuplicate.concat(found)
+        }
+
+        if (sEmail) { // поиск дубликатов по email
+            const r = await $b24.actions.v2.call.make({
+                method: 'crm.duplicate.findbycomm',
+                params: { entity_type: 'LEAD', type: 'EMAIL', values: [sEmail] },
+                requestId: 'dup-email'
+            })
+            const found = r.getData()?.result?.LEAD
+            if (found) arLeadDuplicate = arLeadDuplicate.concat(found)
+        }
+
+        if (arLeadDuplicate.length) { // получение дубликата лида с полями связанных контакта и компании
+            const duplicateLead = await $b24.actions.v2.callList.make({
+                method: 'crm.lead.list',
+                params: {
+                    filter: { '=ID': arLeadDuplicate, STATUS_ID: 'CONVERTED' },
+                    select: ['ID', 'COMPANY_ID', 'CONTACT_ID']
+                },
+                requestId: 'dup-lead-list'
+            })
+            const arDuplicateLead = duplicateLead.getData()?.result ?? []
+            const company = arDuplicateLead.map(r => r.COMPANY_ID).find(v => v > 0)
+            const contact = arDuplicateLead.map(r => r.CONTACT_ID).find(v => v > 0)
+            if (company) arFields.COMPANY_ID = company
+            if (contact) arFields.CONTACT_ID = contact
+        }
+
+        const result = await $b24.actions.v2.call.make({ // создание повторного лида
+            method: 'crm.lead.add',
+            params: { fields: arFields },
+            requestId: 'repeat-lead-add'
+        })
+
+        if (result.isSuccess && result.getData()?.result) {
+            res.json({ message: 'Lead add' })
+        } else {
+            res.json({ message: 'Lead not added: ' + result.getErrorMessages().join('; ') })
+        }
+    })
+
+    app.listen(3000)
+    ```
+
+- PHP
+
+    ```php
+    <?php
+    // composer require bitrix24/b24phpsdk:"^3.0"
+    require_once 'vendor/autoload.php';
+
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Bitrix24\SDK\Services\CRM\Duplicates\Service\EntityType;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use Monolog\Logger;
+    use Monolog\Handler\StreamHandler;
+
+    $log = new Logger('b24');
+    $log->pushHandler(new StreamHandler('php://stdout'));
+
+    $sb = (new ServiceBuilderFactory(new EventDispatcher(), $log))
+        ->initFromWebhook('https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/');
+
+    $sName = htmlspecialchars($_POST["NAME"]);
+    $sLastName = htmlspecialchars($_POST["LAST_NAME"]);
+    $sPhone = htmlspecialchars($_POST["PHONE"]);
+    $sEmail = htmlspecialchars($_POST["EMAIL"]);
+
+    $arFields = [
+        'TITLE' => 'From the site: ' . implode(' ', [$sName, $sLastName]),
+        'NAME' => (!empty($sName)) ? $sName : 'Empty name',
+        'LAST_NAME' => $sLastName,
+        'PHONE' => (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'HOME')) : array(),
+        'EMAIL' => (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array()
+    ];
+
+    $arLeadDuplicate = [];
+    if (!empty($sPhone)) { // поиск дубликатов по телефону
+        $r = $sb->getCRMScope()->duplicate()->findByPhone([$sPhone], EntityType::Lead)
+            ->getCoreResponse()->getResponseData()->getResult();
+        if (!empty($r['LEAD'])) {
+            $arLeadDuplicate = array_merge($arLeadDuplicate, $r['LEAD']);
+        }
+    }
+
+    if (!empty($sEmail)) { // поиск дубликатов по email
+        $r = $sb->getCRMScope()->duplicate()->findByEmail([$sEmail], EntityType::Lead)
+            ->getCoreResponse()->getResponseData()->getResult();
+        if (!empty($r['LEAD'])) {
+            $arLeadDuplicate = array_merge($arLeadDuplicate, $r['LEAD']);
+        }
+    }
+
+    if (!empty($arLeadDuplicate)) { // получение дубликата лида с полями связанных контакта и компании
+        foreach ($sb->getCRMScope()->lead()->batch->list(
+            order: [],
+            filter: ['=ID' => $arLeadDuplicate, 'STATUS_ID' => 'CONVERTED'],
+            select: ['ID', 'COMPANY_ID', 'CONTACT_ID']
+        ) as $lead) {
+            if ($lead->COMPANY_ID > 0 && empty($arFields['COMPANY_ID'])) {
+                $arFields['COMPANY_ID'] = $lead->COMPANY_ID;
+            }
+            if ($lead->CONTACT_ID > 0 && empty($arFields['CONTACT_ID'])) {
+                $arFields['CONTACT_ID'] = $lead->CONTACT_ID;
+            }
+        }
+    }
+
+    try {
+        $sb->getCRMScope()->lead()->add($arFields); // создание повторного лида
+        echo json_encode(['message' => 'Lead add']);
+    } catch (\Throwable $e) {
+        echo json_encode(['message' => 'Lead not added: ' . $e->getMessage()]);
+    }
+    ```
+
+- Python
+
+    ```python
+    # pip install b24pysdk flask
+    from flask import Flask, request, jsonify
+    from b24pysdk import BitrixWebhook, Client
+
+    app = Flask(__name__)
+
+    client = Client(BitrixWebhook(
+        domain="your-domain.bitrix24.ru",
+        webhook_token="USER_ID/TOKEN",  # только user_id/token, без https://
+    ))
+
+
+    def find_lead_duplicates(comm_type: str, value: str) -> list:
+        """Возвращает идентификаторы лидов с совпадающим телефоном или почтой.
+
+        Если совпадений нет, метод возвращает пустой массив, а не объект,
+        поэтому приводим результат к словарю перед обращением по ключу.
+        """
+        result = client.crm.duplicate.findbycomm(
+            type=comm_type, values=[value], entity_type="LEAD",
+        ).result
+        return (result or {}).get("LEAD") or []
+
+
+    @app.route("/form", methods=["POST"])
+    def handle_form():
+        s_name = request.form.get("NAME", "")
+        s_last_name = request.form.get("LAST_NAME", "")
+        s_phone = request.form.get("PHONE", "")
+        s_email = request.form.get("EMAIL", "")
+
+        ar_fields = {
+            "TITLE": "From the site: " + " ".join([s_name, s_last_name]),
+            "NAME": s_name or "Empty name",
+            "LAST_NAME": s_last_name,
+            "PHONE": [{"VALUE": s_phone, "VALUE_TYPE": "HOME"}] if s_phone else [],
+            "EMAIL": [{"VALUE": s_email, "VALUE_TYPE": "HOME"}] if s_email else [],
+        }
+
+        ar_lead_duplicate = []
+        if s_phone:  # поиск дубликатов по телефону
+            ar_lead_duplicate += find_lead_duplicates("PHONE", s_phone)
+
+        if s_email:  # поиск дубликатов по email
+            ar_lead_duplicate += find_lead_duplicates("EMAIL", s_email)
+
+        if ar_lead_duplicate:  # получение дубликата лида с полями связанных контакта и компании
+            ar_duplicate_lead = client.crm.lead.list(
+                filter={"=ID": ar_lead_duplicate, "STATUS_ID": "CONVERTED"},
+                select=["ID", "COMPANY_ID", "CONTACT_ID"],
+            ).as_list().result
+            company = next((r["COMPANY_ID"] for r in ar_duplicate_lead if int(r["COMPANY_ID"] or 0) > 0), None)
+            contact = next((r["CONTACT_ID"] for r in ar_duplicate_lead if int(r["CONTACT_ID"] or 0) > 0), None)
+            if company:
+                ar_fields["COMPANY_ID"] = company
+            if contact:
+                ar_fields["CONTACT_ID"] = contact
+
+        try:
+            client.crm.lead.add(fields=ar_fields)  # создание повторного лида
+            return jsonify({"message": "Lead add"})
+        except Exception as e:
+            return jsonify({"message": f"Lead not added: {e}"})
+    ```
+
+{% endlist %}
+
+## Продолжите изучение
 
 - [{#T}](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md)
+- [{#T}](../../../api-reference/crm/duplicates/crm-entity-merge-batch.md)
 - [{#T}](../../../api-reference/crm/leads/crm-lead-list.md)
 - [{#T}](../../../api-reference/crm/leads/crm-lead-add.md)
-
+- [{#T}](../../../api-reference/crm/leads/crm-lead-get.md)
+- [{#T}](../../../api-reference/crm/data-types.md)

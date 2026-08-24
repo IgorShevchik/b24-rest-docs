@@ -1,4 +1,4 @@
-# Получить список зарегистрированных обработчиков мест встраивания placement.get
+# Получить обработчики, зарегистрированные приложением placement.get
 
 {% note tip "" %}
 
@@ -9,11 +9,11 @@
 
 {% endnote %}
 
-> Scope: [`placement`, `в зависимости от места встройки`](../scopes/permissions.md)
+> Scope: [`placement`, `в зависимости от точки встраивания`](../scopes/permissions.md)
 >
 > Кто может выполнять метод: администратор
 
-Метод `placement.get` получает список зарегистрированных обработчиков мест встраивания виджетов.
+Метод `placement.get` возвращает обработчики виджетов, которые зарегистрировало приложение.
 
 ## Параметры метода
 
@@ -170,6 +170,20 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "placement.get", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("placement.get: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -244,7 +258,7 @@ HTTP-статус: **200**
                     "GROUP_NAME": ""
                 }
             }
-        },
+        }
     ],
     "time": {
         "start": 1712132792.910734,
@@ -279,7 +293,7 @@ HTTP-статус: **400**, **403**, **200**
 ```json
 {
     "error": "INVALID_REQUEST",
-    "error_description": "Https required",
+    "error_description": "Https required"
 }
 ```
 

@@ -1,4 +1,4 @@
-#  Открепить запись в таймлайне crm.timeline.item.unpin
+# Открепить запись в таймлайне crm.timeline.item.unpin
 
 {% note tip "" %}
 
@@ -11,7 +11,7 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: любой пользователь
+> Кто может выполнять метод: пользователь с правом на изменение CRM-элемента
 
 Метод `crm.timeline.item.unpin` открепляет запись в таймлайне.
 
@@ -196,6 +196,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.item.unpin", b24.Params{
+    	"id":          999,
+    	"ownerTypeId": 2,
+    	"ownerId":     10,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.item.unpin: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

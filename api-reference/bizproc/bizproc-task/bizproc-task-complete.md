@@ -29,7 +29,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -61,11 +61,10 @@
 - `field_N` — символьный идентификатор поля задания
 - `value_N` — значение поля
 
-Получить описания полей в задании можно методом [bizproc.task.list](./bizproc-task-list.md) в объекте `"PARAMETERS": "Fields"` ответа. Структура описания объекта поля:
+Получить описания полей в задании можно методом [bizproc.task.list](./bizproc-task-list.md) в поле `PARAMETERS.Fields` ответа. Структура описания объекта поля:
 
 ```json
 "PARAMETERS": {
-    ...
     "Fields": [
         {
             "Id": "field_id",
@@ -78,6 +77,8 @@
             "Settings": null,
             "Default": "default_value"
         }
+    ]
+}
 ```
 
 `Id` — символьный идентификатор поля задания.
@@ -111,7 +112,7 @@
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"TASK_ID":1501,"STATUS":1,"COMMENT":"Добавлено","Fields":{"contractor":"C_607","phone_number":"89991234567"}}' \
+    -d '{"TASK_ID":1501,"STATUS":3,"COMMENT":"Добавлено","FIELDS":{"contractor":"C_607","phone_number":"89991234567"}}' \
     https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/bizproc.task.complete
     ```
 
@@ -121,89 +122,36 @@
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"TASK_ID":1501,"STATUS":1,"COMMENT":"Добавлено","Fields":{"contractor":"C_607","phone_number":"89991234567"},"auth":"**put_access_token_here**"}' \
+    -d '{"TASK_ID":1501,"STATUS":3,"COMMENT":"Добавлено","FIELDS":{"contractor":"C_607","phone_number":"89991234567"},"auth":"**put_access_token_here**"}' \
     https://**put_your_bitrix24_address**/rest/bizproc.task.complete
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'bizproc.task.complete',
-        params: {
-          TASK_ID: 1501,
-          STATUS: 1,
-          COMMENT: 'Added',
-          Fields: {
-            contractor: 'C_607',
-            phone_number: '89991234567',
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Task completed:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		'bizproc.task.complete',
+    		{
+    			'TASK_ID': 1501,
+                'STATUS': 3,
+                'COMMENT': 'Добавлено',
+                'FIELDS': {
+    				'contractor': 'C_607',
+    				'phone_number': '89991234567'
+    			}
+    		}
+    	);
+    	
+    	const result = response.getData().result;
+    	console.log(result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function completeBizprocTask() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.task.complete',
-            params: {
-              TASK_ID: 1501,
-              STATUS: 1,
-              COMMENT: 'Added',
-              Fields: {
-                contractor: 'C_607',
-                phone_number: '89991234567',
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Task completed:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', completeBizprocTask)
-    </script>
+    catch( error )
+    {
+    	alert("Error: " + error);
+    }
     ```
 
 - PHP
@@ -217,9 +165,9 @@
                 'bizproc.task.complete',
                 [
                     'TASK_ID' => 1501,
-                    'STATUS' => 1,
+                    'STATUS' => 3,
                     'COMMENT' => 'Добавлено',
-                    'Fields' => [
+                    'FIELDS' => [
                         'contractor' => 'C_607',
                         'phone_number' => '89991234567'
                     ]
@@ -249,9 +197,9 @@
         'bizproc.task.complete',
         {
             'TASK_ID': 1501,
-            'STATUS': 1,
+            'STATUS': 3,
             'COMMENT': 'Добавлено',
-            "Fields": {
+            'FIELDS': {
                 'contractor': 'C_607',
                 'phone_number': '89991234567'
             }
@@ -275,9 +223,9 @@
         'bizproc.task.complete',
         [
             'TASK_ID' => 1501,
-            'STATUS' => 1,
+            'STATUS' => 3,
             'COMMENT' => 'Добавлено',
-            'Fields' => [
+            'FIELDS' => [
                 'contractor' => 'C_607',
                 'phone_number' => '89991234567'
             ]
@@ -287,6 +235,30 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.task.complete", b24.Params{
+    	"TASK_ID": 1501,
+        "STATUS":  3,
+    	"COMMENT": "Добавлено",
+    	"FIELDS": b24.Params{
+    		"contractor":   "C_607",
+    		"phone_number": "89991234567",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("bizproc.task.complete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}
@@ -339,11 +311,11 @@ HTTP-статус: **400**
  
 #|
 || **Код** | **Сообщение об ошибке** | **Описание** ||
-|| `ERROR_TASK_VALIDATION` | empty TASK_ID | Не укзан `ID` задания ||
+|| `ERROR_TASK_VALIDATION` | empty TASK_ID | Не указан `ID` задания ||
 || `ERROR_TASK_VALIDATION` | incorrect STATUS | Указан некорректный статус задания ||
 || `ERROR_TASK_NOT_FOUND` | Task not found | Не найдено задание с заданным `ID` ||
 || `ERROR_TASK_COMPLETED` | Task already completed | Задание уже выполнено ранее ||
-|| `ERROR_TASK_TYPE` | Incorrect task type | Некорректный тип задания. Такое задание нельзя выполнить через рест ||
+|| `ERROR_TASK_TYPE` | Incorrect task type | Некорректный тип задания. Такое задание нельзя выполнить через REST ||
 || `ERROR_TASK_EXECUTION` | текст ошибки из задания | В процессе выполнения задания случилась указанная ошибка ||
 |#
  

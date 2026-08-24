@@ -13,14 +13,16 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод возвращает роботу или действию выходные параметры, которые были заданы при регистрации или обновлении робота либо действия.
+Метод `bizproc.event.send` возвращает роботу или действию выходные параметры, которые были заданы при регистрации или обновлении робота либо действия.
 
 ## Параметры метода
+
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание**||
-|| **EVENT_TOKEN**
+|| **EVENT_TOKEN***
 [`string`](../../data-types.md) | Специальный токен, который приходит на обработчик приложения, когда выполняется действие или робот. Значение этого токена обработчик получает в массиве входных данных.
 
 Отправить событие можно, если робот или действие зарегистрированы с `'USE_SUBSCRIPTION': 'Y'` ||
@@ -31,7 +33,7 @@
 || **LOG_MESSAGE**
 [`string`](../../data-types.md) | Текст для журнала бизнес-процесса.
 
-По умолчанию имеет значение «Получен ответ от приложения».
+Если параметр не передать, метод отправит пустую строку.
 
 Запись событий в журнал должна быть включена в шаблоне бизнес-процесса
 ||
@@ -59,79 +61,31 @@
     https://**put_your_bitrix24_address**/rest/bizproc.event.send
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'bizproc.event.send',
-        params: {
-          event_token: '55c1dc1c3f0d75.78875596|A51601_82584_96831_81132|hsyUws1j4XiwqPqN45eH66CcQtEvpUIP.47dd5d888e8e549d2c984713e12a4268e6e87d0208ca1f093ba1075e77f92e90',
-          return_values: {
-            outputString: '846c55d14f552180874a628d2615e285',
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Event sent successfully:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		'bizproc.event.send',
+    		{
+    			event_token: '55c1dc1c3f0d75.78875596|A51601_82584_96831_81132|hsyUws1j4XiwqPqN45eH66CcQtEvpUIP.47dd5d888e8e549d2c984713e12a4268e6e87d0208ca1f093ba1075e77f92e90',
+    			return_values: {
+    				outputString: '846c55d14f552180874a628d2615e285'
+    			}
+    		}
+    	);
+    	
+    	if(response.error())
+    		alert("Error: " + response.error());
+    	else
+    		alert("Success: " + response.getData().result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function sendBizprocEvent() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.event.send',
-            params: {
-              event_token: '55c1dc1c3f0d75.78875596|A51601_82584_96831_81132|hsyUws1j4XiwqPqN45eH66CcQtEvpUIP.47dd5d888e8e549d2c984713e12a4268e6e87d0208ca1f093ba1075e77f92e90',
-              return_values: {
-                outputString: '846c55d14f552180874a628d2615e285',
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Event sent successfully:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', sendBizprocEvent)
-    </script>
+    catch( error )
+    {
+    	console.error('Error:', error);
+    }
     ```
 
 - PHP
@@ -205,6 +159,27 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.event.send", b24.Params{
+    	"EVENT_TOKEN": "55c1dc1c3f0d75.78875596|A51601_82584_96831_81132|hsyUws1j4XiwqPqN45eH66CcQtEvpUIP.47dd5d888e8e549d2c984713e12a4268e6e87d0208ca1f093ba1075e77f92e90",
+    	"RETURN_VALUES": b24.Params{
+    		"outputString": "846c55d14f552180874a628d2615e285",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("bizproc.event.send: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

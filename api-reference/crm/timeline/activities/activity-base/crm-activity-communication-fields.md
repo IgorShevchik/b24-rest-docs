@@ -209,6 +209,23 @@
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.communication.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.activity.communication.fields: %w", err)
+    }
+
+    keys, ok := b24.Keys(res.Result)
+    if !ok {
+    	return fmt.Errorf("ожидался объект в ответе")
+    }
+    fmt.Println("полей в ответе:", len(keys))
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -299,25 +316,23 @@ HTTP-статус: **200**
 
 #### Обзор полей коммуникации дела {#all-fields}
 
-{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
-
 #|
 || **Поле** `тип` | **Описание** ||
-|| **ID***
-[`integer`](../../../data-types.md) | Идентификатор коммуниуации ||
-|| **ACTIVITY_ID***
-[`integer`](../../../data-types.md) | Идентификатор дела ||
-|| **ENTITY_ID***
-[`integer`](../../../data-types.md) | Идентификатор элемента CRM ||
-|| **ENTITY_TYPE_ID***
-[`integer`](../../../data-types.md) | [Идентификатор типа объекта CRM](../../../data-types.md#object_type) ||
-|| **TYPE_ID***
-[`integer`](../../../data-types.md) | Тип коммуникации ||
-|| **VALUE***
-[`integer`](../../../data-types.md) | Значение коммуникации ||
+|| **ID**
+[`integer`](../../../../data-types.md) | Идентификатор коммуникации ||
+|| **ACTIVITY_ID**
+[`integer`](../../../../data-types.md) | Идентификатор дела ||
+|| **ENTITY_ID**
+[`integer`](../../../../data-types.md) | Идентификатор элемента CRM ||
+|| **ENTITY_TYPE_ID**
+[`integer`](../../../../data-types.md) | [Идентификатор типа объекта CRM](../../../data-types.md#object_type) ||
+|| **TYPE**
+[`string`](../../../../data-types.md) | Тип коммуникации ||
+|| **VALUE**
+[`string`](../../../../data-types.md) | Значение коммуникации ||
 |#
 
-# Обработка ошибок
+## Обработка ошибок
 
 HTTP-статус: **400**
 

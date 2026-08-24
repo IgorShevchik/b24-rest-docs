@@ -70,75 +70,28 @@
     https://**put_your_bitrix24_address**/rest/imbot.chat.updateTitle
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'imbot.chat.updateTitle',
-        params: {
-          CHAT_ID: 2725,
-          TITLE: 'New chat title',
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Chat title updated:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+        const response = await $b24.callMethod(
+            'imbot.chat.updateTitle',
+            {
+                CHAT_ID: 2725,
+                TITLE: 'Новое имя для чата',
+            }
+        );
+        
+        const result = response.getData().result;
+        console.log('Chat title updated:', result);
+        
+        processResult(result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateChatTitle() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.chat.updateTitle',
-            params: {
-              CHAT_ID: 2725,
-              TITLE: 'New chat title',
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Chat title updated:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateChatTitle)
-    </script>
+    catch( error )
+    {
+        console.error('Error:', error);
+    }
     ```
 
 - PHP
@@ -203,6 +156,26 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.chat.updateTitle", b24.Params{
+    	"CHAT_ID":   2725,
+    	"TITLE":     "Новое имя для чата",
+    	"CLIENT_ID": "**put_your_client_id_here**",
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.chat.updateTitle: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

@@ -43,72 +43,23 @@
     https://**put_your_bitrix24_address**/rest/department.fields
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type DepartmentFieldsResult = Record<string, string>
-
-    try {
-      const response = await $b24.actions.v2.call.make<DepartmentFieldsResult>({
-        method: 'department.fields',
-        params: {},
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Department fields:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		"department.fields", {}
+    	);
+    	
+    	const result = response.getData().result;
+    	console.info(result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function getDepartmentFields() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'department.fields',
-            params: {},
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Department fields:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', getDepartmentFields)
-    </script>
+    catch( error )
+    {
+    	console.error(error);
+    }
     ```
 
 - PHP
@@ -193,6 +144,29 @@
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "department.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("department.fields: %w", err)
+    }
+
+    var item struct {
+    	ID     string `json:"ID"`
+    	Name   string `json:"NAME"`
+    	Sort   string `json:"SORT"`
+    	Parent string `json:"PARENT"`
+    	UFHead string `json:"UF_HEAD"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.Name)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа

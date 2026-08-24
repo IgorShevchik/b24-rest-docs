@@ -23,7 +23,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -143,87 +143,26 @@
       https://**put_your_bitrix24_address**/rest/imbot.register
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<number>({
-        method: 'imbot.register',
-        params: {
-          CODE: 'newbot',
-          TYPE: 'B',
-          EVENT_HANDLER: 'https://example.ru/bot/events',
-          OPENLINE: 'N',
-          PROPERTIES: {
-            NAME: 'NewBot',
-            WORK_POSITION: 'Support bot',
-          },
+      const response = await $b24.callMethod('imbot.register', {
+        CODE: 'newbot',
+        TYPE: 'B',
+        EVENT_HANDLER: 'https://example.ru/bot/events',
+        OPENLINE: 'N',
+        PROPERTIES: {
+          NAME: 'NewBot',
+          WORK_POSITION: 'Support bot',
         },
-        requestId: Text.getUuidRfc4122()
-      })
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Created bot ID:', result)
-      }
+      const { result } = response.getData();
+      console.log('Created bot ID:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error registering bot:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function registerBot() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.register',
-            params: {
-              CODE: 'newbot',
-              TYPE: 'B',
-              EVENT_HANDLER: 'https://example.ru/bot/events',
-              OPENLINE: 'N',
-              PROPERTIES: {
-                NAME: 'NewBot',
-                WORK_POSITION: 'Support bot',
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Created bot ID:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', registerBot)
-    </script>
     ```
 
 - PHP
@@ -310,6 +249,32 @@
     } else {
         echo 'Created bot ID: ' . $result['result'];
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.register", b24.Params{
+    	"CODE":          "newbot",
+    	"TYPE":          "B",
+    	"EVENT_HANDLER": "https://example.ru/bot/events",
+    	"OPENLINE":      "N",
+    	"PROPERTIES": b24.Params{
+    		"NAME":          "NewBot",
+    		"WORK_POSITION": "Support bot",
+    	},
+    	"CLIENT_ID": "**put_your_client_id_here**",
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.register: %w", err)
+    }
+
+    var value b24.ID
+    if err := json.Unmarshal(res.Result, &value); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("результат:", value)
     ```
 
 {% endlist %}

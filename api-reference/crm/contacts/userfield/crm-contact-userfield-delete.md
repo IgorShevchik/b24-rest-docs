@@ -11,13 +11,13 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: администратор
+> Кто может выполнять метод: администратор CRM
 
 Метод `crm.contact.userfield.delete` удаляет пользовательское поле контактов.
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -127,7 +127,7 @@
 
 - PHP
 
-    ```php       
+    ```php
     try {
         $userfieldId = 123; // Replace with the actual userfield ID you want to delete
         $result = $serviceBuilder
@@ -142,6 +142,31 @@
     } catch (Throwable $e) {
         print("An error occurred: " . $e->getMessage());
     }
+    ```
+
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.contact.userfield.delete(bitrix_id=432).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
     ```
 
 - BX24.js
@@ -176,6 +201,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.userfield.delete", b24.Params{
+    	"id": 432,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.contact.userfield.delete: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}
@@ -227,12 +270,12 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-` | `ID is not defined or invalid` | Переданный `id` либо меньше или равен нулю, либо же не передан вовсе ||
-|| `-` | `Access denied` | Возникает в случаях, когда:
+|| Пустое значение | `ID is not defined or invalid` | Переданный `id` либо меньше или равен нулю, либо же не передан вовсе ||
+|| Пустое значение | `Access denied` | Возникает в случаях, когда:
 - у пользователя нет административных прав
 - пользователь пытается удалить пользовательское поле, не привязанное к контактам ||
 || `ERROR_NOT_FOUND` | `The entity with ID 'id' is not found` | Пользовательское поле с переданным `id` не существует ||
-|| `-` | Ошибка удаления `FIELD_NAME` для объекта `ENTITY_ID` | Неизвестная ошибка при удалении ||
+|| Пустое значение | Ошибка удаления `FIELD_NAME` для объекта `ENTITY_ID` | Неизвестная ошибка при удалении ||
 |#
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}

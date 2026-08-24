@@ -1,8 +1,12 @@
 # Как завершить бизнес-процессы уволенного сотрудника
 
-> Scope: [`user_brief, user_basic, user, bizproc`](../../api-reference/scopes/permissions.md)
-> 
-> Кто может выполнять методы: администратор
+> Scope: [`user_brief`](../../api-reference/scopes/permissions.md), [`user_basic`](../../api-reference/scopes/permissions.md), [`user`](../../api-reference/scopes/permissions.md), [`bizproc`](../../api-reference/scopes/permissions.md)
+>
+> Кто может выполнять методы: чтобы пройти сценарий целиком, нужны права администратора
+>
+> - [user.get](../../api-reference/user/user-get.md) — любой пользователь
+> - [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md) — администратор для просмотра заданий любого пользователя
+> - [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md) и [bizproc.workflow.terminate](../../api-reference/bizproc/bizproc-workflow-terminate.md) — администратор
 
 {% note tip "" %}
 
@@ -13,60 +17,83 @@
 
 {% endnote %}
 
-При увольнении сотрудника в Битрикс24 могут остаться незавершенные бизнес-процессы, за которые он был ответственен.
+После увольнения сотрудника в Битрикс24 могут остаться невыполненные задания бизнес-процессов, назначенные на него. По заданиям можно получить `WORKFLOW_ID` и завершить связанные процессы.
 
-Чтобы завершить активные бизнес-процессы уволенного сотрудника, последовательно выполним три метода:
+Метод `bizproc.workflow.kill` удаляет процесс вместе с данными. Если нужно остановить выполнение, но сохранить запись о запуске, используйте [bizproc.workflow.terminate](../../api-reference/bizproc/bizproc-workflow-terminate.md). Оба метода принимают один и тот же идентификатор процесса.
 
-1. [user.get](../../api-reference/user/user-get.md) — получим `ID` уволенного сотрудника
+Сценарий состоит из трех шагов.
 
-2. [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md) — получим список заданий процессов, за которые отвечает уволенный сотрудник
+1. Получить `ID` уволенного сотрудника методом [user.get](../../api-reference/user/user-get.md)
+2. Получить невыполненные задания сотрудника методом [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md)
+3. Удалить связанные процессы методом [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md)
 
-3. [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md) — завершим бизнес-процессы с удалением данных. Если нужно сохранить факт запуска бизнес-процесса, используйте метод [bizproc.workflow.terminate](../../api-reference/bizproc/bizproc-workflow-terminate.md). Оба метода вызываются одинаково
+## Что нужно до начала
+
+- входящий вебхук администратора или приложение со scope `bizproc` и одним из scope для пользователей: `user`, `user_basic` или `user_brief`
+- имя и фамилия уволенного сотрудника
+- решение, что делать с найденными процессами: удалить методом `bizproc.workflow.kill` или остановить методом `bizproc.workflow.terminate`
+
+Администратор может получать задания любых пользователей. Обычный пользователь видит только свои задания или задания подчиненного, поэтому для всего сценария нужна авторизация администратора.
+
+{% include [Сноска о примерах](../../_includes/examples.md) %}
 
 ## 1. Получим ID уволенного сотрудника {#user-id}
 
 Используем метод [user.get](../../api-reference/user/user-get.md) с фильтром:
 
-- `NAME` — укажем имя сотрудника
-
-- `LAST_NAME` — укажем фамилию сотрудника
-
-- `ACTIVE` — параметр регулирует поиск по активным или уволенным сотрудникам. Если параметр не передавать, поиск будет идти по всем сотрудникам вне зависимости от их статуса. Укажем `0` для поиска только среди уволенных сотрудников
-
-{% include [Сноска о примерах](../../_includes/examples.md) %}
+- `NAME` — имя сотрудника
+- `LAST_NAME` — фамилия сотрудника
+- `ACTIVE = 0` — поиск только среди уволенных сотрудников
 
 {% list tabs %}
 
 - JS
 
-    ```javascript
-    BX24.callMethod(
-        "user.get",
-        {
+    ```js
+    import { B24Hook } from '@bitrix24/b24jssdk'
+
+    const $b24 = B24Hook.fromWebhookUrl(process.env.B24_HOOK)
+    // B24_HOOK = 'https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/'
+
+    const response = await $b24.actions.v2.call.make({
+        method: 'user.get',
+        params: {
             filter: {
-                "NAME": "employee's name",
-                "LAST_NAME": "employee's last name",
-                "ACTIVE": 0
-            }
+                NAME: 'Иван',
+                LAST_NAME: 'Петров',
+                ACTIVE: 0,
+            },
         },
-    );
+        requestId: 'user-get',
+    })
+
+    const users = response.getData().result
+    const userId = users.length ? Number(users[0].ID) : null
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
+    // composer require bitrix24/b24phpsdk:"^3.0"
+    require_once 'vendor/autoload.php';
 
-    $result = CRest::call(
-        'user.get',
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use Psr\Log\NullLogger;
+
+    $b24 = (new ServiceBuilderFactory(new EventDispatcher(), new NullLogger()))
+        ->initFromWebhook('https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/');
+
+    $users = $b24->getUserScope()->user()->get(
+        [],
         [
-            'filter' => [
-                'NAME' => "employee's name",
-                'LAST_NAME' => "employee's last name",
-                'ACTIVE' => 0
-            ]
+            'NAME' => 'Иван',
+            'LAST_NAME' => 'Петров',
+            'ACTIVE' => 0,
         ]
-    );
+    )->getUsers();
+
+    $userId = $users === [] ? null : $users[0]->ID;
     ```
 
 - Python
@@ -74,524 +101,741 @@
     ```python
     from b24pysdk import BitrixWebhook, Client
 
-    client = Client(
-        BitrixWebhook(
-            domain="your-domain.bitrix24.com",
-            webhook_token="user_id/webhook_key",
-        )
+    token = BitrixWebhook(
+        domain="your-domain.bitrix24.com",
+        webhook_token="user_id/webhook_key",
     )
+    client = Client(token)
 
-    result = client.user.get(
+    users = client.user.get(
         filter={
-            "NAME": "employee's name",
-            "LAST_NAME": "employee's last name",
+            "NAME": "Иван",
+            "LAST_NAME": "Петров",
             "ACTIVE": 0,
         }
     ).response.result
+
+    user_id = int(users[0]["ID"]) if users else None
+    ```
+
+- Go
+
+    ```go
+    import (
+        "context"
+        "encoding/json"
+        "log"
+        "os"
+
+        b24 "github.com/bitrix24/b24gosdk"
+    )
+
+    ctx := context.Background()
+    core := b24.NewClient(os.Getenv("B24_WEBHOOK_URL")).Core()
+
+    res, err := core.Call(ctx, "user.get", b24.Params{
+        "filter": b24.Params{
+            "NAME":      "Иван",
+            "LAST_NAME": "Петров",
+            "ACTIVE":    0,
+        },
+    }, b24.WithIdempotent())
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var users []struct {
+        ID string `json:"ID"`
+    }
+    if err := json.Unmarshal(res.Result, &users); err != nil {
+        log.Fatal(err)
+    }
+
+    userID := ""
+    if len(users) > 0 {
+        userID = users[0].ID
+    }
     ```
 
 {% endlist %}
 
-В результате получим `ID` уволенного сотрудника.
+В ответе сохраните `ID` сотрудника. Этот идентификатор нужен для фильтра `USER_ID` на следующем шаге.
 
 ```json
 {
     "result": [
         {
             "ID": "29",
-            "XML_ID": "28936832",
             "ACTIVE": false,
-            "NAME": "employee's name",
-            "LAST_NAME": "employee's last name",
-            "SECOND_NAME": "",
-            "TITLE": "",
-            "EMAIL": "employee_email@gmail.com",
-            "LAST_LOGIN": "2025-03-27T13:49:36+03:00",
-            "DATE_REGISTER": "2020-04-23T03:00:00+03:00",
-            "TIME_ZONE": "Asia/Yekaterinburg",
-            "IS_ONLINE": "N",
-            "TIMESTAMP_X": {},
-            "LAST_ACTIVITY_DATE": {},
-            "PERSONAL_GENDER": "",
-            "PERSONAL_PROFESSION": "",
-            "PERSONAL_WWW": "",
-            "PERSONAL_BIRTHDAY": "",
-            "PERSONAL_PHOTO": "https://cdn-ru.bitrix24.ru/b13743910/main/3f2/3f212fkdjf8c3627cfe51633f959de/avatar.png",
-            "PERSONAL_ICQ": "",
-            "PERSONAL_PHONE": "",
-            "PERSONAL_FAX": "",
-            "PERSONAL_MOBILE": "",
-            "PERSONAL_PAGER": "",
-            "PERSONAL_STREET": "",
-            "PERSONAL_CITY": "",
-            "PERSONAL_STATE": "",
-            "PERSONAL_ZIP": "",
-            "PERSONAL_COUNTRY": "0",
-            "PERSONAL_MAILBOX": "",
-            "PERSONAL_NOTES": "",
-            "WORK_PHONE": "",
-            "WORK_COMPANY": "",
-            "WORK_POSITION": "Менеджер",
-            "WORK_DEPARTMENT": "",
-            "WORK_WWW": "",
-            "WORK_FAX": "",
-            "WORK_PAGER": "",
-            "WORK_STREET": "",
-            "WORK_MAILBOX": "",
-            "WORK_CITY": "",
-            "WORK_STATE": "",
-            "WORK_ZIP": "",
-            "WORK_COUNTRY": "0",
-            "WORK_PROFILE": "",
-            "WORK_NOTES": "",
-            "UF_EMPLOYMENT_DATE": "",
-            "UF_DEPARTMENT": [
-                7,
-                1
-            ],
-            "UF_PHONE_INNER": "555",
-            "UF_USR_1619099890455": "12132132123",
+            "NAME": "Иван",
+            "LAST_NAME": "Петров",
+            "EMAIL": "employee@example.com",
             "USER_TYPE": "employee"
         }
     ],
-    "total": 1,
+    "total": 1
 }
 ```
 
-## 2. Получим список заданий процессов, за которые отвечает уволенный сотрудник {#workflow_id}
+Если `result` содержит пустой массив, уволенный сотрудник с указанным именем и фамилией не найден. Уточните данные поиска и повторите первый шаг.
+
+## 2. Получим задания сотрудника {#workflow-id}
 
 Используем метод [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md) с фильтром:
 
-- `USER_ID` — идентификатор сотрудника, передаем ID, полученный на [шаге 1](#user-id)
-
-- `STATUS` — параметр отвечает за статус заданий, укажем `0` для отбора только невыполненных заданий
+- `USER_ID` — идентификатор сотрудника из [шага 1](#user-id)
+- `STATUS = 0` — только невыполненные задания
 
 {% list tabs %}
 
 - JS
-  
-    ```javascript
-    BX24.callMethod(
-        'bizproc.task.list',
-        {
+
+    ```js
+    const response = await $b24.actions.v2.call.make({
+        method: 'bizproc.task.list',
+        params: {
+            select: ['ID', 'WORKFLOW_ID', 'NAME', 'DOCUMENT_NAME'],
             filter: {
-                'USER_ID': 29,
-                'STATUS': 0,
-            }
+                USER_ID: userId,
+                STATUS: 0,
+            },
         },
-    );
+        requestId: 'bizproc-task-list',
+    })
+
+    const tasks = response.getData().result
+    const workflowIds = [...new Set(tasks.map((task) => task.WORKFLOW_ID))]
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
+    $response = $b24->core->call('bizproc.task.list', [
+        'select' => ['ID', 'WORKFLOW_ID', 'NAME', 'DOCUMENT_NAME'],
+        'filter' => [
+            'USER_ID' => $userId,
+            'STATUS' => 0,
+        ],
+    ]);
 
-    $result = CRest::call(
-        'bizproc.task.list',
-        [
-            'filter' => [
-                'USER_ID' => 29,
-                'STATUS' => 0
-            ]
-        ]
-    );
+    $tasks = $response->getResponseData()->getResult();
+    $workflowIds = array_values(array_unique(array_column($tasks, 'WORKFLOW_ID')));
     ```
 
 - Python
 
     ```python
-    result = client.bizproc.task.list(
+    tasks = client.bizproc.task.list(
+        select=["ID", "WORKFLOW_ID", "NAME", "DOCUMENT_NAME"],
         filter={
-            "USER_ID": 29,
+            "USER_ID": user_id,
             "STATUS": 0,
-        }
+        },
     ).response.result
+
+    workflow_ids = list({task["WORKFLOW_ID"] for task in tasks})
+    ```
+
+- Go
+
+    ```go
+    res, err := core.Call(ctx, "bizproc.task.list", b24.Params{
+        "select": []string{"ID", "WORKFLOW_ID", "NAME", "DOCUMENT_NAME"},
+        "filter": b24.Params{
+            "USER_ID": userID,
+            "STATUS":  0,
+        },
+    }, b24.WithIdempotent())
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var tasks []struct {
+        WorkflowID string `json:"WORKFLOW_ID"`
+    }
+    if err := json.Unmarshal(res.Result, &tasks); err != nil {
+        log.Fatal(err)
+    }
+
+    seen := map[string]struct{}{}
+    workflowIDs := []string{}
+    for _, task := range tasks {
+        if _, ok := seen[task.WorkflowID]; ok {
+            continue
+        }
+
+        seen[task.WorkflowID] = struct{}{}
+        workflowIDs = append(workflowIDs, task.WorkflowID)
+    }
     ```
 
 {% endlist %}
 
-В результате получим список невыполненных заданий. У каждого задания есть параметр `WORKFLOW_ID` — это `ID` бизнес-процесса, который мы завершим в следующем шаге.
+В ответе сохраните `WORKFLOW_ID`. Это строковый идентификатор бизнес-процесса, который нужно передать в `ID` метода `bizproc.workflow.kill`.
 
 ```json
 {
     "result": [
         {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2437",
             "ID": "879",
             "WORKFLOW_ID": "67e3db8e581121.72266518",
-            "DOCUMENT_NAME": "widget contact",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2437/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2435",
-            "ID": "877",
-            "WORKFLOW_ID": "67c5b492d0b426.74280093",
-            "DOCUMENT_NAME": "Контакт #2435",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2435/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2433",
-            "ID": "875",
-            "WORKFLOW_ID": "67c598a987d387.85575151",
-            "DOCUMENT_NAME": "Контакт #2433",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2433/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2429",
-            "ID": "871",
-            "WORKFLOW_ID": "67091df4b13dd2.83077613",
-            "DOCUMENT_NAME": "Петечкин Вася",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2429/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2427",
-            "ID": "859",
-            "WORKFLOW_ID": "66e2d5d5c64f82.28057011",
-            "DOCUMENT_NAME": "Иванович",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2427/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2425",
-            "ID": "857",
-            "WORKFLOW_ID": "66e0242399d303.52288141",
-            "DOCUMENT_NAME": "Петровна",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2425/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2423",
-            "ID": "855",
-            "WORKFLOW_ID": "66d870dfbb9542.91956540",
-            "DOCUMENT_NAME": "Смирнов",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2423/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2421",
-            "ID": "853",
-            "WORKFLOW_ID": "66d7fb6f86c0c2.49741539",
-            "DOCUMENT_NAME": "Калашников",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2421/"
-        },
-        {
-            "ENTITY": "CCrmDocumentContact",
-            "DOCUMENT_ID": "CONTACT_2419",
-            "ID": "851",
-            "WORKFLOW_ID": "66d073d9c9fc08.23457428",
-            "DOCUMENT_NAME": "Без имени",
-            "NAME": "Адрес",
-            "DOCUMENT_URL": "/crm/contact/details/2419/"
+            "DOCUMENT_NAME": "Контакт клиента",
+            "NAME": "Согласовать адрес"
         }
     ],
-    "total": 9,
+    "total": 1
 }
 ```
+
+Если `result` содержит пустой массив, у сотрудника нет невыполненных заданий бизнес-процессов. Завершать процессы по этому сценарию не нужно.
 
 ## 3. Завершим бизнес-процессы
 
 Используем метод [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md) с параметром:
 
-- `ID` — идентификатор процесса, передаем `WORKFLOW_ID`, полученный на [шаге 2](#workflow_id)
-  
+- `ID` — идентификатор процесса. Передайте `WORKFLOW_ID` из [шага 2](#workflow-id)
+
 {% list tabs %}
 
 - JS
 
-    ```javascript
-    BX24.callMethod(
-        'bizproc.workflow.kill',
-        {
-            ID: '67e3db8e581121.72266518',
-        },
-    );
+    ```js
+    const response = await $b24.actions.v2.call.make({
+        method: 'bizproc.workflow.kill',
+        params: { ID: workflowIds[0] },
+        requestId: 'bizproc-workflow-kill',
+    })
+
+    const isKilled = response.getData().result
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
-
-    $result = CRest::call(
-        'bizproc.workflow.kill',
-        [
-            'ID' => '67e3db8e581121.72266518'
-        ]
-    );
+    $isKilled = $b24->getBizProcScope()->workflow()
+        ->kill($workflowIds[0])
+        ->isSuccess();
     ```
 
 - Python
 
     ```python
-    result = client.bizproc.workflow.kill(
-        bitrix_id="67e3db8e581121.72266518",
-    ).response.result
+    token.call_method(
+        "bizproc.workflow.kill",
+        {"ID": workflow_ids[0]},
+    )
+    ```
+
+- Go
+
+    ```go
+    res, err := core.Call(ctx, "bizproc.workflow.kill", b24.Params{
+        "ID": workflowIDs[0],
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var isKilled bool
+    if err := json.Unmarshal(res.Result, &isKilled); err != nil {
+        log.Fatal(err)
+    }
+    log.Println(isKilled)
     ```
 
 {% endlist %}
 
-В результате получим `true`, удаление процесса прошло успешно. Если  вы получили ошибку `error`, изучите описание возможных ошибок в документации метода [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md).
+Успешный ответ содержит `true`.
 
 ```json
 {
-    "result": true,
+    "result": true
 }
 ```
 
 ## Пример кода
 
-В примере все найденные процессы удаляются в цикле. Если вам требуется удалить большой объем данных, вы можете столкнуться с лимитами на выполнение запросов. Чтобы оптимизировать код под ваш объем работы, используйте рекомендации раздела [Производительность](../../settings/performance/index.md).
+В примере найденные процессы сначала выводятся для проверки. Чтобы удалить процессы, запустите пример с аргументом `--confirm`.
 
 {% list tabs %}
 
 - JS
 
-    ```javascript
-    // Функция для получения ID сотрудника по имени и фамилии
-    function getUserId(firstName, lastName, callback) {
-        BX24.callMethod(
-            "user.get",
-            {
-                "NAME": firstName,
-                "LAST_NAME": lastName,
-                "ACTIVE": 0,
+    ```js
+    import { B24Hook } from '@bitrix24/b24jssdk'
+
+    const $b24 = B24Hook.fromWebhookUrl(process.env.B24_HOOK)
+
+    async function getUserId(firstName, lastName) {
+        const response = await $b24.actions.v2.call.make({
+            method: 'user.get',
+            params: { filter: { NAME: firstName, LAST_NAME: lastName, ACTIVE: 0 } },
+            requestId: 'user-get',
+        })
+
+        const users = response.getData().result
+        return users.length ? Number(users[0].ID) : null
+    }
+
+    async function getWorkflowIds(userId) {
+        const response = await $b24.actions.v2.call.make({
+            method: 'bizproc.task.list',
+            params: {
+                select: ['ID', 'WORKFLOW_ID', 'NAME', 'DOCUMENT_NAME'],
+                filter: { USER_ID: userId, STATUS: 0 },
             },
-            function(result) {
-                if (result.error()) {
-                    console.error(result.error());
-                } else {
-                    // Предполагаем, что найден только один пользователь
-                    const userId = result.data()[0].ID;
-                    callback(userId);
-                }
-            }
-        );
+            requestId: 'bizproc-task-list',
+        })
+
+        return [...new Set(response.getData().result.map((task) => task.WORKFLOW_ID))]
     }
 
-    // Функция для получения списка невыполненных заданий сотрудника
-    function getUserTasks(userId, callback) {
-        BX24.callMethod(
-            'bizproc.task.list',
-            {
-                filter: {
-                    'USER_ID': userId,
-                    'STATUS': 0,
-                }
-            },
-            function(result) {
-                if (result.error()) {
-                    console.error(result.error());
-                } else {
-                    // Извлекаем WORKFLOW_ID из каждого задания
-                    const workflowIds = result.data().map(task => task.WORKFLOW_ID);
-                    callback(workflowIds);
-                }
-            }
-        );
+    async function killWorkflows(workflowIds) {
+        if (!workflowIds.length) {
+            console.log('Невыполненные задания бизнес-процессов не найдены')
+            return
+        }
+
+        console.log(`Найдено процессов: ${workflowIds.length}`)
+        for (const workflowId of workflowIds) {
+            console.log(`Процесс к удалению: ${workflowId}`)
+        }
+
+        if (!process.argv.includes('--confirm')) {
+            console.log('Проверьте список и запустите пример с аргументом --confirm для удаления')
+            return
+        }
+
+        for (const workflowId of workflowIds) {
+            const response = await $b24.actions.v2.call.make({
+                method: 'bizproc.workflow.kill',
+                params: { ID: workflowId },
+                requestId: `workflow-kill-${workflowId}`,
+            })
+
+            console.log(response.isSuccess
+                ? `Процесс ${workflowId} удален`
+                : `Ошибка при удалении ${workflowId}: ${response.getErrorMessages().join('; ')}`)
+        }
     }
 
-    // Функция для завершения бизнес-процессов по списку WORKFLOW_ID
-    function killWorkflows(workflowIds) {
-        workflowIds.forEach(workflowId => {
-            BX24.callMethod(
-                'bizproc.workflow.kill',
-                {
-                    ID: workflowId,
-                },
-                function(result) {
-                    if (result.error()) {
-                        console.error(result.error());
-                    } else {
-                        console.log(`Workflow ${workflowId} завершен успешно.`);
-                    }
-                }
-            );
-        });
+    const [firstName, lastName] = process.argv.slice(2)
+    if (!firstName || !lastName) {
+        throw new Error('Передайте имя и фамилию сотрудника')
     }
 
-    // Основная функция, которая объединяет все шаги
-    function processEmployeeTasks(firstName, lastName) {
-        getUserId(firstName, lastName, function(userId) {
-            getUserTasks(userId, function(workflowIds) {
-                killWorkflows(workflowIds);
-            });
-        });
+    const userId = await getUserId(firstName, lastName)
+    if (userId === null) {
+        console.log('Уволенный сотрудник не найден')
+    } else {
+        await killWorkflows(await getWorkflowIds(userId))
     }
 
-    // Запрашиваем у пользователя имя и фамилию
-    const firstName = prompt("Введите имя сотрудника:");
-    const lastName = prompt("Введите фамилию сотрудника:");
-
-    // Запускаем процесс
-    processEmployeeTasks(firstName, lastName);
+    $b24.destroy()
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
+    // composer require bitrix24/b24phpsdk:"^3.0"
+    require_once 'vendor/autoload.php';
 
-    // Функция для получения ID сотрудника по имени и фамилии
-    function getUserId($firstName, $lastName) {
-        $result = CRest::call(
-            'user.get',
-            [
-                'filter' => [
-                    'NAME' => $firstName,
-                    'LAST_NAME' => $lastName,
-                    'ACTIVE' => 0
-                ]
-            ]
-        );
+    use Bitrix24\SDK\Services\ServiceBuilder;
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use Psr\Log\NullLogger;
 
-        if (!empty($result['error'])) {
-            echo "Error: " . $result['error_description'];
-            return null;
-        }
+    $b24 = (new ServiceBuilderFactory(new EventDispatcher(), new NullLogger()))
+        ->initFromWebhook('https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/');
 
-        // Предполагаем, что найден только один пользователь
-        return $result['result'][0]['ID'] ?? null;
+    function getUserId(ServiceBuilder $b24, string $firstName, string $lastName): ?int
+    {
+        $users = $b24->getUserScope()->user()->get(
+            [],
+            ['NAME' => $firstName, 'LAST_NAME' => $lastName, 'ACTIVE' => 0]
+        )->getUsers();
+
+        return $users === [] ? null : $users[0]->ID;
     }
 
-    // Функция для получения списка невыполненных заданий сотрудника
-    function getUserTasks($userId) {
-        $result = CRest::call(
-            'bizproc.task.list',
-            [
-                'filter' => [
-                    'USER_ID' => $userId,
-                    'STATUS' => 0
-                ]
-            ]
-        );
+    function getWorkflowIds(ServiceBuilder $b24, int $userId): array
+    {
+        $response = $b24->core->call('bizproc.task.list', [
+            'select' => ['ID', 'WORKFLOW_ID', 'NAME', 'DOCUMENT_NAME'],
+            'filter' => ['USER_ID' => $userId, 'STATUS' => 0],
+        ]);
 
-        if (!empty($result['error'])) {
-            echo "Error: " . $result['error_description'];
-            return [];
-        }
-
-        // Извлекаем WORKFLOW_ID из каждого задания
-        return array_map(function($task) {
-            return $task['WORKFLOW_ID'];
-        }, $result['result']);
+        return array_values(array_unique(array_column(
+            $response->getResponseData()->getResult(),
+            'WORKFLOW_ID'
+        )));
     }
 
-    // Функция для завершения бизнес-процессов по списку WORKFLOW_ID
-    function killWorkflows($workflowIds) {
+    function killWorkflows(ServiceBuilder $b24, array $workflowIds): void
+    {
+        if ($workflowIds === []) {
+            echo "Невыполненные задания бизнес-процессов не найдены\n";
+            return;
+        }
+
+        echo "Найдено процессов: " . count($workflowIds) . "\n";
         foreach ($workflowIds as $workflowId) {
-            $result = CRest::call(
-                'bizproc.workflow.kill',
-                [
-                    'ID' => $workflowId
-                ]
-            );
+            echo "Процесс к удалению: {$workflowId}\n";
+        }
 
-            if (!empty($result['error'])) {
-                echo "Error: " . $result['error_description'];
-            } else {
-                echo "Workflow $workflowId завершен успешно.\n";
-            }
+        if (!in_array('--confirm', $_SERVER['argv'], true)) {
+            echo "Проверьте список и запустите пример с аргументом --confirm для удаления\n";
+            return;
+        }
+
+        foreach ($workflowIds as $workflowId) {
+            $isKilled = $b24->getBizProcScope()->workflow()->kill($workflowId)->isSuccess();
+            echo $isKilled
+                ? "Процесс {$workflowId} удален\n"
+                : "Ошибка при удалении процесса {$workflowId}\n";
         }
     }
 
-    // Основная функция, которая объединяет все шаги
-    function processEmployeeTasks($firstName, $lastName) {
-        $userId = getUserId($firstName, $lastName);
-        if ($userId) {
-            $workflowIds = getUserTasks($userId);
-            killWorkflows($workflowIds);
-        }
+    $firstName = readline('Введите имя сотрудника: ');
+    $lastName = readline('Введите фамилию сотрудника: ');
+
+    $userId = getUserId($b24, $firstName, $lastName);
+    if ($userId === null) {
+        echo "Уволенный сотрудник не найден\n";
+    } else {
+        killWorkflows($b24, getWorkflowIds($b24, $userId));
     }
-
-    // Запрашиваем у пользователя имя и фамилию
-    $firstName = readline("Введите имя сотрудника: ");
-    $lastName = readline("Введите фамилию сотрудника: ");
-
-    // Запускаем процесс
-    processEmployeeTasks($firstName, $lastName);
     ```
 
 - Python
 
     ```python
-    from typing import Optional
+    import sys
 
     from b24pysdk import BitrixWebhook, Client
     from b24pysdk.errors import BitrixAPIError
 
+    token = BitrixWebhook(
+        domain="your-domain.bitrix24.com",
+        webhook_token="user_id/webhook_key",
+    )
+    client = Client(token)
 
-    def get_user_id(client, first_name: str, last_name: str) -> Optional[int]:
-        try:
-            users = client.user.get(
-                filter={
-                    "NAME": first_name,
-                    "LAST_NAME": last_name,
-                    "ACTIVE": 0,
-                },
-            ).response.result
-        except BitrixAPIError as error:
-            print(f"Ошибка: {error}")
-            return None
-
-        if not users:
-            return None
-        return int(users[0]["ID"])
-
-
-    def get_user_tasks(client, user_id: int) -> list[str]:
-        tasks = client.bizproc.task.list(
+    def get_user_id(first_name: str, last_name: str) -> int | None:
+        users = client.user.get(
             filter={
-                "USER_ID": user_id,
-                "STATUS": 0,
+                "NAME": first_name,
+                "LAST_NAME": last_name,
+                "ACTIVE": 0,
             },
         ).response.result
 
-        return [task["WORKFLOW_ID"] for task in tasks]
+        return int(users[0]["ID"]) if users else None
 
+    def get_workflow_ids(user_id: int) -> list[str]:
+        tasks = client.bizproc.task.list(
+            select=["ID", "WORKFLOW_ID", "NAME", "DOCUMENT_NAME"],
+            filter={"USER_ID": user_id, "STATUS": 0},
+        ).response.result
 
-    def kill_workflows(client, workflow_ids: list[str]) -> None:
+        return list({task["WORKFLOW_ID"] for task in tasks})
+
+    def kill_workflows(workflow_ids: list[str]) -> None:
+        if not workflow_ids:
+            print("Невыполненные задания бизнес-процессов не найдены")
+            return
+
+        print(f"Найдено процессов: {len(workflow_ids)}")
+        for workflow_id in workflow_ids:
+            print(f"Процесс к удалению: {workflow_id}")
+
+        if "--confirm" not in sys.argv:
+            print("Проверьте список и запустите пример с аргументом --confirm для удаления")
+            return
+
         for workflow_id in workflow_ids:
             try:
-                client.bizproc.workflow.kill(bitrix_id=workflow_id).response
+                token.call_method("bizproc.workflow.kill", {"ID": workflow_id})
             except BitrixAPIError as error:
-                print(f"Ошибка: {error}")
+                print(f"Ошибка при удалении процесса {workflow_id}: {error}")
             else:
-                print(f"Workflow {workflow_id} завершен успешно.")
-
-
-    def process_employee_tasks(client, first_name: str, last_name: str) -> None:
-        user_id = get_user_id(client, first_name, last_name)
-        if user_id is None:
-            return
-        workflow_ids = get_user_tasks(client, user_id)
-        kill_workflows(client, workflow_ids)
-
-
-    client = Client(
-        BitrixWebhook(
-            domain="your-domain.bitrix24.com",
-            webhook_token="user_id/webhook_key",
-        )
-    )
+                print(f"Процесс {workflow_id} удален")
 
     first_name = input("Введите имя сотрудника: ")
     last_name = input("Введите фамилию сотрудника: ")
 
-    process_employee_tasks(client, first_name, last_name)
+    user_id = get_user_id(first_name, last_name)
+    if user_id is None:
+        print("Уволенный сотрудник не найден")
+    else:
+        kill_workflows(get_workflow_ids(user_id))
+    ```
+
+- Go
+
+    ```go
+    // Подготовка в пустом каталоге:
+    //  go mod init example && go get github.com/bitrix24/b24gosdk
+    //
+    // Запуск:
+    //  B24_WEBHOOK_URL="https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/" go run main.go Иван Петров
+    //  B24_WEBHOOK_URL="https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/" go run main.go Иван Петров --confirm
+
+    package main
+
+    import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "os"
+
+        b24 "github.com/bitrix24/b24gosdk"
+    )
+
+    type user struct {
+        ID string `json:"ID"`
+    }
+
+    type task struct {
+        WorkflowID string `json:"WORKFLOW_ID"`
+    }
+
+    func main() {
+        if err := run(); err != nil {
+            fmt.Fprintf(os.Stderr, "%v\n", err)
+            os.Exit(1)
+        }
+    }
+
+    func run() error {
+        if len(os.Args) < 3 {
+            return fmt.Errorf("передайте имя и фамилию сотрудника")
+        }
+
+        firstName := os.Args[1]
+        lastName := os.Args[2]
+        confirmed := false
+        for _, arg := range os.Args[3:] {
+            if arg == "--confirm" {
+                confirmed = true
+            }
+        }
+
+        ctx := context.Background()
+        core := b24.NewClient(os.Getenv("B24_WEBHOOK_URL")).Core()
+
+        userID, err := getUserID(ctx, core, firstName, lastName)
+        if err != nil {
+            return err
+        }
+        if userID == "" {
+            fmt.Println("Уволенный сотрудник не найден")
+            return nil
+        }
+
+        workflowIDs, err := getWorkflowIDs(ctx, core, userID)
+        if err != nil {
+            return err
+        }
+        if len(workflowIDs) == 0 {
+            fmt.Println("Невыполненные задания бизнес-процессов не найдены")
+            return nil
+        }
+
+        fmt.Printf("Найдено процессов: %d\n", len(workflowIDs))
+        for _, workflowID := range workflowIDs {
+            fmt.Printf("Процесс к удалению: %s\n", workflowID)
+        }
+
+        if !confirmed {
+            fmt.Println("Проверьте список и запустите пример с аргументом --confirm для удаления")
+            return nil
+        }
+
+        for _, workflowID := range workflowIDs {
+            if err := killWorkflow(ctx, core, workflowID); err != nil {
+                fmt.Printf("Ошибка при удалении процесса %s: %v\n", workflowID, err)
+                continue
+            }
+
+            fmt.Printf("Процесс %s удален\n", workflowID)
+        }
+
+        return nil
+    }
+
+    func getUserID(ctx context.Context, core *b24.Core, firstName string, lastName string) (string, error) {
+        res, err := core.Call(ctx, "user.get", b24.Params{
+            "filter": b24.Params{
+                "NAME":      firstName,
+                "LAST_NAME": lastName,
+                "ACTIVE":    0,
+            },
+        }, b24.WithIdempotent())
+        if err != nil {
+            return "", fmt.Errorf("user.get: %w", err)
+        }
+
+        var users []user
+        if err := json.Unmarshal(res.Result, &users); err != nil {
+            return "", fmt.Errorf("decode user.get: %w", err)
+        }
+
+        if len(users) == 0 {
+            return "", nil
+        }
+
+        return users[0].ID, nil
+    }
+
+    func getWorkflowIDs(ctx context.Context, core *b24.Core, userID string) ([]string, error) {
+        res, err := core.Call(ctx, "bizproc.task.list", b24.Params{
+            "select": []string{"ID", "WORKFLOW_ID", "NAME", "DOCUMENT_NAME"},
+            "filter": b24.Params{
+                "USER_ID": userID,
+                "STATUS":  0,
+            },
+        }, b24.WithIdempotent())
+        if err != nil {
+            return nil, fmt.Errorf("bizproc.task.list: %w", err)
+        }
+
+        var tasks []task
+        if err := json.Unmarshal(res.Result, &tasks); err != nil {
+            return nil, fmt.Errorf("decode bizproc.task.list: %w", err)
+        }
+
+        seen := map[string]struct{}{}
+        workflowIDs := []string{}
+        for _, task := range tasks {
+            if _, ok := seen[task.WorkflowID]; ok {
+                continue
+            }
+
+            seen[task.WorkflowID] = struct{}{}
+            workflowIDs = append(workflowIDs, task.WorkflowID)
+        }
+
+        return workflowIDs, nil
+    }
+
+    func killWorkflow(ctx context.Context, core *b24.Core, workflowID string) error {
+        _, err := core.Call(ctx, "bizproc.workflow.kill", b24.Params{
+            "ID": workflowID,
+        })
+        if err != nil {
+            return fmt.Errorf("bizproc.workflow.kill: %w", err)
+        }
+
+        return nil
+    }
     ```
 
 {% endlist %}
+
+## Проверим результат
+
+Через интерфейс проверьте задания уволенного сотрудника: заданий удаленных процессов быть не должно. Если вместо удаления использовали `bizproc.workflow.terminate`, процесс должен остановиться, а запись о запуске процесса должна сохраниться.
+
+Через REST повторите запрос [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md) с тем же `USER_ID` и `STATUS = 0`.
+
+{% list tabs %}
+
+- JS
+
+    ```js
+    const checkResponse = await $b24.actions.v2.call.make({
+        method: 'bizproc.task.list',
+        params: {
+            select: ['ID', 'WORKFLOW_ID'],
+            filter: { USER_ID: userId, STATUS: 0 },
+        },
+        requestId: 'bizproc-task-list-check',
+    })
+
+    console.log(checkResponse.getData().result.map((task) => task.WORKFLOW_ID))
+    ```
+
+- PHP
+
+    ```php
+    $checkResponse = $b24->core->call('bizproc.task.list', [
+        'select' => ['ID', 'WORKFLOW_ID'],
+        'filter' => ['USER_ID' => $userId, 'STATUS' => 0],
+    ]);
+
+    foreach ($checkResponse->getResponseData()->getResult() as $task) {
+        echo $task['WORKFLOW_ID'] . PHP_EOL;
+    }
+    ```
+
+- Python
+
+    ```python
+    check_result = client.bizproc.task.list(
+        select=["ID", "WORKFLOW_ID"],
+        filter={"USER_ID": user_id, "STATUS": 0},
+    ).response.result
+
+    print([task["WORKFLOW_ID"] for task in check_result])
+    ```
+
+- Go
+
+    ```go
+    res, err := core.Call(ctx, "bizproc.task.list", b24.Params{
+        "select": []string{"ID", "WORKFLOW_ID"},
+        "filter": b24.Params{
+            "USER_ID": userID,
+            "STATUS":  0,
+        },
+    }, b24.WithIdempotent())
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var tasks []struct {
+        WorkflowID string `json:"WORKFLOW_ID"`
+    }
+    if err := json.Unmarshal(res.Result, &tasks); err != nil {
+        log.Fatal(err)
+    }
+
+    for _, task := range tasks {
+        log.Println(task.WorkflowID)
+    }
+    ```
+
+{% endlist %}
+
+Сценарий выполнен, если в ответе нет `WORKFLOW_ID`, которые были переданы в `bizproc.workflow.kill`.
+
+## Ошибки и диагностика
+
+Если метод вернул ошибку, проверьте данные запроса.
+
+#|
+|| **Код или текст ошибки** | **Причина и действие** ||
+|| `ACCESS_DENIED` | Метод вызвал пользователь без нужных прав или у вебхука нет нужного scope ||
+|| `ERROR_WRONG_WORKFLOW_ID` | В `ID` передано пустое значение или значение не строкового типа ||
+|| Пустой массив `result` в `user.get` | Уволенный сотрудник с указанным именем и фамилией не найден ||
+|| Пустой массив `result` в `bizproc.task.list` | У сотрудника нет невыполненных заданий бизнес-процессов ||
+|| Метод `bizproc.*` недоступен | Проверьте, что бизнес-процессы доступны на Битрикс24 и запрос выполняет администратор ||
+|#
+
+Повторяйте сценарий с шага, на котором произошла ошибка. Если ошибка возникла при удалении одного процесса, проверьте его `WORKFLOW_ID` и продолжайте обработку остальных процессов.
+
+## Что важно учитывать
+
+- `bizproc.workflow.kill` удаляет процесс вместе с данными процесса
+- `bizproc.workflow.terminate` останавливает процесс и сохраняет запись о его запуске
+- идентификатор пользователя из [user.get](../../api-reference/user/user-get.md) передается в `USER_ID` метода [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md)
+- `WORKFLOW_ID` из [bizproc.task.list](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md) передается в `ID` метода [bizproc.workflow.kill](../../api-reference/bizproc/bizproc-workflow-kill.md)
+- `WORKFLOW_ID` — строка вида `67e3db8e581121.72266518`; не преобразуйте его в число
+
+## Продолжите изучение
+
+- [Получить список пользователей по фильтру](../../api-reference/user/user-get.md)
+- [Получить список заданий бизнес-процесса](../../api-reference/bizproc/bizproc-task/bizproc-task-list.md)
+- [Удалить запущенный процесс](../../api-reference/bizproc/bizproc-workflow-kill.md)
+- [Остановить активный бизнес-процесс](../../api-reference/bizproc/bizproc-workflow-terminate.md)

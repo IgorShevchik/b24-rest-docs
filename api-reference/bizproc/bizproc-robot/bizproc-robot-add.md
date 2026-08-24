@@ -129,7 +129,7 @@
 [`boolean`](../../data-types.md) | Дает возможность открывать дополнительные настройки робота в слайдере приложения. Возможные значения:
 - `Y` — да
 - `N` — нет  ||
-|| **PLACEMENT_HANDLER***
+|| **PLACEMENT_HANDLER**
 [`string`](../../data-types.md) | URL обработчика встройки на стороне приложения. Обязательное, если `USE_PLACEMENT = 'Y'` ||
 |#
 
@@ -273,123 +273,51 @@
     https://**put_your_bitrix24_address**/rest/bizproc.robot.add
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'bizproc.robot.add',
-        params: {
-          CODE: 'test_robot',
-          HANDLER: 'https://your_domain/robot.php',
-          AUTH_USER_ID: 1,
-          USE_SUBSCRIPTION: 'Y',
-          NAME: 'Send a message',
-          PROPERTIES: {
-            datetime: {
-              Name: 'When',
-              Type: 'datetime',
-            },
-            text: {
-              Name: 'Text',
-              Type: 'text',
-            },
-            user: {
-              Name: 'Recipient',
-              Type: 'user',
-              Default: 'Author;',
-            },
-          },
-          FILTER: {
-            INCLUDE: [
-              ['crm', 'CCrmDocumentDeal'],
-              ['crm', 'CCrmDocumentLead'],
-            ],
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Robot registered:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    ```js
+    try
+    {
+    	const response = await $b24.callMethod(
+    		'bizproc.robot.add',
+    		{
+    			'CODE': 'test_robot',
+    			'HANDLER': 'https://your_domain/robot.php',
+    			'AUTH_USER_ID': 1,
+    			'USE_SUBSCRIPTION': 'Y',
+    			'NAME': 'Отправить сообщение',
+    			'PROPERTIES': {
+    				'datetime': {
+    					'Name': 'Во сколько',
+    					'Type': 'datetime'
+    				},
+    				'text': {
+    					'Name': 'Текст',
+    					'Type': 'text'
+    				},
+    				'user': {
+    					'Name': 'Кому',
+    					'Type': 'user',
+    					'Default': 'Автор;'
+    				}
+    			},
+    			'FILTER': {
+    				INCLUDE: [
+    					['crm', 'CCrmDocumentDeal'],
+    					['crm', 'CCrmDocumentLead']
+    				]
+    			}
+    		}
+    	);
+    	
+    	const result = response.getData().result;
+    	alert("Успешно: " + result);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function addRobot() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'bizproc.robot.add',
-            params: {
-              CODE: 'test_robot',
-              HANDLER: 'https://your_domain/robot.php',
-              AUTH_USER_ID: 1,
-              USE_SUBSCRIPTION: 'Y',
-              NAME: 'Send a message',
-              PROPERTIES: {
-                datetime: {
-                  Name: 'When',
-                  Type: 'datetime',
-                },
-                text: {
-                  Name: 'Text',
-                  Type: 'text',
-                },
-                user: {
-                  Name: 'Recipient',
-                  Type: 'user',
-                  Default: 'Author;',
-                },
-              },
-              FILTER: {
-                INCLUDE: [
-                  ['crm', 'CCrmDocumentDeal'],
-                  ['crm', 'CCrmDocumentLead'],
-                ],
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Robot registered:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', addRobot)
-    </script>
+    catch( error )
+    {
+    	alert("Error: " + error);
+    }
     ```
 
 - PHP
@@ -503,6 +431,49 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "bizproc.robot.add", b24.Params{
+    	"CODE":             "test_robot",
+    	"HANDLER":          "https://your_domain/robot.php",
+    	"AUTH_USER_ID":     1,
+    	"USE_SUBSCRIPTION": "Y",
+    	"NAME":             "Отправить сообщение",
+    	"PROPERTIES": b24.Params{
+    		"datetime": b24.Params{
+    			"Name": "Во сколько",
+    			"Type": "datetime",
+    		},
+    		"text": b24.Params{
+    			"Name": "Текст",
+    			"Type": "text",
+    		},
+    		"user": b24.Params{
+    			"Name":    "Кому",
+    			"Type":    "user",
+    			"Default": "Автор;",
+    		},
+    	},
+    	"FILTER": b24.Params{
+    		"INCLUDE": []any{
+    			[]string{"crm", "CCrmDocumentDeal"},
+    			[]string{"crm", "CCrmDocumentLead"},
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("bizproc.robot.add: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

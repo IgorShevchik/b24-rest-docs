@@ -26,11 +26,11 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод добавляет задачу в Избранное.
+Метод `task.item.addtofavourite` добавляет задачу в Избранное.
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.favorite.add](../../tasks-task-favorite-add.md).
+Развитие метода остановлено. Используйте [tasks.task.favorite.add](../../user-actions/tasks-task-favorite-add.md).
 
 {% endnote %}
 
@@ -81,6 +81,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify result shape — no response example is provided on this page
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type AddToFavouriteResult = boolean
 
@@ -220,6 +221,25 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.addtofavorite", b24.Params{
+    	"TASK_ID": 10,
+    	"PARAMS": b24.Params{
+    		"AFFECT_CHILDREN": "Y",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.addtofavorite: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

@@ -70,80 +70,27 @@
     https://**put_your_bitrix24_address**/rest/imbot.chat.get
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type ChatGetResult = {
-      ID: number
+    ```js
+    try
+    {
+        const response = await $b24.callMethod(
+            'imbot.chat.get',
+            {
+                ENTITY_TYPE: 'CHAT',
+                ENTITY_ID: '13'
+            }
+        );
+        
+        const result = response.getData().result;
+        console.log('Retrieved chat data:', result);
+        processResult(result);
     }
-
-    try {
-      const response = await $b24.actions.v2.call.make<ChatGetResult>({
-        method: 'imbot.chat.get',
-        params: {
-          ENTITY_TYPE: 'CHAT',
-          ENTITY_ID: '13',
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Chat ID:', result.ID)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+    catch( error )
+    {
+        console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function getChatId() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.chat.get',
-            params: {
-              ENTITY_TYPE: 'CHAT',
-              ENTITY_ID: '13',
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Chat ID:', result.ID)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', getChatId)
-    </script>
     ```
 
 - PHP
@@ -208,6 +155,27 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.chat.get", b24.Params{
+    	"ENTITY_TYPE": "CHAT",
+    	"ENTITY_ID":   "13",
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("imbot.chat.get: %w", err)
+    }
+
+    var item struct {
+    	ID b24.ID `json:"ID"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID)
     ```
 
 {% endlist %}

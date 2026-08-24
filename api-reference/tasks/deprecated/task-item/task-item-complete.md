@@ -13,11 +13,11 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод переводит задачу в статус «завершена» или «условно завершена (ждет контроля исполнителя)».
+Метод `task.item.complete` переводит задачу в статус «завершена» или «условно завершена (ждет контроля исполнителя)».
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.complete](../../tasks-task-complete.md).
+Развитие метода остановлено. Используйте [tasks.task.complete](../../status/tasks-task-complete.md).
 
 {% endnote %}
 
@@ -64,6 +64,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version — no JSON response section found on this page
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type TaskItemCompleteResult = boolean | null
 
@@ -100,6 +101,7 @@
           // Initialize the SDK inside a Bitrix24 frame
           const $b24 = await B24Js.initializeB24Frame()
 
+          // TODO: verify API version — no JSON response section found on this page
           const response = await $b24.actions.v2.call.make({
             method: 'task.item.complete',
             params: {
@@ -183,6 +185,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.complete", b24.Params{
+    	"TASKID": 13,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.complete: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

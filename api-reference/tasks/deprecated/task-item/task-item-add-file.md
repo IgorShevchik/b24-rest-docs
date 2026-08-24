@@ -19,7 +19,7 @@
 
 {% endnote %}
 
-Метод загружает файл к задаче. Пока реализована загрузка файла через `post` с передачей содержимого файла в параметре `CONTENT`.
+Метод `task.item.addfile` загружает файл к задаче. Пока реализована загрузка файла через `post` с передачей содержимого файла в параметре `CONTENT`.
 
 ## Параметры метода
 
@@ -68,6 +68,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version — the page does not show a JSON response example
     // Shape of the payload returned in result (ID of the uploaded file)
     type AddFileResult = number
 

@@ -27,10 +27,10 @@
 
 #|
 || **Сценарий** | **Основные методы** | **Результат** ||
-|| [Добавить лид через веб-форму](./how-to-add-lead.md) | [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) | ID нового лида ||
+|| [Добавить лид через веб-форму](./how-to-add-lead.md) | [crm.item.add](../../../api-reference/crm/universal/crm-item-add.md) с `entityTypeId = 1` | ID нового лида ||
 || [Добавить повторный лид](./how-to-add-repeat-lead.md) | [crm.duplicate.findbycomm](../../../api-reference/crm/duplicates/crm-duplicate-find-by-comm.md), [crm.lead.list](../../../api-reference/crm/leads/crm-lead-list.md), [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) | ID нового повторного лида после проверки дублей ||
-|| [Добавить контакт через веб-форму](./how-to-add-contact.md) | [crm.contact.add](../../../api-reference/crm/contacts/crm-contact-add.md) | ID нового контакта ||
-|| [Добавить компанию через веб-форму](./how-to-add-company.md) | [crm.company.add](../../../api-reference/crm/companies/crm-company-add.md) | ID новой компании ||
+|| [Добавить контакт через веб-форму](./how-to-add-contact.md) | [crm.item.add](../../../api-reference/crm/universal/crm-item-add.md) с `entityTypeId = 3` | ID нового контакта ||
+|| [Добавить компанию через веб-форму](./how-to-add-company.md) | [crm.item.add](../../../api-reference/crm/universal/crm-item-add.md) с `entityTypeId = 4` | ID новой компании ||
 || [Добавить сделку и компанию с реквизитами](./how-to-add-deal-with-choice-of-requisite.md) | [crm.company.add](../../../api-reference/crm/companies/crm-company-add.md), [crm.requisite.add](../../../api-reference/crm/requisites/universal/crm-requisite-add.md), [crm.deal.add](../../../api-reference/crm/deals/crm-deal-add.md) | ID компании, реквизита и сделки ||
 |#
 
@@ -68,8 +68,7 @@
 
 #|
 || **Сценарий** | **Основные методы** | **Результат** ||
-|| [Добавить дело в новый лид или сделку в зависимости от режима CRM](./how-to-add-objects-with-crm-mode.md) | [crm.settings.mode.get](../../../api-reference/crm/crm-settings-mode-get.md), [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md),
-[crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) | ID дела, связанного с лидом или сделкой ||
+|| [Добавить дело в новый лид или сделку в зависимости от режима CRM](./how-to-add-objects-with-crm-mode.md) | [crm.settings.mode.get](../../../api-reference/crm/crm-settings-mode-get.md), [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md), [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) | ID дела, связанного с лидом или сделкой ||
 || [Добавить событие календаря для работы с клиентами](./how-to-add-activity-to-contact.md) | [crm.contact.get](../../../api-reference/crm/contacts/crm-contact-get.md), [crm.activity.add](../../../api-reference/crm/timeline/activities/activity-base/crm-activity-add.md) | ID дела типа «Событие» ||
 || [Как отправить письмо клиенту от имени сотрудника](./how-to-send-email.md) | [crm.contact.get](../../../api-reference/crm/contacts/crm-contact-get.md), [crm.activity.add](../../../api-reference/crm/timeline/activities/activity-base/crm-activity-add.md) | ID дела типа «Письмо» ||
 || [Как добавить шаблон и создать документ на его основе](./how-to-generate-documents.md) | [crm.documentgenerator.numerator.add](../../../api-reference/crm/document-generator/numerator/crm-document-generator-numerator-add.md), [crm.documentgenerator.template.add](../../../api-reference/crm/document-generator/templates/crm-document-generator-template-add.md), [crm.documentgenerator.document.add](../../../api-reference/crm/document-generator/documents/crm-document-generator-document-add.md) | ID документа и ссылка на файл ||

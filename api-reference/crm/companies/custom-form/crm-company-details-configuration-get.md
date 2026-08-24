@@ -225,6 +225,31 @@
         echo '</PRE>';
        ```
 
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.company.details.configuration.get", b24.Params{
+        	"scope":  "P",
+        	"userId": 6,
+        }, b24.WithIdempotent())
+        if err != nil {
+        	return fmt.Errorf("crm.company.details.configuration.get: %w", err)
+        }
+
+        var items []struct {
+        	Name  string `json:"name"`
+        	Title string `json:"title"`
+        	Type  string `json:"type"`
+        }
+        if err := json.Unmarshal(res.Result, &items); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        for _, it := range items {
+        	fmt.Println(it.Name, it.Title)
+        }
+        ```
+
     {% endlist %}
 
 2. Получить общую конфигурацию карточки
@@ -363,6 +388,35 @@
         }
         ```
 
+    - Python
+
+        Пример
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.company.details.configuration.get(
+                scope="C",
+            ).response
+            result = bitrix_response.result
+            print(result)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
     - BX24.js
 
         ```js
@@ -395,6 +449,30 @@
         echo '<PRE>';
         print_r($result);
         echo '</PRE>';
+        ```
+
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.company.details.configuration.get", b24.Params{
+        	"scope": "C",
+        }, b24.WithIdempotent())
+        if err != nil {
+        	return fmt.Errorf("crm.company.details.configuration.get: %w", err)
+        }
+
+        var items []struct {
+        	Name  string `json:"name"`
+        	Title string `json:"title"`
+        	Type  string `json:"type"`
+        }
+        if err := json.Unmarshal(res.Result, &items); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        for _, it := range items {
+        	fmt.Println(it.Name, it.Title)
+        }
         ```
 
     {% endlist %}
@@ -613,7 +691,7 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-` | `Access denied` | У пользователя нет права «Разрешить изменять настройки» для получения чужих настроек ||
+|| Пустое значение | `Access denied` | У пользователя нет права «Разрешить изменять настройки» для получения чужих настроек ||
 |#
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}

@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -49,7 +49,7 @@
 
 ### Параметр fields {#parameter-fields}
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Параметр**
@@ -275,45 +275,6 @@
     - `N` — нет ||
     |#
 
-- Python
-
-    Пример
-
-    ```python
-    from b24pysdk.client import BaseClient
-    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
-
-    client: BaseClient
-
-    try:
-        bitrix_response = client.crm.deal.userfield.update(
-            bitrix_id=42,
-            fields={
-                "EDIT_FORM_LABEL": {"en": "Priority Score"},
-                "LIST_COLUMN_LABEL": {"en": "Priority Score"},
-                "LIST_FILTER_LABEL": {"en": "Priority Score"},
-                "MANDATORY": "N",
-                "SHOW_FILTER": "E",
-            },
-            list=[
-                {"ID": 1, "VALUE": "Low", "SORT": 100},
-                {"ID": 2, "VALUE": "High", "SORT": 200},
-            ],
-        ).response
-        result = bitrix_response.result
-        print(result)
-    except BitrixAPIError as error:
-        print(
-            "Ошибка Bitrix API",
-            f"error: {error.error}",
-            f"error_description: {error.error_description}",
-            sep="\n",
-        )
-    except BitrixSDKException as error:
-        print(f"Ошибка Bitrix SDK: {error.message}")
-    except Exception as error:
-        print(f"Непредвиденная ошибка: {error}")
-    ```
 {% endlist %}
 
 ### Параметр LIST {#uf_enum_element}
@@ -365,135 +326,52 @@
     https://**put_your_bitrix24_address**/rest/crm.deal.userfield.update
     ```
 
-- JS (TS)
+- BX24.js
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    try {
-      const response = await $b24.actions.v2.call.make<boolean>({
-        method: 'crm.deal.userfield.update',
-        params: {
-          id: 536,
-          fields: {
-            MANDATORY: 'N',
-            SHOW_FILTER: 'N',
-            SETTINGS: {
-              DEFAULT_VALUE: 'Hello, World! Default value (changed)',
-              ROWS: 10,
-            },
-            SORT: 2000,
-            EDIT_IN_LIST: 'N',
-            LIST_FILTER_LABEL: 'Hello, World! Filter (changed)',
-            LIST_COLUMN_LABEL: {
-              en: 'Hello, World! Column (changed)',
-              ru: 'Hello, World! Column (changed, RU)',
-              de: 'Hello, World! Column (changed, DE)',
-            },
-            EDIT_FORM_LABEL: {
-              en: 'Hello, World! Edit (changed)',
-              ru: 'Hello, World! Edit (changed, RU)',
-              de: 'Hello, World! Edit (changed, DE)',
-            },
-            ERROR_MESSAGE: {
-              en: 'Hello, World! Error (changed)',
-              ru: 'Hello, World! Error (changed, RU)',
-              de: 'Hello, World! Error (changed, DE)',
-            },
-            HELP_MESSAGE: {
-              en: 'Hello, World! Help (changed)',
-              ru: 'Hello, World! Help (changed, RU)',
-              de: 'Hello, World! Help (changed, DE)',
-            },
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Updated:', result)
-      }
-    } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
-    }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function updateDealUserfield() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'crm.deal.userfield.update',
-            params: {
-              id: 536,
-              fields: {
-                MANDATORY: 'N',
-                SHOW_FILTER: 'N',
+    ```js
+    BX24.callMethod(
+        'crm.deal.userfield.update',
+        {
+            id: 536,
+            fields: {
+                MANDATORY: "N",
+                SHOW_FILTER: "N",
                 SETTINGS: {
-                  DEFAULT_VALUE: 'Hello, World! Default value (changed)',
-                  ROWS: 10,
+                    DEFAULT_VALUE: "Привет, мир! Значение по умолчанию (изменено)",
+                    ROWS: 10,
                 },
                 SORT: 2000,
-                EDIT_IN_LIST: 'N',
-                LIST_FILTER_LABEL: 'Hello, World! Filter (changed)',
+                EDIT_IN_LIST: "N",
+                LIST_FILTER_LABEL: "Привет, мир! Фильтр (изменено)",
                 LIST_COLUMN_LABEL: {
-                  en: 'Hello, World! Column (changed)',
-                  ru: 'Hello, World! Column (changed, RU)',
-                  de: 'Hello, World! Column (changed, DE)',
+                    "en": "Hello, World! Column (changed)",
+                    "ru": "Привет, мир! Колонка (изменено)",
+                    "de": "Hallo, Welt! Spalte (geändert)"
                 },
                 EDIT_FORM_LABEL: {
-                  en: 'Hello, World! Edit (changed)',
-                  ru: 'Hello, World! Edit (changed, RU)',
-                  de: 'Hello, World! Edit (changed, DE)',
+                    "en": "Hello, World! Edit (changed)",
+                    "ru": "Привет, мир! Редактировать (изменено)",
+                    "de": "Hallo, Welt! Bearbeiten (geändert)"
                 },
                 ERROR_MESSAGE: {
-                  en: 'Hello, World! Error (changed)',
-                  ru: 'Hello, World! Error (changed, RU)',
-                  de: 'Hello, World! Error (changed, DE)',
+                    "en": "Hello, World! Error (changed)",
+                    "ru": "Привет, мир! Ошибка (изменено)",
+                    "de": "Hallo, Welt! Fehler (geändert)"
                 },
                 HELP_MESSAGE: {
-                  en: 'Hello, World! Help (changed)',
-                  ru: 'Hello, World! Help (changed, RU)',
-                  de: 'Hello, World! Help (changed, DE)',
+                    "en": "Hello, World! Help (changed)",
+                    "ru": "Привет, мир! Помощь (изменено)",
+                    "de": "Hallo, Welt! Hilfe (geändert)"
                 },
-              },
             },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Updated:', result)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', updateDealUserfield)
-    </script>
+        },
+        (result) => {
+            result.error()
+                ? console.error(result.error())
+                : console.info(result.data())
+            ;
+        },
+    );
     ```
 
 - PHP
@@ -542,6 +420,113 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.deal.userfield.update(
+            bitrix_id=536,
+            fields={
+                "MANDATORY": "N",
+                "SHOW_FILTER": "N",
+                "SETTINGS": {
+                    "DEFAULT_VALUE": "Привет, мир! Значение по умолчанию (изменено)",
+                    "ROWS": 10,
+                },
+                "SORT": 2000,
+                "EDIT_IN_LIST": "N",
+                "LIST_FILTER_LABEL": "Привет, мир! Фильтр (изменено)",
+                "LIST_COLUMN_LABEL": {
+                    "en": "Hello, World! Column (changed)",
+                    "ru": "Привет, мир! Колонка (изменено)",
+                    "de": "Hallo, Welt! Spalte (geändert)",
+                },
+                "EDIT_FORM_LABEL": {
+                    "en": "Hello, World! Edit (changed)",
+                    "ru": "Привет, мир! Редактировать (изменено)",
+                    "de": "Hallo, Welt! Bearbeiten (geändert)",
+                },
+                "ERROR_MESSAGE": {
+                    "en": "Hello, World! Error (changed)",
+                    "ru": "Привет, мир! Ошибка (изменено)",
+                    "de": "Hallo, Welt! Fehler (geändert)",
+                },
+                "HELP_MESSAGE": {
+                    "en": "Hello, World! Help (changed)",
+                    "ru": "Привет, мир! Помощь (изменено)",
+                    "de": "Hallo, Welt! Hilfe (geändert)",
+                },
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.deal.userfield.update", b24.Params{
+    	"id": 536,
+    	"fields": b24.Params{
+    		"MANDATORY":   "N",
+    		"SHOW_FILTER": "N",
+    		"SETTINGS": b24.Params{
+    			"DEFAULT_VALUE": "Привет, мир! Значение по умолчанию (изменено)",
+    			"ROWS":          10,
+    		},
+    		"SORT":              2000,
+    		"EDIT_IN_LIST":      "N",
+    		"LIST_FILTER_LABEL": "Привет, мир! Фильтр (изменено)",
+    		"LIST_COLUMN_LABEL": b24.Params{
+    			"en": "Hello, World! Column (changed)",
+    			"ru": "Привет, мир! Колонка (изменено)",
+    			"de": "Hallo, Welt! Spalte (geändert)",
+    		},
+    		"EDIT_FORM_LABEL": b24.Params{
+    			"en": "Hello, World! Edit (changed)",
+    			"ru": "Привет, мир! Редактировать (изменено)",
+    			"de": "Hallo, Welt! Bearbeiten (geändert)",
+    		},
+    		"ERROR_MESSAGE": b24.Params{
+    			"en": "Hello, World! Error (changed)",
+    			"ru": "Привет, мир! Ошибка (изменено)",
+    			"de": "Hallo, Welt! Fehler (geändert)",
+    		},
+    		"HELP_MESSAGE": b24.Params{
+    			"en": "Hello, World! Help (changed)",
+    			"ru": "Привет, мир! Помощь (изменено)",
+    			"de": "Hallo, Welt! Hilfe (geändert)",
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.deal.userfield.update: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}

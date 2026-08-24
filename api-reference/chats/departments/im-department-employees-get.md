@@ -25,13 +25,15 @@
 || **ID***
 [`array`](../../data-types.md) | Массив идентификаторов подразделений. Можно передать строку с JSON-массивом идентификаторов.
 
-Получить идентификатор департамента можно методом [получения списка подразделений](../../departments/department-get.md) или методом [поиска подразделений по названию](../search/im-search-department-list.md) ||
+Получить идентификатор подразделения можно методом [получения списка подразделений](../../departments/department-get.md) или методом [поиска подразделений по названию](../search/im-search-department-list.md) ||
 || **USER_DATA**
-[`string`](../../data-types.md) | Возвращать подробные данные пользователей.  
+[`string`](../../data-types.md) | Возвращать подробные данные пользователей.
 
 Возможные значения:
-- `Y` — да,
-- `N` — нет ||
+- `Y` — да
+- `N` — нет
+
+По умолчанию: `N` ||
 |#
 
 ## Примеры кода
@@ -233,6 +235,22 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "im.department.employees.get", b24.Params{
+    	"ID":        []int{3, 7},
+    	"USER_DATA": "Y",
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("im.department.employees.get: %w", err)
+    }
+
+    // Форма ответа показана ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -299,15 +317,7 @@ HTTP-статус: **200**
                     "type": "user",
                     "website": "",
                     "email": "ivan.ivanov@mysite.ru"
-                },
-                {
-                    "id": 67,
-                    "active": true,
-                    "name": "Анна Петрова",
-                    "first_name": "Анна",
-                    ...
-                },
-
+                }
             ],
             "3": [
                 {
@@ -316,9 +326,31 @@ HTTP-статус: **200**
                     "name": "Мария Сидорова",
                     "first_name": "Мария",
                     "last_name": "Сидорова",
-                    ...
-                },
-            ...
+                    "work_position": "Менеджер",
+                    "color": "#df532d",
+                    "avatar": "",
+                    "gender": "F",
+                    "birthday": "",
+                    "extranet": false,
+                    "network": false,
+                    "bot": false,
+                    "connector": false,
+                    "external_auth_id": "default",
+                    "status": "online",
+                    "idle": false,
+                    "last_activity_date": "2026-03-03T09:36:00+03:00",
+                    "mobile_last_date": false,
+                    "desktop_last_date": false,
+                    "absent": false,
+                    "departments": [
+                        3
+                    ],
+                    "phones": false,
+                    "bot_data": null,
+                    "type": "user",
+                    "website": "",
+                    "email": "maria.sidorova@mysite.ru"
+                }
             ]
         },
         "time": {
@@ -347,7 +379,7 @@ HTTP-статус: **200**
 [`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
-#### Объект пользователя {#user-object}
+#### Объект user {#user-object}
 
 #|
 || **Название**
@@ -448,5 +480,5 @@ HTTP-статус: **400**
 
 - [{#T}](./im-department-get.md)
 - [{#T}](./im-department-managers-get.md)
-- [{#T}](./im-department-employees-get.md)
 - [{#T}](./im-department-colleagues-list.md)
+- [{#T}](./index.md)

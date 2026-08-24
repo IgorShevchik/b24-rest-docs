@@ -180,6 +180,37 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "biconnector.dataset.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("biconnector.dataset.fields: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "fields".
+    raw, ok := b24.Unwrap(res.Result, "fields")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа fields")
+    }
+
+    var items []struct {
+    	Title       string `json:"title"`
+    	Type        string `json:"type"`
+    	IsRequired  bool   `json:"isRequired"`
+    	IsReadOnly  bool   `json:"isReadOnly"`
+    	IsImmutable bool   `json:"isImmutable"`
+    	IsMultiple  bool   `json:"isMultiple"`
+    }
+    if err := json.Unmarshal(raw, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.Title)
+    }
+    ```
+
 {% endlist %}
 
 
@@ -314,29 +345,16 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`](../../data-types.md) | Объект в формате:
-
-```
-{
-    field_1: value_1,
-    field_2: value_2,
-    ...
-    field_n: value_n,
-}
-```
-
-где:
-- `field_n` — поле датасета
-- `value_n` — [информация о поле](../connector/index.md#description) ||
+[`object`](../../data-types.md) | Корневой элемент ответа. Содержит массив `fields` с описанием полей датасета. Структура элемента массива описана в статье [Коннектор: обзор методов](../connector/index.md#description) ||
 || **time**
 [`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок
 
-Метод не возвращает ошибки.
+{% include notitle [обработка ошибок](../../../_includes/error-info.md) %}
 
-{% include [системные ошибки](./../../../_includes/system-errors.md) %}
+{% include [системные ошибки](../../../_includes/system-errors.md) %}
 
 ## Продолжите изучение
 

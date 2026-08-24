@@ -17,13 +17,13 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id**^*^
-[`integer`](../../data-types.md) | Идентификатор документа ||
+[`integer`](../../../data-types.md) | Идентификатор документа ||
 |#
 
 ## Примеры кода
@@ -150,6 +150,31 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.documentgenerator.document.delete(bitrix_id=61).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -184,6 +209,22 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.documentgenerator.document.delete", b24.Params{
+    	"id": 61,
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.documentgenerator.document.delete: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -212,9 +253,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`null`](../../data-types.md) | Корневой элемент ответа. Для метода удаления возвращается `null` ||
+[`null`](../../../data-types.md) | Корневой элемент ответа. Для метода удаления возвращается `null` ||
 || **time**
-[`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок

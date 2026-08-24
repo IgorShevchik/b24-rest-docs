@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод возвращает описание задачи.
+Метод `task.item.getdescription` возвращает описание задачи.
 
 {% note warning "DEPRECATED" %}
 
@@ -70,6 +70,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version
     // Shape of the payload returned in result
     type TaskDescriptionResult = string
 

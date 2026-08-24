@@ -151,6 +151,33 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.contact.company.fields().response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -179,6 +206,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.company.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.contact.company.fields: %w", err)
+    }
+
+    keys, ok := b24.Keys(res.Result)
+    if !ok {
+    	return fmt.Errorf("ожидался объект в ответе")
+    }
+    fmt.Println("полей в ответе:", len(keys))
     ```
 
 {% endlist %}
@@ -235,7 +278,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`object`][1] | Объект в формате:
+[`object`](../../../data-types.md) | Объект в формате:
 ```
 {
     field_1: value_1,
@@ -249,7 +292,7 @@ HTTP-статус: **200**
 - `field_n` — поле элемента
 - `value_n` — информация о поле в формате [crm_rest_field_description](../../data-types.md#crm_rest_field_description) ||
 || **time**
-[`time`][1] | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок
@@ -265,5 +308,3 @@ HTTP-статус: **200**
 - [{#T}](./crm-contact-company-items-get.md)
 - [{#T}](./crm-contact-company-items-set.md)
 - [{#T}](./crm-contact-company-items-delete.md)
-
-[1]: ../../../data-types.md

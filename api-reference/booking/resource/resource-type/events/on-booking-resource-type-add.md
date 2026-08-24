@@ -13,8 +13,7 @@
 >
 > Кто может подписаться: любой пользователь
 
-Событие `ONBOOKINGRESOURCETYPEADD` сработает при создании нового типа ресурса вручную или методом [booking.v1.resourcetype.add](../booking-v1-resourcetype-add.md).
-
+Событие `ONBOOKINGRESOURCETYPEADD` сработает при создании нового типа ресурса вручную или методом [booking.v1.resourceType.add](../booking-v1-resourcetype-add.md).
 
 {% note info "" %}
 
@@ -80,5 +79,5 @@
 
 - [{#T}](../../../../events/index.md)
 - [{#T}](../../../../events/event-bind.md)
-- [{#T}](./on-booking-resource-type-delete.md)
 - [{#T}](./on-booking-resource-type-update.md)
+- [{#T}](./on-booking-resource-type-delete.md)

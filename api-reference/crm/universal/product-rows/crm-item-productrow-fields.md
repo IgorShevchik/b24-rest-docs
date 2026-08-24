@@ -147,6 +147,33 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.productrow.fields().response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -175,6 +202,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.item.productrow.fields", nil, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.item.productrow.fields: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "fields".
+    raw, ok := b24.Unwrap(res.Result, "fields")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа fields")
+    }
+
+    fmt.Printf("%s\n", raw)
     ```
 
 {% endlist %}

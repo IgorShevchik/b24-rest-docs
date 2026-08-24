@@ -13,7 +13,7 @@
 BX24.appOption.set(string name, mixed value[, Function callback]): void;
 ```
 
-Метод `BX24.appOption.set` устанавливает общие настройки для текущего приложения. 
+Метод `BX24.appOption.set` устанавливает общие настройки для текущего приложения.
 
 Установка значений настроек приложения доступна только пользователям с правом управления приложениями (см. [BX24.isAdmin](../additional-functions/bx24-is-admin.md)). Для настроек приложения может потребоваться обработчик завершения (см. ниже параметр `callback`).
 
@@ -27,7 +27,7 @@ BX24.appOption.set(string name, mixed value[, Function callback]): void;
 || **name***
 [`string`](../../../api-reference/data-types.md) | Код параметра ||
 || **value***
-[`mixed`](../../../api-reference/data-types.md) | Значение параметра ||
+[`any`](../../../api-reference/data-types.md) | Значение параметра ||
 || **callback**
 [`function`](../../../api-reference/data-types.md) | Callback после сохранения. В качестве аргумента будут переданы текущие настройки приложения ||
 |#
@@ -42,6 +42,10 @@ BX24.init(() => {
 ```
 
 {% include [Сноска о примерах](../../../_includes/examples.md) %}
+
+## Возвращаемое значение
+
+Метод ничего не возвращает. Если передан параметр `callback`, текущие настройки приложения будут переданы в аргумент функции `callback`.
 
 ## Продолжите изучение
 

@@ -26,7 +26,7 @@
 || **Название**
 `тип` | **Описание** ||
 || **entityTypeId**
-[`integer`][1] | Идентификатор типа объекта. Может принимать значения:
+[`integer`](../data-types.md) | Идентификатор типа объекта. Может принимать значения:
 - `1` — лид,
 - `2` — сделка,
 - `5` — счет (старый),
@@ -34,9 +34,9 @@
 - числовой идентификатор [пользовательского типа](./universal/user-defined-object-types/index.md#id), например `130`
 ||
 || **order**
-[`object`][1]| Список для сортировки, где ключ — поле, а значение — `ASC` или `DESC` ||
+[`object`](../data-types.md)| Список для сортировки, где ключ — поле, а значение — `ASC` или `DESC` ||
 || **filter**
-[`object`][1] | Список для фильтрации. Фильтр поддерживает использование точных значений, массивов значений, а также модификаторы:
+[`object`](../data-types.md) | Список для фильтрации. Фильтр поддерживает использование точных значений, массивов значений, а также модификаторы:
 - `>=` — больше либо равно
 - `>` — больше
 - `<=` — меньше либо равно
@@ -60,9 +60,9 @@
 - `!` — не равно
 ||
 || **select**
-[`object`][1]| Список получаемых полей ||
+[`object`](../data-types.md)| Список получаемых полей ||
 || **start**
-[`integer`][1] | Сдвиг для постраничной навигации. Логика работы с постраничной навигацией стандартная для [списочных методов](../../settings/how-to-call-rest-api/list-methods-pecularities.md) ||
+[`integer`](../data-types.md) | Сдвиг для постраничной навигации. Логика работы с постраничной навигацией стандартная для [списочных методов](../../settings/how-to-call-rest-api/list-methods-pecularities.md) ||
 |#
 
 ## Примеры кода
@@ -93,112 +93,51 @@
     https://**put_your_bitrix24_address**/rest/crm.stagehistory.list
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
 
-    declare const $b24: B24Frame
-
-    type StageHistoryItem = {
-      ID: number
-      STAGE_ID: string
-      CREATED_TIME: string
-    }
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type StageHistoryListResult = {
-      items: StageHistoryItem[]
-    }
-
-    // crm.stagehistory.list returns a single page (max 50 records). For the whole result set
-    // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-    // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-    // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-    // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
+    ```js
+    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
+    
+    const parameters = {
+        entityTypeId: 2,
+        order: { "ID": "ASC" },
+        filter: { "OWNER_ID": 1 },
+        select: [ "ID", "STAGE_ID", "CREATED_TIME" ]
+    };
+    
     try {
-      const response = await $b24.actions.v2.call.make<StageHistoryListResult>({
-        method: 'crm.stagehistory.list',
-        params: {
-          entityTypeId: 2,
-          order: {
-            ID: 'ASC',
-          },
-          filter: {
-            OWNER_ID: 1,
-          },
-          select: ['ID', 'STAGE_ID', 'CREATED_TIME'],
-          start: 0,
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info(`Loaded ${result.items.length} stage-history record(s) on this page`)
-        console.info(result.items)
+      const response = await $b24.callListMethod(
+        'crm.stagehistory.list',
+        parameters,
+        (progress) => { console.log('Progress:', progress) }
+      )
+      const items = response.getData() || []
+      for (const entity of items) { console.log('Entity:', entity) }
+    } catch (error) {
+      console.error('Request failed', error)
+    }
+    
+    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
+    
+    try {
+      const generator = $b24.fetchListMethod('crm.stagehistory.list', parameters, 'ID')
+      for await (const page of generator) {
+        for (const entity of page) { console.log('Entity:', entity) }
       }
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Request failed', error)
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function listStageHistory() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          // crm.stagehistory.list returns a single page (max 50 records). For the whole result set
-          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-          const response = await $b24.actions.v2.call.make({
-            method: 'crm.stagehistory.list',
-            params: {
-              entityTypeId: 2,
-              order: {
-                ID: 'ASC',
-              },
-              filter: {
-                OWNER_ID: 1,
-              },
-              select: ['ID', 'STAGE_ID', 'CREATED_TIME'],
-              start: 0,
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info(`Loaded ${result.items.length} stage-history record(s) on this page`)
-          console.info(result.items)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', listStageHistory)
-    </script>
+    
+    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
+    
+    try {
+      const response = await $b24.callMethod('crm.stagehistory.list', parameters, 0)
+      const result = response.getData().result || []
+      for (const entity of result) { console.log('Entity:', entity) }
+    } catch (error) {
+      console.error('Request failed', error)
+    }
     ```
 
 - PHP
@@ -279,6 +218,46 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.stagehistory.list", b24.Params{
+    	"entityTypeId": 2,
+    	"order": b24.Params{
+    		"ID": "ASC",
+    	},
+    	"filter": b24.Params{
+    		"OWNER_ID": 1,
+    	},
+    	"select": []string{"ID", "STAGE_ID", "CREATED_TIME"},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.stagehistory.list: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "items".
+    raw, ok := b24.Unwrap(res.Result, "items")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа items")
+    }
+
+    var items []struct {
+    	ID              b24.ID `json:"ID"`
+    	TypeID          b24.ID `json:"TYPE_ID"`
+    	OwnerID         b24.ID `json:"OWNER_ID"`
+    	CreatedTime     string `json:"CREATED_TIME"`
+    	CategoryID      b24.ID `json:"CATEGORY_ID"`
+    	StageSemanticID string `json:"STAGE_SEMANTIC_ID"`
+    }
+    if err := json.Unmarshal(raw, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
+    ```
+
 {% endlist %}
 
 Получить историю движения по стадиям для смарт-процесса с `entityTypeId=130` и элементом `OWNER_ID=29`
@@ -305,112 +284,50 @@
     https://**put_your_bitrix24_address**/rest/crm.stagehistory.list
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    type StageHistoryItem = {
-      ID: number
-      STAGE_ID: string
-      CREATED_TIME: string
-    }
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type StageHistoryListResult = {
-      items: StageHistoryItem[]
-    }
-
-    // crm.stagehistory.list returns a single page (max 50 records). For the whole result set
-    // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-    // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-    // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-    // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
+    ```js
+    // callListMethod: Получает все данные сразу. Используйте только для небольших выборок (< 1000 элементов) из-за высокой нагрузки на память.
+    
+    const parameters = {
+        entityTypeId: 130,
+        order: { "ID": "ASC" },
+        filter: { "OWNER_ID": 29 },
+        select: [ "ID", "STAGE_ID", "CREATED_TIME" ]
+    };
+    
     try {
-      const response = await $b24.actions.v2.call.make<StageHistoryListResult>({
-        method: 'crm.stagehistory.list',
-        params: {
-          entityTypeId: 130,
-          order: {
-            ID: 'ASC',
-          },
-          filter: {
-            OWNER_ID: 29,
-          },
-          select: ['ID', 'STAGE_ID', 'CREATED_TIME'],
-          start: 0,
-        },
-        requestId: Text.getUuidRfc4122()
-      })
-
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info(`Loaded ${result.items.length} stage-history record(s) on this page`)
-        console.info(result.items)
+      const response = await $b24.callListMethod(
+        'crm.stagehistory.list',
+        parameters,
+        (progress) => { console.log('Progress:', progress) }
+      )
+      const items = response.getData() || []
+      for (const entity of items) { console.log('Entity:', entity) }
+    } catch (error) {
+      console.error('Request failed', error)
+    }
+    
+    // fetchListMethod: Выбирает данные по частям с помощью итератора. Используйте для больших объемов данных для эффективного потребления памяти.
+    
+    try {
+      const generator = $b24.fetchListMethod('crm.stagehistory.list', parameters, 'ID')
+      for await (const page of generator) {
+        for (const entity of page) { console.log('Entity:', entity) }
       }
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Request failed', error)
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function listStageHistoryForSmartProcess() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          // crm.stagehistory.list returns a single page (max 50 records). For the whole result set
-          // use a list helper: $b24.actions.v2.callList.make() returns every record as one
-          // array, $b24.actions.v2.fetchList.make() yields them in chunks (async generator).
-          // NOTE: the list helpers do not accept `order` (it is excluded from their params, so
-          // passing it is a TS error) — keep this call.make + `start` variant when sort matters.
-          const response = await $b24.actions.v2.call.make({
-            method: 'crm.stagehistory.list',
-            params: {
-              entityTypeId: 130,
-              order: {
-                ID: 'ASC',
-              },
-              filter: {
-                OWNER_ID: 29,
-              },
-              select: ['ID', 'STAGE_ID', 'CREATED_TIME'],
-              start: 0,
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info(`Loaded ${result.items.length} stage-history record(s) on this page`)
-          console.info(result.items)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', listStageHistoryForSmartProcess)
-    </script>
+    
+    // callMethod: Ручное управление постраничной навигацией через параметр start. Используйте для точного контроля над пакетами запросов. Для больших данных менее эффективен, чем fetchListMethod.
+    
+    try {
+      const response = await $b24.callMethod('crm.stagehistory.list', parameters, 0)
+      const result = response.getData().result || []
+      for (const entity of result) { console.log('Entity:', entity) }
+    } catch (error) {
+      console.error('Request failed', error)
+    }
     ```
 
 - PHP
@@ -490,6 +407,46 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.stagehistory.list", b24.Params{
+    	"entityTypeId": 130,
+    	"order": b24.Params{
+    		"ID": "ASC",
+    	},
+    	"filter": b24.Params{
+    		"OWNER_ID": 29,
+    	},
+    	"select": []string{"ID", "STAGE_ID", "CREATED_TIME"},
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.stagehistory.list: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "items".
+    raw, ok := b24.Unwrap(res.Result, "items")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа items")
+    }
+
+    var items []struct {
+    	ID              b24.ID `json:"ID"`
+    	TypeID          b24.ID `json:"TYPE_ID"`
+    	OwnerID         b24.ID `json:"OWNER_ID"`
+    	CreatedTime     string `json:"CREATED_TIME"`
+    	CategoryID      b24.ID `json:"CATEGORY_ID"`
+    	StageSemanticID string `json:"STAGE_SEMANTIC_ID"`
+    }
+    if err := json.Unmarshal(raw, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -541,17 +498,17 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **ID**
-[`int`][1] | Идентификатор записи ||
+[`integer`](../data-types.md) | Идентификатор записи ||
 || **TYPE_ID**
-[`int`][1] | Тип записи. Может принимать значения:
+[`integer`](../data-types.md) | Тип записи. Может принимать значения:
 - `1` — создание элемента,
 - `2` — перевод на промежуточную стадию,
 - `3` — перевод на финальную стадию,
 - `5` — смена воронки ||
 || **OWNER_ID**
-[`int`][1] | Идентификатор объекта, в котором изменилась стадия ||
+[`integer`](../data-types.md) | Идентификатор объекта, в котором изменилась стадия ||
 || **CREATED_TIME**
-[`datetime`][1] | Идентификатор созданного элемента, равен времени перевода элемента на стадию ||
+[`datetime`](../data-types.md) | Идентификатор созданного элемента, равен времени перевода элемента на стадию ||
 |#
 
 Дополнительно есть специфичные для разных типов объектов поля:
@@ -564,12 +521,12 @@ HTTP-статус: **200**
     || **Название**
     `тип` | **Описание** ||
     || **STATUS_SEMANTIC_ID**
-    [`int`][1] | Cемантика стадии:
+    [`string`](../data-types.md) | Cемантика стадии:
     - `P` — промежуточная стадия,
     - `S` — успешная стадия,
     - `F` — провальная стадия ||
     || **STATUS_ID**
-    [`int`][1] | Идентификатор стадии ||
+    [`crm_status`](./data-types.md) | Идентификатор стадии ||
     |#
 
 - для сделок, новых счетов и смарт-процессов
@@ -578,14 +535,14 @@ HTTP-статус: **200**
     || **Название**
     `тип` | **Описание** ||
     || **CATEGORY_ID**
-    [`int`][1] | Идентификатор воронки ||
+    [`integer`](../data-types.md) | Идентификатор воронки ||
     || **STAGE_SEMANTIC_ID**
-    [`int`][1] | Семантика стадии:
+    [`string`](../data-types.md) | Семантика стадии:
     - `P` — промежуточная стадия,
     - `S` — успешная стадия,
     - `F` — провальная стадия ||
     || **STAGE_ID**
-    [`int`][1] | Идентификатор стадии ||
+    [`crm_status`](./data-types.md) | Идентификатор стадии ||
     |#
 
 {% endlist %}    
@@ -622,5 +579,3 @@ HTTP-статус: **401**, **400**
 
 - [{#T}](./index.md)
 - [{#T}](./main-entities-fields.md)
-
-[1]: ../data-types.md

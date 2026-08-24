@@ -13,11 +13,21 @@
 
 > Быстрый переход: [все методы и события](#all-methods) 
 > 
-> Пользовательская документация: [задачи Битрикс24](https://helpdesk.bitrix24.ru/open/17962166/) 
+> Пользовательская документация: [Задачи в Битрикс24: как создать и настроить](https://helpdesk.bitrix24.ru/open/27359038/)
 
 ## Особенности методов задач
 
 В методах задач нужно соблюдать порядок следования параметров в запросе, указанный в таблицах параметров. Иначе запрос выполнится с ошибками.
+
+## Задачи в REST 3.0
+
+В [REST 3.0](../rest-v3.md) методы задач получили обновленную архитектуру, унифицированный формат ответов и поддержку связей между объектами. Сейчас REST 3.0 охватывает базовые операции над задачами, работу с чатом задачи, прикрепление файлов, результаты задачи и методы получения схемы полей (`*.field.list` / `*.field.get`).
+
+{% note info "" %}
+
+Некоторые методы новой версии выполняют те же задачи, что и методы старой версии API. Такие методы помечены как `v 3.0`, чтобы было проще различать версии.
+
+{% endnote %}
 
 ## Карточка задачи
 
@@ -48,10 +58,12 @@
 
 Все действия с задачей фиксируются и сохраняются в истории задачи. Чтобы получить историю используйте метод [tasks.task.history.list](./tasks-task-history-list.md).
 
+В REST 3.0 структура карточки остается прежней, но меняются модель данных и работа со связями. Полный состав полей новой версии описан в статье [Поля задачи v 3.0](./fields-rest-v3.md).
+
 {% note tip "Пользовательская документация" %}
 
-  - [Как создать задачу](https://helpdesk.bitrix24.ru/open/17958164/)
-  - [Чек-листы в задачах](https://helpdesk.bitrix24.ru/open/17657420/)
+  - [Как создать задачу](https://helpdesk.bitrix24.ru/open/27359038/)
+  - [Чек-листы в задачах](https://helpdesk.bitrix24.ru/open/27333140/)
   - [Учет времени в задачах](https://helpdesk.bitrix24.ru/open/17980006/)
   - [Дополнительные возможности задач](https://helpdesk.bitrix24.ru/open/17821400/)
 
@@ -64,13 +76,14 @@
 **Группа или проект.** Задача привязывается по идентификатору группы `GROUP_ID`. Получить идентификатор можно методом [создания новой группы](../sonet-group/sonet-group-create.md) или методом [получения списка групп](../sonet-group/socialnetwork-api-workgroup-list.md).
 
 **Пользователь.** Задача имеет привязку к пользователям по числовым идентификаторам в полях:
-  - `CREATED_BY` — постановщик
-  - `RESPONSIBLE_ID` — исполнитель
-  - `ACCOMPLICES` — соисполнители
-  - `AUDITORS` — наблюдатели
-  - `CHANGED_BY`  — последний пользователь, который изменил задачу
-  - `STATUS_CHANGED_BY` — последний пользователь, который изменил статус задачи 
-  - `CLOSED_BY` — пользователь, который завершил задачу
+
+- `CREATED_BY` — постановщик
+- `RESPONSIBLE_ID` — исполнитель
+- `ACCOMPLICES` — соисполнители
+- `AUDITORS` — наблюдатели
+- `CHANGED_BY` — последний пользователь, который изменил задачу
+- `STATUS_CHANGED_BY` — последний пользователь, который изменил статус задачи
+- `CLOSED_BY` — пользователь, который завершил задачу
 
 Получить идентификатор пользователя можно с помощью метода [user.get](../user/user-get.md).
 
@@ -78,10 +91,14 @@
 
 **Почта.** Задача может быть связана с письмом по идентификатору через параметр `UF_MAIL_MESSAGE`.
 
+В REST 3.0 связи передаются в новой модели полей: `parentId`, `groupId`, `crmItemIds`, `emailId`, `flowId`, `chatId`. Также в новой модели отдельно доступны связи с пользователями через поля `creatorId`, `responsibleId`, `accomplices`, `auditors`, `changedById`, `statusChangedById`, `closedById`.
+
+Метод [tasks.task.get](./tasks-task-get-rest-v3.md) позволяет получать данные связанных объектов через `select`, например `"select": ["parent.title", "responsible.name", "group.name", "chat.id"]`. Данные учета времени также доступны в новой модели через `elapsedTime`.
+
 {% note tip "Пользовательская документация" %}
 
   - [Как создать подзадачу](https://helpdesk.bitrix24.ru/open/17750248/)
-  - [Как создать группу и проект](https://helpdesk.bitrix24.ru/open/22699004/)
+  - [Как создать проект в Битрикс24](https://helpdesk.bitrix24.ru/open/28540716/)
 
 {% endnote %}
 
@@ -90,14 +107,18 @@
 К описанию задачи можно прикрепить файлы Диска. В параметре `UF_TASK_WEBDAV_FILES` передайте массив с идентификаторами файлов Диска. Перед каждым идентификатором укажите префикс `n`, например: `"UF_TASK_WEBDAV_FILES": ["n428", "n345"]`. Получить идентификаторы файлов можно двумя способами.
 
 Использовать один из методов загрузки файла:
-  - [disk.storage.uploadfile](../disk/storage/disk-storage-upload-file.md)
-  - [disk.folder.uploadfile](../disk/folder/disk-folder-upload-file.md)
+
+- [disk.storage.uploadfile](../disk/storage/disk-storage-upload-file.md)
+- [disk.folder.uploadfile](../disk/folder/disk-folder-upload-file.md)
 
 Использовать один из методов получения списка файлов:
-  - [disk.storage.getchildren](../disk/storage/disk-storage-get-children.md)
-  - [disk.folder.getchildren ](../disk/folder/disk-folder-get-children.md)
+
+- [disk.storage.getchildren](../disk/storage/disk-storage-get-children.md)
+- [disk.folder.getchildren](../disk/folder/disk-folder-get-children.md)
 
 Прикрепляйте файлы к задаче методом [tasks.task.files.attach](./tasks-task-files-attach.md), если задача уже создана.
+
+В REST 3.0 для уже созданной задачи используйте метод [tasks.task.file.attach](./tasks-task-file-attach.md).
 
 {% note tip "Частые кейсы и сценарии" %}
 
@@ -110,7 +131,7 @@
 
 Потоки — это инструмент, который автоматизирует распределение и выполнение задач. Сотрудникам не нужно искать, кто будет делать задачу. Они ставят задачи в поток отдела, и он автоматически назначает исполнителя.
 
-Управлять Потоками можно группой методов [tasks.flow.Flow.*](./flow/index.md). 
+Управлять Потоками можно группой методов [tasks.flow.Flow.*](./flow/index.md).
 
 {% note tip "Пользовательская документация" %}
 
@@ -151,23 +172,36 @@
 
 В карточку задачи можно встроить приложение. Благодаря встраиванию можно будет использовать приложение и не покидать карточку. 
 
-- [Вкладка в карточке задачи](../widgets/task/view-tab.md) `TASK_VIEW_TAB`
-- [Правая панель карточки задачи](../widgets/task/view-sidebar.md) `TASK_VIEW_SIDEBAR`
-- [Ссылка в верхней части карточки задачи](../widgets/task/view-top-panel.md) `TASK_VIEW_TOP_PANEL`
+- [Виджет на вкладке карточки задачи](../widgets/task/view-tab.md) `TASK_VIEW_TAB`
+- [Виджет в правой панели карточки задачи](../widgets/task/view-sidebar.md) `TASK_VIEW_SIDEBAR`
+- [Виджет в верхней части карточки задачи](../widgets/task/view-top-panel.md) `TASK_VIEW_TOP_PANEL`
 
 Приложение можно встроить в списке задач:
 
-- [Пункт контекстного меню списка](../widgets/task/index.md) `TASK_LIST_CONTEXT_MENU` 
+- [Пункт контекстного меню задачи в списке](../widgets/task/list-context-menu.md) `TASK_LIST_CONTEXT_MENU`
+- [Пункт выпадающего меню над списком задач](../widgets/task/list-toolbar.md) `TASK_USER_LIST_TOOLBAR`, `TASK_GROUP_LIST_TOOLBAR`
+- [Кнопка в дизайнере роботов задач](../widgets/task/robot-designer-toolbar.md) `TASK_ROBOT_DESIGNER_TOOLBAR`
 
-В режимах работы с задачами канбан или «Мой план» есть ещё два специальных места для встройки:
+В новой карточке задач с версии модуля `tasks 25.700.0` места `TASK_VIEW_TAB`, `TASK_VIEW_SIDEBAR` и `TASK_VIEW_TOP_PANEL` объединены в блок «Приложения» в нижней части карточки.
 
-- [Пункт основного выпадающего меню](../widgets/task/list-toolbar.md) `TASK_USER_LIST_TOOLBAR`, `TASK_GROUP_LIST_TOOLBAR`
-- [Пункт основного выпадающего меню около настроек роботов](../widgets/task/robot-designer-toolbar.md) `TASK_ROBOT_DESIGNER_TOOLBAR`
+Как выбрать точку и что приходит обработчику, описано в [обзоре точек встраивания](../widgets/task/index.md).
+
+## Чат задачи в REST 3.0
+
+Обсуждение задачи в REST 3.0 ведется через чат. Метод [tasks.task.chat.message.send](./tasks-task-chat-message-send.md) отправляет сообщение в чат задачи.
+
+Для работы с сообщениями также используйте методы мессенджера:
+
+- [im.message.update](../chats/messages/im-message-update.md)
+- [im.message.delete](../chats/messages/im-message-delete.md)
+- [im.dialog.messages.get](../chats/messages/im-dialog-messages-get.md)
 
 
 ## Обзор методов и событий {#all-methods}
 
-> Scope: [`task`](../scopes/permissions.md)
+> Scope:
+> - [`task`](../scopes/permissions.md) — для методов прежней версии API
+> - [`tasks`](../scopes/permissions.md) — для методов REST 3.0
 >
 > Кто может выполнять метод: в зависимости от метода
 
@@ -180,31 +214,34 @@
     #|
     || **Метод** | **Описание** ||
     || [tasks.task.add](./tasks-task-add.md) | Создает задачу ||
+    || [tasks.task.add](./tasks-task-add-rest-v3.md) | Создает задачу v 3.0 ||
     || [tasks.task.update](./tasks-task-update.md) | Обновляет задачу ||
+    || [tasks.task.update](./tasks-task-update-rest-v3.md) | Обновляет задачу v 3.0 ||
     || [tasks.task.get](./tasks-task-get.md) | Получает информацию о задаче по `id` ||
+    || [tasks.task.get](./tasks-task-get-rest-v3.md) | Получает информацию о задаче по `id` v 3.0 ||
     || [tasks.task.list](./tasks-task-list.md) | Получает список задач ||
+    || [tasks.task.list](./tasks-task-list-rest-v3.md) | Получает список задач v 3.0 ||
+    || [tasks.task.delete](./tasks-task-delete.md) | Удаляет задачу ||
+    || [tasks.task.delete](./tasks-task-delete-rest-v3.md) | Удаляет задачу v 3.0 ||
+    || [tasks.task.getFields](./tasks-task-get-fields.md) | Получает список полей задачи ||
+    || [tasks.task.field.list](./tasks-task-field-list.md) | Получает список полей задачи v 3.0 ||
+    || [tasks.task.field.get](./tasks-task-field-get.md) | Получает описание поля задачи ||
+    || [tasks.task.getaccess](./tasks-task-get-access.md) | Проверяет доступ к задаче ||
+    || [tasks.task.access.get](./tasks-task-access-get.md) | Проверяет доступ к задаче v 3.0 ||
+    || [tasks.task.access.field.list](./tasks-task-access-field-list.md) | Получает список полей прав доступа ||
+    || [tasks.task.access.field.get](./tasks-task-access-field-get.md) | Получает описание поля прав доступа ||
     || [tasks.task.files.attach](./tasks-task-files-attach.md) | Прикрепляет файлы к задаче ||
+    || [tasks.task.file.attach](./tasks-task-file-attach.md) | Прикрепляет файлы к задаче v 3.0 ||
+    || [tasks.task.file.field.list](./tasks-task-file-field-list.md) | Получает список полей файлов задачи ||
+    || [tasks.task.file.field.get](./tasks-task-file-field-get.md) | Получает описание поля файлов задачи ||
+    || [tasks.task.chat.message.send](./tasks-task-chat-message-send.md) | Отправляет сообщение в чат задачи ||
+    || [tasks.task.chat.message.field.list](./tasks-task-chat-message-field-list.md) | Получает список полей сообщения чата задачи ||
+    || [tasks.task.chat.message.field.get](./tasks-task-chat-message-field-get.md) | Получает описание поля сообщения чата задачи ||
     || [tasks.task.delegate](./tasks-task-delegate.md) | Делегирует задачи ||
     || [tasks.task.counters.get](./tasks-task-counters-get.md) | Получает счетчики пользователя ||
-    || [tasks.task.start](./tasks-task-start.md) | Переводит задачу в статус «выполняется» ||
-    || [tasks.task.pause](./tasks-task-pause.md) | Останавливает выполнение задачи и переводит в статус «ждет выполнения» ||
-    || [tasks.task.defer](./tasks-task-defer.md) | Переводит задачу в статус «отложена» ||
-    || [tasks.task.complete](./tasks-task-complete.md) | Переводит задачу в статус «завершена» ||
-    || [tasks.task.renew](./tasks-task-renew.md) | Возобновляет задачу после ее завершения ||
     || [tasks.task.approve](./tasks-task-approve.md) | Принимает задачу ||
     || [tasks.task.disapprove](./tasks-task-disapprove.md) | Отклоняет задачу ||
-    || [tasks.task.delete](./tasks-task-delete.md) | Удаляет задачу ||
-    || [tasks.task.startwatch](./tasks-task-start-watch.md) | Позволяет наблюдать за задачей ||
-    || [tasks.task.stopwatch](./tasks-task-stop-watch.md) | Останавливает наблюдение за задачей ||
-    || [tasks.task.favorite.add](./tasks-task-favorite-add.md) | Добавляет задачи в избранное ||
-    || [tasks.task.favorite.remove](./tasks-task-favorite-remove.md) | Удаляет задачи из избранного ||
-    || [tasks.task.pin](./tasks-task-pin.md) | Закрепляет задачу в списке ||
-    || [tasks.task.unpin](./tasks-task-unpin.md) | Открепляет задачу в списке ||
-    || [tasks.task.getFields](./tasks-task-get-fields.md) |	Получает доступные поля ||
-    || [tasks.task.getaccess](./tasks-task-get-access.md) |	Проверяет доступ к задаче ||
     || [tasks.task.history.list](./tasks-task-history-list.md) | Получает историю задачи ||
-    || [tasks.task.mute](./tasks-task-mute.md) | Включает режим «Без звука» ||
-    || [tasks.task.unmute](./tasks-task-unmute.md) | Выключает режим «Без звука» ||
     || [task.dependence.add](./task-dependence-add.md) | Создает зависимость одной задачи от другой ||
     || [task.dependence.delete](./task-dependence-delete.md) | Удаляет зависимость одной задачи от другой ||
     |#
@@ -220,13 +257,43 @@
 
 {% endlist %}
 
+### Смена статуса задачи
+
+#|
+|| **Метод** | **Описание** ||
+|| [tasks.task.start](./status/tasks-task-start.md) | Переводит задачу в статус «выполняется» ||
+|| [tasks.task.pause](./status/tasks-task-pause.md) | Останавливает выполнение задачи и переводит в статус «ждет выполнения» ||
+|| [tasks.task.defer](./status/tasks-task-defer.md) | Переводит задачу в статус «отложена» ||
+|| [tasks.task.complete](./status/tasks-task-complete.md) | Переводит задачу в статус «завершена» ||
+|| [tasks.task.renew](./status/tasks-task-renew.md) | Возобновляет задачу после ее завершения ||
+|#
+
+### Действия пользователя по задаче
+
+#|
+|| **Метод** | **Описание** ||
+|| [tasks.task.startwatch](./user-actions/tasks-task-start-watch.md) | Включает наблюдение за задачей ||
+|| [tasks.task.stopwatch](./user-actions/tasks-task-stop-watch.md) | Отключает наблюдение за задачей ||
+|| [tasks.task.favorite.add](./user-actions/tasks-task-favorite-add.md) | Добавляет задачу в избранное ||
+|| [tasks.task.favorite.remove](./user-actions/tasks-task-favorite-remove.md) | Удаляет задачу из избранного ||
+|| [tasks.task.pin](./user-actions/tasks-task-pin.md) | Закрепляет задачу в списке ||
+|| [tasks.task.unpin](./user-actions/tasks-task-unpin.md) | Открепляет задачу в списке ||
+|| [tasks.task.mute](./user-actions/tasks-task-mute.md) | Включает режим «Без звука» ||
+|| [tasks.task.unmute](./user-actions/tasks-task-unmute.md) | Выключает режим «Без звука» ||
+|#
+
 ### Результат задачи
 
 #|
 || **Метод** | **Описание** ||
-|| [tasks.task.result.addFromCommentt](./result/tasks-task-result-add-from-comment.md) | Добавляет комментарий в результат ||
+|| [tasks.task.result.addFromComment](./result/tasks-task-result-add-from-comment.md) | Добавляет комментарий в результат ||
 || [tasks.task.result.list](./result/tasks-task-result-list.md) | Получает список результатов задачи ||
 || [tasks.task.result.deleteFromComment](./result/tasks-task-result-delete-from-comment.md) | Удаляет комментарий из результата задачи ||
+|| [tasks.task.result.add](./result/tasks-task-result-add.md) | Добавляет результат к задаче ||
+|| [tasks.task.result.addfromchatmessage](./result/tasks-task-result-addfromchatmessage.md) | Создает результат из сообщения чата задачи ||
+|| [tasks.task.result.update](./result/tasks-task-result-update.md) | Обновляет текст результата ||
+|| [tasks.task.result.list](./result/tasks-task-result-list-rest-v3.md) | Получает список результатов задачи v 3.0 ||
+|| [tasks.task.result.delete](./result/tasks-task-result-delete.md) | Удаляет результат задачи ||
 |#
 
 ### Чек-листы
@@ -318,3 +385,4 @@
 || [tasks.flow.Flow.isExists](./flow/tasks-flow-flow-is-exists.md) | Проверить, существует ли поток с таким названием ||
 || [tasks.flow.Flow.activate](./flow/tasks-flow-flow-activate.md) | Включить или выключить поток ||
 |#
+

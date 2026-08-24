@@ -27,22 +27,22 @@
 || **Название**
 `тип` | **Описание** ||
 || **entityTypeId***
-[`integer`][1] | Идентификатор [системного](./../../index.md) или [пользовательского типа](./../user-defined-object-types/index.md) объектов CRM ||
+[`integer`](../../../data-types.md) | Идентификатор [системного](./../../index.md) или [пользовательского типа](./../user-defined-object-types/index.md) объектов CRM ||
 || **userId**
-[`user`][1] | Идентификатор пользователя, чью конфигурацию вы хотите сбросить.
+[`user`](../../../data-types.md) | Идентификатор пользователя, чью конфигурацию вы хотите сбросить.
 
 Если параметр не передан, то будет взят `userId` пользователя, вызывающего этот метод.
 
 Нужен только при запросе личных настроек
 ||
 || **scope**
-[`string`][1] | Область применения настроек. Допустимые значения:
+[`string`](../../../data-types.md) | Область применения настроек. Допустимые значения:
 - `'P'` — личные настройки
 - `'C'` — общие настройки
 
 По умолчанию значение равно `'P'` ||
 || **extras**
-[`object`][1] | Дополнительные параметры. Возможные значения и их структура описана [ниже](#extras) ||
+[`object`](../../../data-types.md) | Дополнительные параметры. Возможные значения и их структура описана [ниже](#extras) ||
 |#
 
 ### extras
@@ -208,6 +208,40 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.details.configuration.reset(
+            entity_type_id=2,
+            user_id=1,
+            scope="C",
+            extras={
+                "dealCategoryId": 9,
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -256,6 +290,29 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.item.details.configuration.reset", b24.Params{
+    	"entityTypeId": 2,
+    	"userId":       1,
+    	"scope":        "C",
+    	"extras": b24.Params{
+    		"dealCategoryId": 9,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.item.details.configuration.reset: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -283,9 +340,9 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`boolean`][1] | Корневой элемент ответа. Возвращает `true` в случае успешного сброса настроек ||
+[`boolean`](../../../data-types.md) | Корневой элемент ответа. Возвращает `true` в случае успешного сброса настроек ||
 || **time**
-[`time`][1] | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
 ## Обработка ошибок
@@ -317,5 +374,3 @@ HTTP-статус: **400**
 - [{#T}](./crm-item-details-configuration-get.md)
 - [{#T}](./crm-item-details-configuration-set.md)
 - [{#T}](./crm-item-details-configuration-forceCommonScopeForAll.md)
-
-[1]: ../../../data-types.md

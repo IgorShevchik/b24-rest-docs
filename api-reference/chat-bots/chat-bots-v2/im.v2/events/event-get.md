@@ -25,7 +25,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -62,87 +62,20 @@
       https://**put_your_bitrix24_address**/rest/im.v2.Event.get
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type EventGetResult = {
-      events: {
-        eventId: number
-        type: string
-        date: ISODate | null
-        data: object
-      }[]
-      nextOffset: number
-      hasMore: boolean
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<EventGetResult>({
-        method: 'im.v2.Event.get',
-        params: {
-          offset: 2000,
-          limit: 50,
-        },
-        requestId: Text.getUuidRfc4122()
-      })
+      const response = await $b24.callMethod('im.v2.Event.get', {
+        offset: 2000,
+        limit: 50,
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Events:', result.events, 'Next offset:', result.nextOffset, 'Has more:', result.hasMore)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function getEvents() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'im.v2.Event.get',
-            params: {
-              offset: 2000,
-              limit: 50,
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Events:', result.events, 'Next offset:', result.nextOffset, 'Has more:', result.hasMore)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', getEvents)
-    </script>
     ```
 
 - PHP
@@ -209,6 +142,28 @@
             echo $event['type'] . ': ' . $event['eventId'] . "\n";
         }
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "im.v2.Event.get", b24.Params{
+    	"offset": 2000,
+    	"limit":  50,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("im.v2.Event.get: %w", err)
+    }
+
+    var item struct {
+    	NextOffset int  `json:"nextOffset"`
+    	HasMore    bool `json:"hasMore"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.NextOffset, item.HasMore)
     ```
 
 {% endlist %}

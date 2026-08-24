@@ -152,7 +152,7 @@
     https://your-domain.bitrix24.com/rest/_USER_ID_/_CODE_/tasks.flow.Flow.create
     ```
 
-- cURL (oAuth)
+- cURL (OAuth)
 
     ```bash
     curl -X POST \
@@ -392,6 +392,44 @@
     } else {
         print_r($result['result']);
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "tasks.flow.Flow.create", b24.Params{
+    	"flowData": b24.Params{
+    		"name":                  "Unique Flow Name",
+    		"description":           "Описание потока",
+    		"plannedCompletionTime": 7200,
+    		"distributionType":      "manually",
+    		"responsibleList": []any{
+    			[]string{"user", "3"},
+    		},
+    		"taskCreators": []any{
+    			[]string{"meta-user", "all-users"},
+    		},
+    		"matchWorkTime":    1,
+    		"notifyAtHalfTime": 0,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("tasks.flow.Flow.create: %w", err)
+    }
+
+    var item struct {
+    	ID         b24.ID `json:"id"`
+    	CreatorID  b24.ID `json:"creatorId"`
+    	OwnerID    b24.ID `json:"ownerId"`
+    	GroupID    b24.ID `json:"groupId"`
+    	TemplateID b24.ID `json:"templateId"`
+    	Efficiency int    `json:"efficiency"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID, item.CreatorID)
     ```
 
 {% endlist %}

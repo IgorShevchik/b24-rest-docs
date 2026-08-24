@@ -45,7 +45,7 @@
     https://your-domain.bitrix24.com/rest/_USER_ID_/_CODE_/tasks.api.scrum.sprint.delete
     ```
     
-- cURL (oAuth)
+- cURL (OAuth)
 
     ```bash
     curl -X POST \
@@ -187,6 +187,21 @@
     } else {
         print_r($result['result']);
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "tasks.api.scrum.sprint.delete", b24.Params{
+    	"id": 1,
+    })
+    if err != nil {
+    	return fmt.Errorf("tasks.api.scrum.sprint.delete: %w", err)
+    }
+
+    // Ответ — список; разберите его в структуру под форму ответа ниже.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

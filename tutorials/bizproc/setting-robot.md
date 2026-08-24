@@ -1,4 +1,8 @@
-# Как встроить свой UI в параметры робота 
+# Как встроить свой UI в параметры робота
+
+> Scope: [`bizproc`, `placement`](../../api-reference/scopes/permissions.md)
+>
+> Кто может выполнять методы: администратор
 
 {% note tip "" %}
 
@@ -9,15 +13,124 @@
 
 {% endnote %}
 
-В *Битрикс24* можно настраивать робота и действие бизнес-процесса используя интерфейс приложения. Это реализовано стандартным [механизмом встройки виджетов](../../api-reference/widgets/index.md). В коробочной версии доступно с версии [20.0.600](../../settings/cloud-and-on-premise/on-premise/versions.md) модуля `Бизнес-процессы`. 
+В Битрикс24 можно настраивать робота или действие бизнес-процесса через интерфейс приложения. Пользователь открывает настройки робота, Битрикс24 показывает страницу приложения в слайдере, а приложение передает выбранные значения обратно в форму робота. Это реализовано стандартным [механизмом встройки виджетов](../../api-reference/widgets/index.md).
 
-## Реализация на примере приложения
+В коробочной версии настройка робота через встройку доступна с версии [20.0.600](../../settings/cloud-and-on-premise/on-premise/versions.md) модуля `Бизнес-процессы`.
 
-Рассмотрим реализацию на конкретном примере приложения, полный код приложения представлен [ниже](#полный-код-приложения).
+В примере приложение добавляет робота, у которого есть два параметра с типом `string`.
 
-![Робот-встройка](_images/robot_app_sm.png "Робот-встройка" )
+Сценарий состоит из четырех шагов.
 
-В примере приложение добавляет робота, у которого есть 2 параметра с типом `строка`.
+1. Зарегистрировать робота методом [bizproc.robot.add](../../api-reference/bizproc/bizproc-robot/bizproc-robot-add.md) с параметрами `USE_PLACEMENT` и `PLACEMENT_HANDLER`
+2. Получить в обработчике данные из `PLACEMENT_OPTIONS`
+3. Сохранить значения параметров командой [BX24.placement.call](../../api-reference/widgets/ui-interaction/bx24-placement-call.md) `setPropertyValue`
+4. Проверить список роботов методом [bizproc.robot.list](../../api-reference/bizproc/bizproc-robot/bizproc-robot-list.md) или удалить тестового робота методом [bizproc.robot.delete](../../api-reference/bizproc/bizproc-robot/bizproc-robot-delete.md)
+
+{% note info "" %}
+
+Методы `bizproc.robot.*` работают только в контексте [приложения](../../settings/app-installation/index.md). Через входящий вебхук метод вернет ошибку `ACCESS_DENIED` с описанием `Application context required`.
+
+{% endnote %}
+
+## Подготовьте приложение
+
+Перед регистрацией робота подготовьте:
+
+- установленное приложение с правом `bizproc`
+- публичный HTTPS-обработчик робота `HANDLER`
+- публичный HTTPS-обработчик страницы настроек `PLACEMENT_HANDLER`
+- идентификатор пользователя `AUTH_USER_ID`, токен которого Битрикс24 передаст приложению при запуске робота
+- зависимости SDK для выбранного стека: `npm install @bitrix24/b24jssdk`, `composer require bitrix24/b24phpsdk:"^3.0"` или `pip install b24pysdk`
+
+`HANDLER` и `PLACEMENT_HANDLER` могут вести на один URL, если приложение само разделяет запросы запуска робота и открытия страницы настроек.
+
+В сценарии есть три участка кода:
+
+- страница приложения в iframe — регистрирует робота через `bizproc.robot.add` и может проверять список роботов
+- серверный обработчик робота `HANDLER` — получает данные, когда автоматизация запускает робота
+- обработчик настроек `PLACEMENT_HANDLER` — отдает страницу настройки робота и сохраняет значения через `setPropertyValue`
+
+В примерах замените:
+
+- `https://your-domain.example/handler.php` — на URL обработчика приложения
+- `AUTH_USER_ID` — на идентификатор пользователя, от имени которого робот будет выполнять запросы
+- `robot` — на уникальный код робота в рамках приложения
+
+## Инициализируйте SDK в контексте приложения
+
+Методы `bizproc.robot.*` требуют контекст приложения. Для страницы приложения в iframe используйте `initializeB24Frame()`. Для серверных PHP- и Python-обработчиков создайте клиент из объекта `auth`, который Битрикс24 передает в запросе приложения.
+
+{% list tabs %}
+
+- JS
+
+    ```js
+    // npm install @bitrix24/b24jssdk
+    import { initializeB24Frame } from '@bitrix24/b24jssdk'
+
+    const $b24 = await initializeB24Frame()
+    ```
+
+- PHP
+
+    ```php
+    <?php
+    // composer require bitrix24/b24phpsdk:"^3.0"
+    require_once 'vendor/autoload.php';
+
+    use Bitrix24\SDK\Core\Credentials\ApplicationProfile;
+    use Bitrix24\SDK\Core\Credentials\AuthToken;
+    use Bitrix24\SDK\Core\Credentials\DefaultOAuthServerUrl;
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Monolog\Handler\StreamHandler;
+    use Monolog\Logger;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use Symfony\Component\HttpFoundation\Request;
+
+    $request = Request::createFromGlobals();
+    $appProfile = ApplicationProfile::initFromArray([
+        'BITRIX24_PHP_SDK_APPLICATION_CLIENT_ID' => 'local.xxxxxxxx.xxxxxxxx',
+        'BITRIX24_PHP_SDK_APPLICATION_CLIENT_SECRET' => 'yyyyyyyy',
+        'BITRIX24_PHP_SDK_APPLICATION_SCOPE' => 'bizproc',
+    ]);
+
+    $authToken = AuthToken::initFromEventRequest($request);
+    $domain = (string)$request->request->all('auth')['domain'];
+
+    $log = new Logger('bizproc');
+    $log->pushHandler(new StreamHandler('php://stdout'));
+
+    $b24 = (new ServiceBuilderFactory(new EventDispatcher(), $log))
+        ->init($appProfile, $authToken, $domain, DefaultOAuthServerUrl::default());
+    ```
+
+- Python
+
+    ```python
+    # pip install b24pysdk
+    from flask import request
+    from b24pysdk import BitrixApp, BitrixToken, Client
+
+    APP = BitrixApp(client_id="local.xxxxxxxx.xxxxxxxx", client_secret="yyyyyyyy")
+
+    def make_client(auth: dict) -> tuple[Client, BitrixToken]:
+        token = BitrixToken(
+            domain=auth["domain"],
+            auth_token=auth["access_token"],
+            refresh_token=auth.get("refresh_token", ""),
+            bitrix_app=APP,
+        )
+        return Client(token), token
+
+    auth = request.json["auth"]  # словарь auth из тела запроса обработчика
+    client, token = make_client(auth)
+    ```
+
+{% endlist %}
+
+## 1. Зарегистрируйте робота
+
+Чтобы параметры можно было настраивать через приложение, при добавлении робота передайте `USE_PLACEMENT = 'Y'` и URL обработчика в `PLACEMENT_HANDLER`.
 
 {% include [Сноска о примерах](../../_includes/examples.md) %}
 
@@ -26,110 +139,95 @@
 - JS
 
     ```js
-    var params = {
-        'CODE': 'robot',
-        'HANDLER': 'http://handler.com',
-        'AUTH_USER_ID': 1,
-        'NAME': 'Пример робота-встройки',
-        'USE_PLACEMENT': 'Y',
-        'PLACEMENT_HANDLER': 'http://handler.com',
-        'PROPERTIES': {
-            'string': {
-                'Name': 'Параметр 1',
-                'Type': 'string'
+    // npm install @bitrix24/b24jssdk
+    // Страница приложения открыта в iframe Битрикс24
+    import { initializeB24Frame } from '@bitrix24/b24jssdk'
+
+    const $b24 = await initializeB24Frame()
+
+    const response = await $b24.actions.v2.call.make({
+        method: 'bizproc.robot.add',
+        params: {
+            CODE: 'robot',
+            HANDLER: 'https://your-domain.example/handler.php',
+            AUTH_USER_ID: 1,
+            NAME: 'Пример робота-встройки',
+            USE_PLACEMENT: 'Y',
+            PLACEMENT_HANDLER: 'https://your-domain.example/handler.php',
+            PROPERTIES: {
+                string: { Name: 'Параметр 1', Type: 'string' },
+                stringm: { Name: 'Параметр 2', Type: 'string', Multiple: 'Y', Default: ['value 1', 'value 2'] },
             },
-            'stringm': {
-                'Name': 'Параметр 2',
-                'Type': 'string',
-                'Multiple': 'Y',
-                'Default': ['value 1', 'value 2']
-            },
-        }
-    };
-    BX24.callMethod(
-        'bizproc.robot.add',
-        params,
-        function(result)
-        {
-            if(result.error())
-                alert("Ошибка: " + result.error());
-        }
-    );
+        },
+        requestId: 'bizproc-robot-add',
+    })
+
+    if (!response.isSuccess) {
+        throw new Error(response.getErrorMessages().join('; '))
+    }
+
+    console.log(response.getData().result)
     ```
 
 - PHP
 
     ```php
-    require_once('crest.php');
+    <?php
+    // $b24 построен на токене приложения
 
-    $result = CRest::call(
-        'bizproc.robot.add',
-        [
-            'CODE' => 'robot',
-            'HANDLER' => 'http://handler.com',
-            'AUTH_USER_ID' => 1,
-            'NAME' => 'Пример робота-встройки',
-            'USE_PLACEMENT' => 'Y',
-            'PLACEMENT_HANDLER' => 'http://handler.com',
-            'PROPERTIES' => [
-                'string' => [
-                    'Name' => 'Параметр 1',
-                    'Type' => 'string'
-                ],
-                'stringm' => [
-                    'Name' => 'Параметр 2',
-                    'Type' => 'string',
-                    'Multiple' => 'Y',
-                    'Default' => ['value 1', 'value 2']
-                ],
-            ]
-        ]
-    );
+    // Типизированный getBizProcScope()->robot()->add(...) принимает локализованные
+    // массивы. Для короткого примера вызываем метод напрямую через ядро.
+    $response = $b24->core->call('bizproc.robot.add', [
+        'CODE' => 'robot',
+        'HANDLER' => 'https://your-domain.example/handler.php',
+        'AUTH_USER_ID' => 1,
+        'NAME' => 'Пример робота-встройки',
+        'USE_PLACEMENT' => 'Y',
+        'PLACEMENT_HANDLER' => 'https://your-domain.example/handler.php',
+        'PROPERTIES' => [
+            'string' => ['Name' => 'Параметр 1', 'Type' => 'string'],
+            'stringm' => ['Name' => 'Параметр 2', 'Type' => 'string', 'Multiple' => 'Y', 'Default' => ['value 1', 'value 2']],
+        ],
+    ]);
 
-    echo '<PRE>';
-    print_r($result);
-    echo '</PRE>';
+    var_dump($response->getResponseData()->getResult());
     ```
 
 - Python
 
     ```python
-    from b24pysdk import BitrixWebhook, Client
-
-    client = Client(
-        BitrixWebhook(
-            domain="your-domain.bitrix24.com",
-            webhook_token="user_id/webhook_key",
-        )
-    )
-
+    # client построен на токене приложения
     result = client.bizproc.robot.add(
         code="robot",
-        handler="http://handler.com",
-        auth_user_id=1,
+        handler="https://your-domain.example/handler.php",
         name="Пример робота-встройки",
+        auth_user_id=1,
         use_placement=True,
-        placement_handler="http://handler.com",
+        placement_handler="https://your-domain.example/handler.php",
         properties={
-            "string": {
-                "Name": "Параметр 1",
-                "Type": "string",
-            },
-            "stringm": {
-                "Name": "Параметр 2",
-                "Type": "string",
-                "Multiple": "Y",
-                "Default": ["value 1", "value 2"],
-            },
+            "string": {"Name": "Параметр 1", "Type": "string"},
+            "stringm": {"Name": "Параметр 2", "Type": "string", "Multiple": "Y", "Default": ["value 1", "value 2"]},
         },
     ).response
+
+    print(result.result)
     ```
 
 {% endlist %}
 
-Чтобы параметры можно было настраивать через приложение, при добавлении робота нужно передать параметры `USE_PLACEMENT=Y` и обработчик `PLACEMENT_HANDLER`.
+Успешный вызов вернет `true`.
 
-Остается написать обработчик встройки, который отрисует параметры и сохранит их значения. Для этого в обработчик в `PLACEMENT_OPTIONS` нужно передать данные:
+```json
+{
+    "result": true
+}
+```
+
+После регистрации сохраните код робота `robot`. Битрикс24 передаст его в обработчик настроек в поле `code` объекта `PLACEMENT_OPTIONS`.
+
+## 2. Получите данные обработчика встройки
+
+В обработчик в `PLACEMENT_OPTIONS` Битрикс24 передает данные:
 
 - `code` — код вашего робота при регистрации
 - `activity_name` — идентификатор действия в шаблоне бизнес-процесса
@@ -137,447 +235,248 @@
 - `current_values` — текущие значения свойств
 - `document_type` — тип документа, для которого проводится настройка
 - `document_fields` — список полей документа
-- `template` — список доступных полей шаблона. В коробочной версии *Битрикс24* доступно с версии [24.200.0](../../settings/cloud-and-on-premise/on-premise/versions.md)
+- `template` — список доступных полей шаблона (параметры, переменные, константы, глобальные переменные и константы, `return_activities`). В коробочной версии доступно с версии [24.200.0](../../settings/cloud-and-on-premise/on-premise/versions.md)
 
-    Для параметра `template` доступны элементы:
-
-    - `parameters` — список параметров шаблона
-    - `variables` — список переменных шаблона
-    - `constants` — список констант шаблона
-    - `global_variables` — список глобальных переменных
-    - `global_constants` — список глобальных констант
-    - `return_activities` — список действий или роботов, которые генерируют дополнительные результаты
-
-    Структура свойств в этих списках приведена к единому формату:
-
-    ```
-    {
-        Id: строка, идентификатор (код) свойства
-        Type: строка, идентификатор типа свойства
-
-        Name: строка, название
-        Description: строка, описание
-
-        Multiple: булевое, множественное свойство или нет
-        Required: булевое, обязательное свойство или нет
-
-        Options: смешанное, зависит от типа свойства
-        Settings: список настроек, зависит от типа свойства
-        Default: смешанное, значение по умолчанию для свойства
-    }
-    ```
-
-    Список `return_activities` состоит из списка действий, которые возвращают результаты и их свойства. Имеет структуру:
-
-    ```
-    {
-        Id: строка, идентификатор действия в шаблоне
-        Type: строка, тип действия
-        Title: строка, название действия в шаблоне
-        Return: список, доступные свойства
-    }
-    ```
-
-В приложение данные приходят в следующем виде:
-
-```php
-$array = [
-    'code' => 'robot',
-    'activity_name' => 'A72788_31169_37133_27365',
-    'properties' => [
-        'string' => [
-            'NAME' => 'Параметр 1',
-            'TYPE' => 'string'
-        ],
-        'stringm' => [
-            'NAME' => 'Параметр 2',
-            'TYPE' => 'string',
-            'MULTIPLE' => 'Y',
-            'DEFAULT' => [
-                'value 1',
-                'value 2'
-            ]
-        ]
-    ],
-    'current_values' => [
-        'string' => 1,
-        'stringm' => [
-            2
-        ]
-    ],
-    'document_type' => [
-        'crm',
-        'CCrmDocumentDeal',
-        'DEAL'
-    ],
-    'document_fields' => [
-        'ID' => [
-            'Name' => 'ID',
-            'Type' => 'int',
-            'Filterable' => 1,
-            'Editable' => false,
-            'Required' => false,
-            'BaseType' => 'int'
-        ],
-        'TITLE' => [
-            'Name' => 'Название',
-            'Type' => 'string',
-            'Filterable' => 1,
-            'Editable' => 1,
-            'Required' => 1,
-            'BaseType' => 'string'
-        ],
-        // ...
-    ],
-    'template' => [
-        'parameters' => [],
-        'variables' => [
-            [
-                'Id' => 'Approver',
-                'Type' => 'user',
-                'Name' => 'Утверждающий',
-                'Description' => '',
-                'Multiple' => 1,
-                'Required' => false,
-                'Options' => '',
-                'Settings' => '',
-                'Default' => ''
-            ]
-        ],
-        'constants' => [
-            [
-                'Id' => 'Manager',
-                'Type' => 'user',
-                'Name' => 'Кто утверждает',
-                'Description' => 'директор или заместитель',
-                'Multiple' => 1,
-                'Required' => 1,
-                'Options' => '',
-                'Settings' => '',
-                'Default' => [
-                    'user_4'
-                ]
-            ]
-        ],
-        'global_variables' => [
-            [
-                'Id' => 'Variable1666332520655',
-                'Type' => 'user',
-                'Name' => 'test u',
-                'Description' => '',
-                'Multiple' => 1,
-                'Required' => false,
-                'Options' => '',
-                'Settings' => '',
-                'Default' => [
-                    'user_1'
-                ]
-            ]
-        ],
-        'global_constants' => [
-            [
-                'Id' => 'Constant1666332578194',
-                'Type' => 'user',
-                'Name' => 'test u 1',
-                'Description' => '',
-                'Multiple' => false,
-                'Required' => false,
-                'Options' => '',
-                'Settings' => '',
-                'Default' => 'user_1'
-            ]
-        ],
-        'return_activities' => [
-            [
-                'Id' => 'A71026_84473_24610_19894',
-                'Type' => 'LogActivity',
-                'Title' => 'Запись в отчет',
-                'Return' => [
-                    [
-                        'Id' => 'Report',
-                        'Name' => 'Отчет',
-                        'Type' => 'string'
-                    ]
-                ]
-            ],
-            [
-                'Id' => 'A58853_60082_34258_61777',
-                'Type' => 'ApproveActivity',
-                'Title' => 'Утверждение',
-                'Return' => [
-                    [
-                        'Id' => 'TaskId',
-                        'Name' => 'ID',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'Comments',
-                        'Name' => 'Комментарии',
-                        'Type' => 'string'
-                    ],
-                    [
-                        'Id' => 'VotedCount',
-                        'Name' => 'Сколько проголосовало',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'TotalCount',
-                        'Name' => 'Сколько должно проголосовать',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'VotedPercent',
-                        'Name' => 'Процент проголосовавших',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'ApprovedPercent',
-                        'Name' => 'Процент утвердивших',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'NotApprovedPercent',
-                        'Name' => 'Процент отклонивших',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'ApprovedCount',
-                        'Name' => 'Количество утвердивших',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'NotApprovedCount',
-                        'Name' => 'Количество отклонивших',
-                        'Type' => 'int'
-                    ],
-                    [
-                        'Id' => 'LastApprover',
-                        'Name' => 'Последний голосовавший',
-                        'Type' => 'user'
-                    ],
-                    [
-                        'Id' => 'LastApproverComment',
-                        'Name' => 'Комментарий последнего голосовавшего',
-                        'Type' => 'string'
-                    ],
-                    [
-                        'Id' => 'UserApprovers',
-                        'Name' => 'Утвердили пользователи',
-                        'Type' => 'user'
-                    ],
-                    [
-                        'Id' => 'Approvers',
-                        'Name' => 'Утвердили пользователи (текст)',
-                        'Type' => 'string'
-                    ],
-                    [
-                        'Id' => 'UserRejecters',
-                        'Name' => 'Отклонили пользователи',
-                        'Type' => 'user'
-                    ],
-                    [
-                        'Id' => 'Rejecters',
-                        'Name' => 'Отклонили пользователи (текст)',
-                        'Type' => 'string'
-                    ],
-                    [
-                        'Id' => 'IsTimeout',
-                        'Name' => 'Автоматическое отклонение',
-                        'Type' => 'int'
-                    ]
-                ]
-            ]
-        ]
-    ]
-];
-```
-
-Осталось сделать верстку и научиться сохранять параметры непосредственно в Робота. Для этого можно использовать функцию `setPropertyValue`, которая доступна через [BX24.placement.call](../../api-reference/widgets/ui-interaction/bx24-placement-call.md).
+Структура свойств приведена к единому формату:
 
 ```js
-BX24.placement.call(
-    'setPropertyValue',
-    {
-        string: 'test string'
-    }
-)
-```
-
-В качестве параметров передаются `ID` свойства и значения. Можно передавать несколько значений свойств.
-
-```js
-BX24.placement.call(
-    'setPropertyValue',
-    {
-        string: 'test string',
-        stringm: [
-            'test2',
-            'test3'
-        ]
-    }
-)
-```
-
-Далее пользователь сохраняет робота как обычно.
-
-Так это выглядит в Роботах:
-
-![Пример робота-встройки](_images/robot_example_sm.png "Робот-встройка" )
-
-А так это выглядит в дизайнере бизнес-процессов:
-
-![Робот-встройка](_images/designer_bp_sm.png "Робот-встройка в дизайнере бизнес-процессов")
-
-Белая область — встройка, фрейм приложения.
-
-## Полный код приложения
-
-{% include [Сноска о примерах](../../_includes/examples.md) %}
-
-```php
-<?php
-header('Content-Type: text/html; charset=UTF-8');
-$protocol = $_SERVER['SERVER_PORT'] == '443' ? 'https' : 'http';
-$host = explode(':', $_SERVER['HTTP_HOST']);
-$host = $host[0];
-define('BP_APP_HANDLER', $protocol.'://'.$host.explode('?', $_SERVER['REQUEST_URI'])[0]);
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title></title>
-</head>
-<body>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="//api.bitrix24.tech/api/v1/"></script>
-<?if (!isset($_POST['PLACEMENT']) || $_POST['PLACEMENT'] === 'DEFAULT'):?>
-<h1>Робот-встройка</h1>
-<div class="container-fluid">
-<div class="container-fluid">
-        <h2>Робот</h2>
-        <button onclick="installRobot();" class="btn btn-primary">Установить</button> вЂ“
-        <button onclick="uninstallRobot();" class="btn btn-danger">Удалить</button>
-    </div>
-    <hr/>
-    <div class="container-fluid">
-        <button onclick="getList();" class="btn btn-light">Получить список установленных роботов</button>
-    </div>
-</div>
-<script type="text/javascript">
-    document.body.style.display = 'none';
-    BX24.init(function()
-    {
-        document.body.style.display = '';
-    });
-    function installRobot()
-    {
-        var params = {
-            'CODE': 'robot',
-            'HANDLER': '<?=BP_APP_HANDLER?>',
-            'AUTH_USER_ID': 1,
-            'NAME': 'Пример робота-встройки',
-            'USE_PLACEMENT': 'Y',
-            'PLACEMENT_HANDLER': '<?=BP_APP_HANDLER?>',
-            'PROPERTIES': {
-                'string': {
-                    'Name': 'Параметр 1',
-                    'Type': 'string'
-                },
-                'stringm': {
-                    'Name': 'Параметр 2',
-                    'Type': 'string',
-                    'Multiple': 'Y',
-                    'Default': ['value 1', 'value 2']
-                },
-            }
-        };
-        BX24.callMethod(
-            'bizproc.robot.add',
-            params,
-            function(result)
-            {
-                if(result.error())
-                    alert("Ошибка: " + result.error());
-                else
-                    alert("Успешно");
-            }
-        );
-    }
-    function uninstallRobot()
-    {
-        BX24.callMethod(
-                'bizproc.robot.delete',
-                {
-                    'CODE': 'robot'
-                },
-                function(result)
-                {
-                    if(result.error())
-                        alert('Ошибка: ' + result.error());
-                    else
-                        alert("Успешно");
-                }
-        );
-    }
-    function getList()
-    {
-        BX24.callMethod(
-            'bizproc.robot.list',
-            {},
-            function(result)
-            {
-                if(result.error())
-                    alert("Ошибка: " + result.error());
-                else
-                    alert("Коды установленных роботов: " + result.data().join(', '));
-            }
-        );
-    }
-</script>
-<?php else:?>
-    <form name="props" class="container-fluid">
-<?php
-$options = json_decode($_POST['PLACEMENT_OPTIONS'], true);
-foreach ($options['properties'] as $id => $property)
 {
-    $multiple = isset($property['MULTIPLE']) && $property['MULTIPLE'] === 'Y';
-    $val = (array) $options['current_values'][$id];
-    if (!$val)
-    {
-        $val[] = '';
-    }
-    if ($multiple)
-    {
-        $val[] = '';
-    }
-    $name = $multiple ? $id.'[]' : $id;
-    ?>
-    <div class="form-group">
-        <label><?=htmlspecialchars($property['NAME'])?>:</label>
-        <?foreach ($val as $v):?>
-        <p><input name="<?=$name?>" value="<?=htmlspecialchars((string)$v)?>" class="form-control" onchange="setPropertyValue('<?=$id?>', this.name, <?=(int)$multiple?>)"></p>
-        <?endforeach;?>
-    </div>
-    <?
+    Id: 'string',        // идентификатор (код) свойства
+    Type: 'string',      // идентификатор типа свойства
+    Name: 'string',      // название
+    Description: 'string',
+    Multiple: false,     // множественное свойство или нет
+    Required: false,     // обязательное свойство или нет
+    Options: '',         // зависит от типа свойства
+    Settings: [],        // зависит от типа свойства
+    Default: ''           // значение по умолчанию
 }
-?>
-        <script>
-            function setPropertyValue(name, inputName, multiple)
-            {
-                var form = new FormData(document.forms.props);
-                var value = multiple? form.getAll(inputName) : form.get(inputName);
-                var params = {};
-                params[name] = value;
-                BX24.placement.call(
-                    'setPropertyValue',
-                    params
-                )
-            }
-        </script>
-    </form>
-<?php endif;?>
-</body>
-</html>
 ```
+
+## 3. Сохраните параметры робота
+
+Чтобы сохранить значения параметров в форме робота, в обработчике встройки используйте команду `setPropertyValue`. В b24jssdk она вызывается через `$b24.placement.call`:
+
+```js
+import { initializeB24Frame } from '@bitrix24/b24jssdk'
+
+const $b24 = await initializeB24Frame()
+
+// можно передать несколько свойств: ID свойства → значение
+await $b24.placement.call('setPropertyValue', {
+    string: 'test string',
+    stringm: ['test2', 'test3'],
+})
+```
+
+Команда принимает объект, где ключ — идентификатор свойства из `PROPERTIES`, а значение — новое значение свойства. После этого пользователь сохраняет робота как обычно.
+
+При следующем открытии настроек Битрикс24 передаст сохраненные значения в `current_values`.
+
+## 4. Проверьте или удалите робота
+
+Получить список установленных роботов и удалить робота:
+
+{% list tabs %}
+
+- JS
+
+    ```js
+    // Список роботов приложения
+    const listResponse = await $b24.actions.v2.call.make({
+        method: 'bizproc.robot.list',
+        requestId: 'bizproc-robot-list',
+    })
+    const codes = listResponse.getData().result
+    console.log(codes)
+
+    // Удалить робота по коду
+    await $b24.actions.v2.call.make({
+        method: 'bizproc.robot.delete',
+        params: { CODE: 'robot' },
+        requestId: 'bizproc-robot-delete',
+    })
+    ```
+
+- PHP
+
+    ```php
+    // Список роботов приложения
+    $codes = $b24->getBizProcScope()->robot()->list()->getRobots();
+
+    // Удалить робота по коду
+    $b24->getBizProcScope()->robot()->delete('robot');
+    ```
+
+- Python
+
+    ```python
+    # Список роботов приложения
+    codes = client.bizproc.robot.list().response.result
+    print(codes)
+
+    # Удалить робота по коду
+    client.bizproc.robot.delete(code="robot").response
+    ```
+
+{% endlist %}
+
+Метод `bizproc.robot.list` вернет массив кодов роботов приложения.
+
+```json
+{
+    "result": [
+        "robot"
+    ]
+}
+```
+
+## Полный код обработчика встройки
+
+Обработчик отрисовывает форму по списку `properties` и сохраняет значения командой `setPropertyValue`. Форму можно строить на стороне браузера через b24jssdk в режиме фрейма.
+
+{% list tabs %}
+
+- JS
+
+    ```js
+    // Страница-обработчик встройки (iframe приложения)
+    import { initializeB24Frame } from '@bitrix24/b24jssdk'
+
+    const $b24 = await initializeB24Frame()
+    const options = $b24.placement.options
+    const form = document.createElement('form')
+
+    for (const [id, property] of Object.entries(options.properties || {})) {
+        const multiple = property.Multiple === true || property.Multiple === 'Y' || property.MULTIPLE === 'Y'
+        const values = [].concat(options.current_values?.[id] ?? '')
+
+        const label = document.createElement('label')
+        label.textContent = property.Name || property.NAME
+        form.appendChild(label)
+
+        values.forEach((value) => {
+            const input = document.createElement('input')
+            input.value = value
+            input.addEventListener('change', () => {
+                const all = Array.from(form.querySelectorAll(`[data-id="${id}"]`)).map((i) => i.value)
+                $b24.placement.call('setPropertyValue', { [id]: multiple ? all : all[0] })
+            })
+            input.dataset.id = id
+            form.appendChild(input)
+        })
+    }
+
+    document.body.appendChild(form)
+    ```
+
+- PHP
+
+    ```php
+    <?php
+    // Сервер отдает HTML-страницу обработчика. PLACEMENT_OPTIONS приходит JSON-строкой.
+    $options = json_decode($_POST['PLACEMENT_OPTIONS'] ?? '{}', true) ?: [];
+    ?>
+    <!DOCTYPE html>
+    <html>
+        <body>
+            <form name="props">
+            <?php foreach (($options['properties'] ?? []) as $id => $property):
+                $multiple = ($property['Multiple'] ?? false) === true || ($property['Multiple'] ?? '') === 'Y' || ($property['MULTIPLE'] ?? '') === 'Y';
+                $values = (array)($options['current_values'][$id] ?? '');
+                $name = $multiple ? $id . '[]' : $id; ?>
+                <label><?=htmlspecialchars($property['Name'] ?? $property['NAME'])?>:</label>
+                <?php foreach ($values as $v): ?>
+                    <input name="<?=$name?>" value="<?=htmlspecialchars((string)$v)?>"
+                           onchange="setPropertyValue('<?=$id?>', this.name, <?=(int)$multiple?>)">
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+            </form>
+            <script type="module">
+                // b24jssdk подключается ESM-сборкой или собирается сборщиком
+                import { initializeB24Frame } from 'https://esm.sh/@bitrix24/b24jssdk'
+                const $b24 = await initializeB24Frame()
+                window.setPropertyValue = (id, inputName, multiple) => {
+                    const data = new FormData(document.forms.props)
+                    const value = multiple ? data.getAll(inputName) : data.get(inputName)
+                    $b24.placement.call('setPropertyValue', { [id]: value })
+                }
+            </script>
+        </body>
+    </html>
+    ```
+
+- Python
+
+    ```python
+    # Flask: сервер отдает HTML обработчика, PLACEMENT_OPTIONS приходит JSON-строкой
+    from flask import request
+    import json, html
+
+    options = json.loads(request.form.get("PLACEMENT_OPTIONS", "{}") or "{}")
+
+    rows = []
+    for prop_id, prop in (options.get("properties") or {}).items():
+        multiple = prop.get("Multiple") is True or prop.get("Multiple") == "Y" or prop.get("MULTIPLE") == "Y"
+        values = options.get("current_values", {}).get(prop_id, "")
+        values = values if isinstance(values, list) else [values]
+        name = f"{prop_id}[]" if multiple else prop_id
+        inputs = "".join(
+            f'<input name="{name}" value="{html.escape(str(v))}" '
+            f'onchange="setPropertyValue(\'{prop_id}\', this.name, {int(multiple)})">'
+            for v in values
+        )
+        rows.append(f'<label>{html.escape(prop.get("Name") or prop.get("NAME"))}:</label>{inputs}')
+
+    # JS держим в обычной строке без f-префикса — фигурные скобки остаются как есть
+    script = """<script type="module">
+        import { initializeB24Frame } from 'https://esm.sh/@bitrix24/b24jssdk'
+        const $b24 = await initializeB24Frame()
+        window.setPropertyValue = (id, inputName, multiple) => {
+            const data = new FormData(document.forms.props)
+            const value = multiple ? data.getAll(inputName) : data.get(inputName)
+            $b24.placement.call('setPropertyValue', { [id]: value })
+        }
+    </script>"""
+
+    form_html = f'<form name="props">{"".join(rows)}</form>'
+    page = f"<!DOCTYPE html><html><body>\n{form_html}\n" + script + "</body></html>"
+    ```
+
+{% endlist %}
+
+## Проверим результат
+
+1. Откройте настройки автоматизации CRM или шаблон бизнес-процесса.
+2. Добавьте робота приложения с названием `Пример робота-встройки`.
+3. Откройте настройки робота и проверьте, что Битрикс24 открывает `PLACEMENT_HANDLER` в слайдере.
+4. Измените значения параметров и сохраните робота.
+
+Через REST проверьте, что код `robot` есть в ответе метода `bizproc.robot.list`.
+
+## Диагностика ошибок
+
+Если метод вернул ошибку, проверьте данные запроса.
+
+- `ACCESS_DENIED` с описанием `Application context required` — метод вызван не из контекста приложения
+- `ACCESS_DENIED` с описанием `Access denied!` — метод вызвал не администратор
+- `ERROR_ACTIVITY_VALIDATION_FAILURE` — не указан обязательный параметр или некорректно заполнены `CODE`, `PROPERTIES`, `DOCUMENT_TYPE` или `FILTER`
+- `ERROR_UNSUPPORTED_PROTOCOL` — в URL обработчика указан неподдерживаемый протокол
+- `ERROR_WRONG_HANDLER_URL` — URL обработчика не прошел проверку
+- `ERROR_ACTIVITY_ALREADY_INSTALLED` — робот с таким кодом уже зарегистрирован этим приложением
+
+После исправления параметров регистрации повторите сценарий с шага 1. Если ошибка возникла при сохранении значений через `setPropertyValue`, повторите сценарий с шага 3.
+
+## Что важно учитывать
+
+- Методы `bizproc.robot.add`, `bizproc.robot.list` и `bizproc.robot.delete` не помечены как устаревшие в документации и зарегистрированы в исходном коде как актуальные методы
+- `PLACEMENT_HANDLER` должен быть доступен по HTTPS и находиться на домене установленного приложения
+- Значения, переданные через `setPropertyValue`, сохраняются в форме настройки. Чтобы изменения попали в шаблон автоматизации или бизнес-процесса, пользователь должен сохранить робота
+- Повторный запуск примера с тем же `CODE` вернет ошибку, если робот уже зарегистрирован
+
+## Продолжите изучение
+
+- [Роботы приложений: обзор методов](../../api-reference/bizproc/bizproc-robot/index.md)
+- [Зарегистрировать нового робота bizproc.robot.add](../../api-reference/bizproc/bizproc-robot/bizproc-robot-add.md)
+- [Обновить поля робота bizproc.robot.update](../../api-reference/bizproc/bizproc-robot/bizproc-robot-update.md)
+- [Вызвать зарегистрированную команду интерфейса BX24.placement.call](../../api-reference/widgets/ui-interaction/bx24-placement-call.md)

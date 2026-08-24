@@ -13,11 +13,11 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод переводит задачу в статус «отложена». Для выполнения данной операции задача должна быть в статусе [Выполняется](./task-item-start-execution.md).
+Метод `task.item.defer` переводит задачу в статус «отложена». Для выполнения данной операции задача должна быть в статусе [Выполняется](./task-item-start-execution.md).
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.defer](../../tasks-task-defer.md).
+Развитие метода остановлено. Используйте [tasks.task.defer](../../status/tasks-task-defer.md).
 
 {% endnote %}
 
@@ -64,6 +64,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type DeferTaskItemResult = boolean
 
@@ -181,6 +182,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.defer", b24.Params{
+    	"TASKID": 13,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.defer: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

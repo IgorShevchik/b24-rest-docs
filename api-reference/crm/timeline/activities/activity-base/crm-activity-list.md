@@ -23,11 +23,11 @@
 || **Название**
 `тип` | **Описание** ||
 || **select**
-[`array`](../../../data-types.md) | Массив полей дела [crm.activity.fields](./crm-activity-fields.md), которые необходимо выбрать.
+[`array`](../../../../data-types.md) | Массив полей дела [crm.activity.fields](./crm-activity-fields.md), которые необходимо выбрать.
 Чтобы получить поля `COMMUNICATIONS` и `FILES` укажите их в select.
 ||
 || **filter**
-[`object`](../../../data-types.md) | Объект для фильтрации выбираемых элементов в формате ключ-значение.
+[`object`](../../../../data-types.md) | Объект для фильтрации выбираемых элементов в формате ключ-значение.
 
 Возможные значения для `field` соответствуют полям дела [crm.activity.fields](./crm-activity-fields.md).
 
@@ -56,7 +56,7 @@
 - `!` — не равно
 ||
 || **order**
-[`object`](../../../data-types.md) | Набор пар ключ-значение для сортировки результатов вывода.
+[`object`](../../../../data-types.md) | Набор пар ключ-значение для сортировки результатов вывода.
 В качестве ключей можно использовать смотрите поля дела [crm.activity.fields](./crm-activity-fields.md).
 
 Возможные значения для `order`:
@@ -67,7 +67,7 @@
 По-умолчанию сортируется по увеличению поля Дата начала (`START_TIME`)
 ||
 || **start**
-  [`integer`](../../../data-types.md) | Параметр используется для управления постраничной навигацией.
+  [`integer`](../../../../data-types.md) | Параметр используется для управления постраничной навигацией.
 
 Размер страницы результатов всегда статичный: 50 записей.
 
@@ -111,7 +111,7 @@ Cм. описание [списочных методов](../../../../../setting
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"order":{"ID":"DESC"},"filter":{"OWNER_TYPE_ID":3,"OWNER_ID":102},"select":["*","COMMUNICATIONS"]}' \
+    -d '{"order":{"ID":"DESC"},"filter":{"OWNER_TYPE_ID":3,"OWNER_ID":102},"select":["*","COMMUNICATIONS"],"start":0}' \
     https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/crm.activity.list
     ```
 
@@ -121,7 +121,7 @@ Cм. описание [списочных методов](../../../../../setting
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"order":{"ID":"DESC"},"filter":{"OWNER_TYPE_ID":3,"OWNER_ID":102},"select":["*","COMMUNICATIONS"],"auth":"**put_access_token_here**"}' \
+    -d '{"order":{"ID":"DESC"},"filter":{"OWNER_TYPE_ID":3,"OWNER_ID":102},"select":["*","COMMUNICATIONS"],"start":0,"auth":"**put_access_token_here**"}' \
     https://**put_your_bitrix24_address**/rest/crm.activity.list
     ```
 
@@ -234,6 +234,75 @@ Cм. описание [списочных методов](../../../../../setting
 - PHP
 
     ```php
+    try {
+        $response = $b24Service
+            ->core
+            ->call(
+                'crm.activity.list',
+                [
+                    'order' => [
+                        'ID' => 'DESC',
+                    ],
+                    'filter' => [
+                        'OWNER_TYPE_ID' => 3,
+                        'OWNER_ID' => 102,
+                    ],
+                    'select' => [
+                        '*',
+                        'COMMUNICATIONS',
+                    ],
+                    'start' => 0,
+                ]
+            );
+
+        $result = $response
+            ->getResponseData()
+            ->getResult();
+
+        if ($result->error()) {
+            error_log($result->error());
+        } else {
+            echo 'Activities: ' . print_r($result->data(), true);
+        }
+
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        echo 'Error getting activity list: ' . $e->getMessage();
+    }
+    ```
+
+- BX24.js
+
+    ```javascript
+    BX24.callMethod(
+        'crm.activity.list',
+        {
+            order: {
+                ID: 'DESC',
+            },
+            filter: {
+                OWNER_TYPE_ID: 3,
+                OWNER_ID: 102,
+            },
+            select: [
+                '*',
+                'COMMUNICATIONS',
+            ],
+            start: 0,
+        },
+        result => {
+            if (result.error()) {
+                console.error(result.error());
+            } else {
+                console.dir(result.data());
+            }
+        }
+    );
+    ```
+
+- PHP CRest
+
+    ```php
     require_once('crest.php');
 
     $result = CRest::call(
@@ -244,7 +313,8 @@ Cм. описание [списочных методов](../../../../../setting
                 'OWNER_TYPE_ID' => 3,
                 'OWNER_ID' => 102
             ],
-            'select' => [ '*', 'COMMUNICATIONS' ]
+            'select' => [ '*', 'COMMUNICATIONS' ],
+            'start' => 0
         ]
     );
 
@@ -344,6 +414,31 @@ Cм. описание [списочных методов](../../../../../setting
     except Exception as error:
         print(f"Непредвиденная ошибка: {error}")
     ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.list", b24.Params{
+    	"order": b24.Params{
+    		"ID": "DESC",
+    	},
+    	"filter": b24.Params{
+    		"OWNER_TYPE_ID": 3,
+    		"OWNER_ID":      102,
+    	},
+    	"select": []string{"*", "COMMUNICATIONS"},
+    	"start":  0,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.activity.list: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
+    ```
+
 {% endlist %}
 
 {% note tip "Частые кейсы и сценарии" %}
@@ -425,7 +520,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`boolean`](../../../../data-types.md) | Результат операции. Массив дел. Для получения информации о структуре дела смотрите метод [crm.activity.fields](./crm-activity-fields.md) ||
+[`array`](../../../../data-types.md) | Массив дел. Для получения информации о структуре дела смотрите метод [crm.activity.fields](./crm-activity-fields.md) ||
 || **time**
 [`time`](../../../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#
@@ -469,7 +564,7 @@ HTTP-статус: **400**, **403**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"order":{"ID":"DESC"},"filter":{"BINDINGS":[{"OWNER_TYPE_ID":2},{"OWNER_TYPE_ID":3}]},"select":["*","COMMUNICATIONS"]}' \
+    -d '{"order":{"ID":"DESC"},"filter":{"BINDINGS":[{"OWNER_TYPE_ID":2},{"OWNER_TYPE_ID":3}]},"select":["*","COMMUNICATIONS"],"start":0}' \
     https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/crm.activity.list
     ```
 
@@ -479,7 +574,7 @@ HTTP-статус: **400**, **403**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"order":{"ID":"DESC"},"filter":{"BINDINGS":[{"OWNER_TYPE_ID":2},{"OWNER_TYPE_ID":3}]},"select":["*","COMMUNICATIONS"],"auth":"**put_access_token_here**"}' \
+    -d '{"order":{"ID":"DESC"},"filter":{"BINDINGS":[{"OWNER_TYPE_ID":2},{"OWNER_TYPE_ID":3}]},"select":["*","COMMUNICATIONS"],"start":0,"auth":"**put_access_token_here**"}' \
     https://**put_your_bitrix24_address**/rest/crm.activity.list
     ```
 
@@ -596,6 +691,87 @@ HTTP-статус: **400**, **403**
 - PHP
 
     ```php
+    try {
+        $response = $b24Service
+            ->core
+            ->call(
+                'crm.activity.list',
+                [
+                    'order' => [
+                        'ID' => 'DESC',
+                    ],
+                    'filter' => [
+                        'BINDINGS' => [
+                            [
+                                'OWNER_TYPE_ID' => 2,
+                            ],
+                            [
+                                'OWNER_TYPE_ID' => 3,
+                            ],
+                        ],
+                    ],
+                    'select' => [
+                        '*',
+                        'COMMUNICATIONS',
+                    ],
+                    'start' => 0,
+                ]
+            );
+
+        $result = $response
+            ->getResponseData()
+            ->getResult();
+
+        if ($result->error()) {
+            error_log($result->error());
+        } else {
+            echo 'Activities: ' . print_r($result->data(), true);
+        }
+
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        echo 'Error getting activity list: ' . $e->getMessage();
+    }
+    ```
+
+- BX24.js
+
+    ```javascript
+    BX24.callMethod(
+        'crm.activity.list',
+        {
+            order: {
+                ID: 'DESC',
+            },
+            filter: {
+                BINDINGS: [
+                    {
+                        OWNER_TYPE_ID: 2,
+                    },
+                    {
+                        OWNER_TYPE_ID: 3,
+                    },
+                ],
+            },
+            select: [
+                '*',
+                'COMMUNICATIONS',
+            ],
+            start: 0,
+        },
+        result => {
+            if (result.error()) {
+                console.error(result.error());
+            } else {
+                console.dir(result.data());
+            }
+        }
+    );
+    ```
+
+- PHP CRest
+
+    ```php
     require_once('crest.php');
 
     $result = CRest::call(
@@ -608,13 +784,56 @@ HTTP-статус: **400**, **403**
                     ['OWNER_TYPE_ID' => 3]
                 ]
             ],
-            'select' => ['*', 'COMMUNICATIONS']
+            'select' => ['*', 'COMMUNICATIONS'],
+            'start' => 0
         ]
     );
 
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.list", b24.Params{
+    	"order": b24.Params{
+    		"ID": "DESC",
+    	},
+    	"filter": b24.Params{
+    		"BINDINGS": []b24.Params{
+    			{
+    				"OWNER_TYPE_ID": 2,
+    			},
+    			{
+    				"OWNER_TYPE_ID": 3,
+    			},
+    		},
+    	},
+    	"select": []string{"*", "COMMUNICATIONS"},
+    	"start":  0,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.activity.list: %w", err)
+    }
+
+    var items []struct {
+    	ID b24.ID `json:"ID"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
     ```
 
 {% endlist %}
@@ -629,7 +848,7 @@ HTTP-статус: **400**, **403**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"filter":{"ID":"20"},"select":["*","COMMUNICATIONS"]}' \
+    -d '{"filter":{"ID":"20"},"select":["*","COMMUNICATIONS"],"start":0}' \
     https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/crm.activity.list
     ```
 
@@ -639,7 +858,7 @@ HTTP-статус: **400**, **403**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"filter":{"ID":"20"},"select":["*","COMMUNICATIONS"],"auth":"**put_access_token_here**"}' \
+    -d '{"filter":{"ID":"20"},"select":["*","COMMUNICATIONS"],"start":0,"auth":"**put_access_token_here**"}' \
     https://**put_your_bitrix24_address**/rest/crm.activity.list
     ```
 
@@ -749,6 +968,67 @@ HTTP-статус: **400**, **403**
 - PHP
 
     ```php
+    try {
+        $response = $b24Service
+            ->core
+            ->call(
+                'crm.activity.list',
+                [
+                    'filter' => [
+                        'ID' => '20',
+                    ],
+                    'select' => [
+                        '*',
+                        'COMMUNICATIONS',
+                    ],
+                    'start' => 0,
+                ]
+            );
+
+        $result = $response
+            ->getResponseData()
+            ->getResult();
+
+        if ($result->error()) {
+            error_log($result->error());
+        } else {
+            echo 'Activity communications: ' . print_r($result->data(), true);
+        }
+
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        echo 'Error getting activity communications: ' . $e->getMessage();
+    }
+    ```
+
+- BX24.js
+
+    ```javascript
+    BX24.callMethod(
+        'crm.activity.list',
+        {
+            filter: {
+                ID: '20',
+            },
+            select: [
+                '*',
+                'COMMUNICATIONS',
+            ],
+            start: 0,
+        },
+        result => {
+            if (result.error()) {
+                console.error(result.error());
+            } else {
+                console.dir(result.data());
+            }
+        }
+    );
+    ```
+
+- PHP CRest
+
+    ```php
     require_once('crest.php');
 
     $result = CRest::call(
@@ -757,13 +1037,46 @@ HTTP-статус: **400**, **403**
             'filter' => [
                 'ID' => '20'
             ],
-            'select' => ['*', 'COMMUNICATIONS']
+            'select' => ['*', 'COMMUNICATIONS'],
+            'start' => 0
         ]
     );
 
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.list", b24.Params{
+    	"filter": b24.Params{
+    		"ID": "20",
+    	},
+    	"select": []string{"*", "COMMUNICATIONS"},
+    	"start":  0,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.activity.list: %w", err)
+    }
+
+    var items []struct {
+    	ID b24.ID `json:"ID"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
     ```
 
 {% endlist %}
@@ -818,7 +1131,7 @@ HTTP-статус: **200**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"filter":{"ID":"101121"},"select":["*","STORAGE_ELEMENT_IDS"]}' \
+    -d '{"filter":{"ID":"101121"},"select":["*","STORAGE_ELEMENT_IDS"],"start":0}' \
     https://**put_your_bitrix24_address**/rest/**put_your_user_id_here**/**put_your_webhook_here**/crm.activity.list
     ```
 
@@ -828,7 +1141,7 @@ HTTP-статус: **200**
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    -d '{"filter":{"ID":"101121"},"select":["*","STORAGE_ELEMENT_IDS"],"auth":"**put_access_token_here**"}' \
+    -d '{"filter":{"ID":"101121"},"select":["*","STORAGE_ELEMENT_IDS"],"start":0,"auth":"**put_access_token_here**"}' \
     https://**put_your_bitrix24_address**/rest/crm.activity.list
     ```
 
@@ -935,6 +1248,67 @@ HTTP-статус: **200**
 - PHP
 
     ```php
+    try {
+        $response = $b24Service
+            ->core
+            ->call(
+                'crm.activity.list',
+                [
+                    'filter' => [
+                        'ID' => '101121',
+                    ],
+                    'select' => [
+                        '*',
+                        'STORAGE_ELEMENT_IDS',
+                    ],
+                    'start' => 0,
+                ]
+            );
+
+        $result = $response
+            ->getResponseData()
+            ->getResult();
+
+        if ($result->error()) {
+            error_log($result->error());
+        } else {
+            echo 'Activity files: ' . print_r($result->data(), true);
+        }
+
+    } catch (Throwable $e) {
+        error_log($e->getMessage());
+        echo 'Error getting activity files: ' . $e->getMessage();
+    }
+    ```
+
+- BX24.js
+
+    ```javascript
+    BX24.callMethod(
+        'crm.activity.list',
+        {
+            filter: {
+                ID: '101121',
+            },
+            select: [
+                '*',
+                'STORAGE_ELEMENT_IDS',
+            ],
+            start: 0,
+        },
+        result => {
+            if (result.error()) {
+                console.error(result.error());
+            } else {
+                console.dir(result.data());
+            }
+        }
+    );
+    ```
+
+- PHP CRest
+
+    ```php
     require_once('crest.php');
 
     $result = CRest::call(
@@ -943,13 +1317,46 @@ HTTP-статус: **200**
             'filter' => [
                 'ID' => '101121'
             ],
-            'select' => ['*', 'STORAGE_ELEMENT_IDS']
+            'select' => ['*', 'STORAGE_ELEMENT_IDS'],
+            'start' => 0
         ]
     );
 
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.activity.list", b24.Params{
+    	"filter": b24.Params{
+    		"ID": "101121",
+    	},
+    	"select": []string{"*", "STORAGE_ELEMENT_IDS"},
+    	"start":  0,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.activity.list: %w", err)
+    }
+
+    var items []struct {
+    	ID b24.ID `json:"ID"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
+
+    // Total и Next заполняют списочные методы; для полного
+    // обхода списка есть client.Core().Pages и Scan.
+    if res.Total != nil {
+    	fmt.Println("всего:", *res.Total)
+    }
     ```
 
 {% endlist %}

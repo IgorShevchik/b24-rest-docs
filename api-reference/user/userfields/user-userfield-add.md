@@ -34,8 +34,12 @@
 || **Название**
 `тип` | **Описание** ||
 || **FIELD_NAME***
-[`string`](../../data-types.md)| Название (код) поля. Дополняется префиксом `UF_USR_`
- ||
+[`string`](../../data-types.md)| Название (код) поля. Битрикс24 приводит его к верхнему регистру и дополняет префиксом `UF_USR_`:
+
+- `DEALS` и `UF_DEALS` превратятся в `UF_USR_DEALS`
+- `UF_USR_DEALS` останется без изменений
+
+Итоговый код поля возвращает метод [user.userfield.list](./user-userfield-list.md) ||
 || **USER_TYPE_ID***
 [`string`](../../data-types.md)| Тип пользовательского поля. Возможные значения:
 - `string` — строка
@@ -384,7 +388,7 @@
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
     -d '{"fields": {
-            "FIELD_NAME": "UF_USER_DEALS",
+            "FIELD_NAME": "UF_USR_DEALS",
             "USER_TYPE_ID": "crm",
             "XML_ID": "UF_CRM_DEALS",
             "SORT": 100,
@@ -412,7 +416,7 @@
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
     -d '{"fields": {
-            "FIELD_NAME": "UF_USER_DEALS",
+            "FIELD_NAME": "UF_USR_DEALS",
             "USER_TYPE_ID": "crm",
             "XML_ID": "UF_CRM_DEALS",
             "SORT": 100,
@@ -452,7 +456,7 @@
         method: 'user.userfield.add',
         params: {
           fields: {
-            FIELD_NAME: 'UF_USER_DEALS',
+            FIELD_NAME: 'UF_USR_DEALS',
             USER_TYPE_ID: 'crm',
             XML_ID: 'UF_CRM_DEALS',
             SORT: 100,
@@ -501,7 +505,7 @@
             method: 'user.userfield.add',
             params: {
               fields: {
-                FIELD_NAME: 'UF_USER_DEALS',
+                FIELD_NAME: 'UF_USR_DEALS',
                 USER_TYPE_ID: 'crm',
                 XML_ID: 'UF_CRM_DEALS',
                 SORT: 100,
@@ -550,7 +554,7 @@
                 'user.userfield.add',
                 [
                     'fields' => [
-                        'FIELD_NAME' => 'UF_USER_DEALS',
+                        'FIELD_NAME' => 'UF_USR_DEALS',
                         'USER_TYPE_ID' => 'crm',
                         'XML_ID' => 'UF_CRM_DEALS',
                         'SORT' => 100,
@@ -590,7 +594,7 @@
         'user.userfield.add', 
         {
             fields: {
-                FIELD_NAME: "UF_USER_DEALS",
+                FIELD_NAME: "UF_USR_DEALS",
                 USER_TYPE_ID: "crm",
                 XML_ID: "UF_CRM_DEALS",
                 SORT: 100,
@@ -627,7 +631,7 @@
         'user.userfield.add',
         [
             'fields' => [
-                'FIELD_NAME' => 'UF_USER_DEALS',
+                'FIELD_NAME' => 'UF_USR_DEALS',
                 'USER_TYPE_ID' => 'crm',
                 'XML_ID' => 'UF_CRM_DEALS',
                 'SORT' => 100,
@@ -650,6 +654,41 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "user.userfield.add", b24.Params{
+    	"fields": b24.Params{
+    		"FIELD_NAME":   "UF_USR_DEALS",
+    		"USER_TYPE_ID": "crm",
+    		"XML_ID":       "UF_CRM_DEALS",
+    		"SORT":         100,
+    		"MULTIPLE":     "Y",
+    		"MANDATORY":    "N",
+    		"SHOW_FILTER":  "N",
+    		"SHOW_IN_LIST": "Y",
+    		"EDIT_IN_LIST": "Y",
+    		"SETTINGS": b24.Params{
+    			"DEAL": "Y",
+    		},
+    		"LABEL": "Привязка к сделкам CRM",
+    		"EDIT_FORM_LABEL": b24.Params{
+    			"ru": "Привязка к сделкам CRM",
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("user.userfield.add: %w", err)
+    }
+
+    var newID b24.ID
+    if err := json.Unmarshal(res.Result, &newID); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("идентификатор:", newID)
     ```
 
 {% endlist %}

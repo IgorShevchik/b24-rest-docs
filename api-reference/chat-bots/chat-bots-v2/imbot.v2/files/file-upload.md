@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -85,99 +85,21 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.File.upload
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type FileUploadResult = {
-      file: {
-        id: number
-        chatId: number
-        name: string
-        extension: string
-        size: number
-      }
-      messageId: number
-      chatId: number
-      dialogId: string
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<FileUploadResult>({
-        method: 'imbot.v2.File.upload',
-        params: {
-          botId: 456,
-          dialogId: 'chat5',
-          fields: {
-            name: 'report.pdf',
-            content: 'SGVsbG8gV29ybGQh',
-            message: 'Here is the report',
-          },
-        },
-        requestId: Text.getUuidRfc4122()
-      })
+      const response = await $b24.callMethod('imbot.v2.File.upload', {
+        botId: 456,
+        dialogId: 'chat5',
+        fields: { name: 'report.pdf', content: 'SGVsbG8gV29ybGQh', message: 'Here is the report' },
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Uploaded file ID:', result.file.id, '| Message ID:', result.messageId, '| Dialog:', result.dialogId)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function uploadBotFile() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.File.upload',
-            params: {
-              botId: 456,
-              dialogId: 'chat5',
-              fields: {
-                name: 'report.pdf',
-                content: 'SGVsbG8gV29ybGQh',
-                message: 'Here is the report',
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Uploaded file ID:', result.file.id, '| Message ID:', result.messageId, '| Dialog:', result.dialogId)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', uploadBotFile)
-    </script>
     ```
 
 - PHP
@@ -253,6 +175,35 @@
     } else {
         echo 'File ID: '. $result['result']['file']['id'];
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.File.upload", b24.Params{
+    	"botId":    456,
+    	"botToken": "my_bot_token",
+    	"dialogId": "chat5",
+    	"fields": b24.Params{
+    		"name":    "report.pdf",
+    		"content": "SGVsbG8gV29ybGQh",
+    		"message": "Here is the report",
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.File.upload: %w", err)
+    }
+
+    var item struct {
+    	MessageID b24.ID `json:"messageId"`
+    	ChatID    b24.ID `json:"chatId"`
+    	DialogID  string `json:"dialogId"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.MessageID, item.ChatID)
     ```
 
 {% endlist %}

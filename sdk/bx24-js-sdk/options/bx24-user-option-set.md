@@ -10,7 +10,7 @@
 {% endnote %}
 
 ```js
-BX24.userOption.set(string name, string value): void;
+BX24.userOption.set(string name, mixed value): void;
 ```
 
 Метод `BX24.userOption.set` устанавливает значение `value` настройки с именем `name` для текущего пользователя. Установка значения происходит сразу.
@@ -25,9 +25,8 @@ BX24.userOption.set(string name, string value): void;
 || **name***
 [`string`](../../../api-reference/data-types.md) | Код параметра ||
 || **value***
-[`mixed`](../../../api-reference/data-types.md) | Значение параметра ||
+[`any`](../../../api-reference/data-types.md) | Значение параметра ||
 |#
-
 
 ## Пример кода
 
@@ -40,6 +39,10 @@ BX24.init(() => {
 ```
 
 {% include [Сноска о примерах](../../../_includes/examples.md) %}
+
+## Возвращаемое значение
+
+Метод ничего не возвращает.
 
 ## Продолжите изучение
 

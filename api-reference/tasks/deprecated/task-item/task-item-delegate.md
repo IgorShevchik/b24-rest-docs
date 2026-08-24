@@ -13,7 +13,7 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод делегирует задачу новому пользователю.
+Метод `task.item.delegate` делегирует задачу новому пользователю.
 
 {% note warning "DEPRECATED" %}
 
@@ -67,6 +67,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version — the page has no JSON response shape
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type DelegateResult = boolean
 
@@ -181,6 +182,23 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.delegate", b24.Params{
+    	"TASKID": 13,
+    	"USERID": 3,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.delegate: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

@@ -13,11 +13,11 @@
 >
 > Кто может выполнять метод: любой пользователь
 
-Метод переводит задачу в статус «выполняется».
+Метод `task.item.startexecution` переводит задачу в статус «выполняется».
 
 {% note warning "DEPRECATED" %}
 
-Развитие метода остановлено. Используйте [tasks.task.start](../../tasks-task-start.md).
+Развитие метода остановлено. Используйте [tasks.task.start](../../status/tasks-task-start.md).
 
 {% endnote %}
 
@@ -65,6 +65,7 @@
 
     declare const $b24: B24Frame
 
+    // TODO: verify API version — no JSON response shape found on the page
     // Shape of the payload returned in result (match the "response handling" section of the page)
     type StartExecutionResult = boolean
 
@@ -180,6 +181,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "task.item.startexecution", b24.Params{
+    	"TASKID": 3,
+    })
+    if err != nil {
+    	return fmt.Errorf("task.item.startexecution: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}

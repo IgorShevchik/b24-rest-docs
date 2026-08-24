@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -62,7 +62,7 @@
 || **settings***
 [`array`](../../data-types.md) | Список параметров подключения, [(подробное описание)](./index.md#settings) ||
 || **sort**
-[`int`](../../data-types.md) | Параметр сортировки коннекторов. Значение по умолчанию `100` ||
+[`integer`](../../data-types.md) | Параметр сортировки коннекторов. Значение по умолчанию `100` ||
 |#
 
 ## Примеры кода
@@ -380,6 +380,47 @@
     echo '</PRE>';
     ```
 
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "biconnector.connector.add", b24.Params{
+    	"fields": b24.Params{
+    		"title":               "SUPER REST CONNECTOR",
+    		"logo":                "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjIiIGhlaWdodD0iMjIiIHZpZXdCb3g9IjAgMCAyMiAyMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KCTxjaXJjbGUgY3g9IjExIiBjeT0iMTEiIHI9IjEwIiBmaWxsPSIjRkYzQjNCIiAvPgoJPHRleHQgeD0iMTEiIHk9IjEzIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNiIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC13ZWlnaHQ9ImJvbGQiPlJFU1Q8L3RleHQ+Cjwvc3ZnPg==",
+    		"description":         "Connector with token",
+    		"urlCheck":            "http://example.com/api/check",
+    		"urlTableList":        "http://example.com/api/table_list",
+    		"urlTableDescription": "http://example.com/api/table_description",
+    		"urlData":             "http://example.com/api/data",
+    		"settings": []b24.Params{
+    			{
+    				"name": "Логин",
+    				"type": "STRING",
+    				"code": "login",
+    			},
+    			{
+    				"name": "Пароль",
+    				"type": "STRING",
+    				"code": "password",
+    			},
+    		},
+    		"sort": 100,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("biconnector.connector.add: %w", err)
+    }
+
+    var item struct {
+    	ID b24.ID `json:"id"`
+    }
+    if err := json.Unmarshal(res.Result, &item); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println(item.ID)
+    ```
+
 {% endlist %}
 
 ## Обработка ответа
@@ -409,7 +450,7 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **result**
-[`integer`](../../data-types.md) | Корневой элемент ответа, содержит идентификатор созданного коннектора ||
+[`object`](../../data-types.md) | Корневой элемент ответа. Содержит поле `id` с идентификатором созданного коннектора ||
 || **time**
 [`time`](../../data-types.md#time) | Информация о времени выполнения запроса ||
 |#

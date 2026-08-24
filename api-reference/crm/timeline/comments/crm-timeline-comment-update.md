@@ -52,7 +52,7 @@ fields:
 
 ||
 || **ownerTypeId**
-[`integer`](../../data-types.md) | [Целочисленный идентификатор типа объекта CRM](../../data-types.md#object_type), к которому привязан комментарий (например, `2` для сделки) ||
+[`integer`](../../../data-types.md) | [Целочисленный идентификатор типа объекта CRM](../../data-types.md#object_type), к которому привязан комментарий (например, `2` для сделки) ||
 || **ownerId**
 [`integer`](../../../data-types.md) | Целочисленный идентификатор элемента CRM, к которому привязан комментарий (например, `1`). Получить список идентификаторов можно методом [`crm.timeline.bindings.list`](../bindings/crm-timeline-bindings-list.md) (поле `ENTITY_ID`) ||
 |#
@@ -66,7 +66,7 @@ fields:
 || **COMMENT**
 [`string`](../../../data-types.md) | Текст комментария ||
 || **FILES**
-[`attached_diskfile`](../../../data-types.md) | Список файлов. Массив значений, описанный по [правилам](../../../files/how-to-update-files.md) ||
+[`attached_diskfile`](../../data-types.md#attached_diskfile) | Список файлов. Массив значений, описанный по [правилам](../../../files/how-to-update-files.md) ||
 |#
 
 ## Примеры кода
@@ -213,6 +213,42 @@ fields:
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.timeline.comment.update(
+            bitrix_id=999,
+            fields={
+                "COMMENT": "Comment was changed",
+                "FILES": [
+                    ["1.gif", "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="],
+                    ["2.gif", "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="],
+                ],
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -266,6 +302,31 @@ fields:
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.timeline.comment.update", b24.Params{
+    	"id": 999,
+    	"fields": b24.Params{
+    		"COMMENT": "Comment was changed",
+    		"FILES": []any{
+    			[]string{"1.gif", "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="},
+    			[]string{"2.gif", "R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="},
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.timeline.comment.update: %w", err)
+    }
+
+    var value b24.ID
+    if err := json.Unmarshal(res.Result, &value); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("результат:", value)
     ```
 
 {% endlist %}

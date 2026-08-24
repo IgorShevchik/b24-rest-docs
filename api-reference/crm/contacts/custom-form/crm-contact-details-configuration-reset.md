@@ -12,8 +12,8 @@
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
 > Кто может выполнять метод:
->  - Любой пользователь имеет право получать свои и общие настройки
->  - Только администратор имеет право получать чужие настройки
+>  - любой пользователь может сбросить свои личные настройки
+>  - пользователь с правом «Разрешить изменять настройки» в CRM может сбросить общие и чужие личные настройки
 
 {% note warning "DEPRECATED" %}
 
@@ -31,7 +31,7 @@
 || **Название**
 `тип` | **Описание** ||
 || **scope**
-[`string`](../../../data-types.md) | Область применения настроек. 
+[`string`](../../../data-types.md) | Область применения настроек.
 
 Возможные значения:
 - **P** — личные настройки
@@ -74,73 +74,21 @@
         https://**put_your_bitrix24_address**/rest/crm.contact.details.configuration.reset
         ```
 
-    - JS (TS)
+    - BX24.js
 
-        ```ts
-        // This snippet is an ES module: top-level await requires type="module" or a bundler.
-        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-        import { Text } from '@bitrix24/b24jssdk'
-        import type { B24Frame } from '@bitrix24/b24jssdk'
-
-        declare const $b24: B24Frame
-
-        try {
-          const response = await $b24.actions.v2.call.make<boolean>({
-            method: 'crm.contact.details.configuration.reset',
-            params: {
-              scope: 'C',
+        ```js
+        BX24.callMethod(
+            'crm.contact.details.configuration.reset',
+            {
+                scope: "C",
             },
-            requestId: Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-          } else {
-            const result = response.getData()!.result
-            console.info('Reset successful:', result)
-          }
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-        ```
-
-    - JS (UMD)
-
-        ```html
-        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-        <script>
-          async function resetCommonConfig() {
-            try {
-              // Initialize the SDK inside a Bitrix24 frame
-              const $b24 = await B24Js.initializeB24Frame()
-
-              const response = await $b24.actions.v2.call.make({
-                method: 'crm.contact.details.configuration.reset',
-                params: {
-                  scope: 'C',
-                },
-                requestId: B24Js.Text.getUuidRfc4122()
-              })
-
-              // The payload is available only on a successful response
-              if (!response.isSuccess) {
-                console.error(response.getErrorMessages().join('; '))
-                return
-              }
-
-              const result = response.getData().result
-              console.info('Reset successful:', result)
-            } catch (error) {
-              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-              console.error(error)
-            }
-          }
-
-          document.addEventListener('DOMContentLoaded', resetCommonConfig)
-        </script>
+            (result) => {
+                result.error()
+                    ? console.error(result.error())
+                    : console.info(result.data())
+                ;
+            },
+        );
         ```
 
     - PHP
@@ -158,6 +106,24 @@
         echo '<PRE>';
         print_r($result);
         echo '</PRE>';
+        ```
+
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.contact.details.configuration.reset", b24.Params{
+        	"scope": "C",
+        })
+        if err != nil {
+        	return fmt.Errorf("crm.contact.details.configuration.reset: %w", err)
+        }
+
+        var ok bool
+        if err := json.Unmarshal(res.Result, &ok); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        fmt.Println("выполнено:", ok)
         ```
 
     {% endlist %}
@@ -186,75 +152,22 @@
         https://**put_your_bitrix24_address**/rest/crm.contact.details.configuration.reset
         ```
 
-    - JS (TS)
+    - BX24.js
 
-        ```ts
-        // This snippet is an ES module: top-level await requires type="module" or a bundler.
-        // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-        import { Text } from '@bitrix24/b24jssdk'
-        import type { B24Frame } from '@bitrix24/b24jssdk'
-
-        declare const $b24: B24Frame
-
-        try {
-          const response = await $b24.actions.v2.call.make<boolean>({
-            method: 'crm.contact.details.configuration.reset',
-            params: {
-              scope: 'P',
-              userId: 6,
+        ```js
+        BX24.callMethod(
+            'crm.contact.details.configuration.reset',
+            {
+                scope: "P",
+                userId: 6,
             },
-            requestId: Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-          } else {
-            const result = response.getData()!.result
-            console.info('Reset successful:', result)
-          }
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-        ```
-
-    - JS (UMD)
-
-        ```html
-        <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-        <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-        <script>
-          async function resetPersonalConfig() {
-            try {
-              // Initialize the SDK inside a Bitrix24 frame
-              const $b24 = await B24Js.initializeB24Frame()
-
-              const response = await $b24.actions.v2.call.make({
-                method: 'crm.contact.details.configuration.reset',
-                params: {
-                  scope: 'P',
-                  userId: 6,
-                },
-                requestId: B24Js.Text.getUuidRfc4122()
-              })
-
-              // The payload is available only on a successful response
-              if (!response.isSuccess) {
-                console.error(response.getErrorMessages().join('; '))
-                return
-              }
-
-              const result = response.getData().result
-              console.info('Reset successful:', result)
-            } catch (error) {
-              // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-              console.error(error)
-            }
-          }
-
-          document.addEventListener('DOMContentLoaded', resetPersonalConfig)
-        </script>
+            (result) => {
+                result.error()
+                    ? console.error(result.error())
+                    : console.info(result.data())
+                ;
+            },
+        );
         ```
 
     - PHP
@@ -273,6 +186,55 @@
         echo '<PRE>';
         print_r($result);
         echo '</PRE>';
+        ```
+
+    - Python
+
+        Пример
+
+        ```python
+        from b24pysdk.client import BaseClient
+        from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+        client: BaseClient
+
+        try:
+            bitrix_response = client.crm.contact.details.configuration.reset(
+                scope="P",
+                user_id=6,
+            ).response
+            result = bitrix_response.result
+            print(result)
+        except BitrixAPIError as error:
+            print(
+                "Ошибка Bitrix API",
+                f"error: {error.error}",
+                f"error_description: {error.error_description}",
+                sep="\n",
+            )
+        except BitrixSDKException as error:
+            print(f"Ошибка Bitrix SDK: {error.message}")
+        except Exception as error:
+            print(f"Непредвиденная ошибка: {error}")
+        ```
+
+    - Go
+
+        ```go
+        // client и ctx уже созданы — см. раздел «SDK для Go»
+        res, err := client.Core().Call(ctx, "crm.contact.details.configuration.reset", b24.Params{
+        	"scope":  "P",
+        	"userId": 6,
+        })
+        if err != nil {
+        	return fmt.Errorf("crm.contact.details.configuration.reset: %w", err)
+        }
+
+        var ok bool
+        if err := json.Unmarshal(res.Result, &ok); err != nil {
+        	return fmt.Errorf("разбор ответа: %w", err)
+        }
+        fmt.Println("выполнено:", ok)
         ```
 
     {% endlist %}
@@ -331,7 +293,7 @@ HTTP-статус: **400**
 
 {% include [системные ошибки](../../../../_includes/system-errors.md) %}
 
-## Продолжите изучение 
+## Продолжите изучение
 
 - [{#T}](./index.md)
 - [{#T}](./crm-contact-details-configuration-get.md)

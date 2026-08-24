@@ -2,9 +2,12 @@
 
 > Scope: [`crm`](../../../api-reference/scopes/permissions.md)
 >
-> Кто может выполнять метод:
-> -  создания лида — пользователи с правом создания лида,
-> -  добавления дела в лид или сделку — пользователи с правом изменения лида или сделки в CRM
+> Кто может выполнять методы: чтобы пройти сценарий целиком, нужно самое строгое из перечисленных прав — «право на изменение лидов и сделок»
+>
+> - [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) — пользователь с правом на создание лидов
+> - [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md) — пользователь с правом на чтение лидов
+> - [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md) — пользователь с правом на чтение сделок
+> - [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) — пользователь с правом на редактирование элемента CRM, в который добавляется дело
 
 {% note tip "" %}
 
@@ -17,159 +20,317 @@
 
 На сайте можно разместить форму для сбора данных потенциальных клиентов. Когда клиент заполнит форму, его данные попадут в CRM. Вы сможете обработать заявку и позвонить клиенту.
 
-Настройка формы состоит из двух шагов.
+В результате сценария в CRM появится новый лид, а в таймлайне — дело с напоминанием о звонке. К какому объекту привязано дело, зависит от режима работы CRM: в простом режиме — к сделке, которая получилась из лида, в классическом — к самому лиду.
 
-1. Разместите форму на HTML-странице. Она отправит данные в обработчик.
+Настройка состоит из двух этапов:
 
-2. Создайте файл для обработки данных. Обработчик:
+1. Подготавливаем поля и размещаем форму на странице
 
-   -  примет и подготовит данные,
-
-   -  создаст лид методом [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add),
-
-   -  проверит режим CRM,
-
-   -  добавит дело с напоминанием о звонке в сделку или в лид.
+2. Создаем файл-обработчик, который вызывает последовательно методы [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md), [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md), [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md) и [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md)
 
 ## Режимы CRM
 
 В Битрикс24 есть два режима работы CRM.
 
-1. Простой режим — работает без лидов. Система автоматически конвертирует новый лид в сделку.
+1. Простой режим — работает без лидов. Система автоматически конвертирует новый лид в сделку, а лид получает статус `CONVERTED`
 
-2. Классический режим — разделяет потенциальных и действующих клиентов. Лид остается в системе после создания.
+2. Классический режим — разделяет потенциальных и действующих клиентов. Лид остается в системе со статусом `NEW`
 
-В обработчике определим, в каком режиме работает CRM — простом или классическом — и в зависимости от этого привяжем напоминание о звонке к сделке или к лиду.
+Дело нужно привязать к тому объекту, который в CRM появился на самом деле. Поэтому в обработчике после создания лида проверяем его статус и по нему выбираем, куда добавить напоминание о звонке.
+
+Узнать, какой режим настроен в Битрикс24, можно методом [crm.settings.mode.get](../../../api-reference/crm/crm-settings-mode-get.md). Он возвращает `1` для классического режима и `2` для простого. Но в сценарии мы опираемся не на эту настройку, а на статус конкретного лида: в классическом режиме лид тоже может сконвертироваться, если это делают роботы или другие инструменты автоматизации.
 
 {% note tip "Пользовательская документация" %}
 
--  [Как выбрать режим работы CRM](https://helpdesk.bitrix24.ru/open/23440468/)
+- [Как выбрать режим работы CRM](https://helpdesk.bitrix24.ru/open/23440468/)
 
 {% endnote %}
+
+## Что нужно до начала
+
+- вебхук создан от имени пользователя с правом на создание лидов, на чтение сделок и на редактирование лидов и сделок
+
+- есть сервер, который отдает страницу с формой и принимает данные формы методом `POST`. В примерах это Express для JS, PHP-скрипт и Flask для Python
+
+- путь вебхука хранится в окружении, а не в коде страницы. Форма находится на публичной странице, и попадать в нее секрет не должен
+
+- поле `NAME` в форме обязательное. В простом режиме система конвертирует в сделку лид с заполненным именем
 
 ## 1. Создаем веб-форму
 
 В Битрикс24 из лида можно автоматически создать контакт и компанию. Чтобы форма подходила для разных случаев, сделаем ее универсальной. Для контакта нужно указать имя и фамилию, а для компании — название. Создадим на странице сайта веб-форму с пятью полями:
 
--  `NAME` — имя клиента, обязательное поле,
+- `NAME` — имя клиента, обязательное поле
 
--  `LAST_NAME` — фамилия,
+- `LAST_NAME` — фамилия
 
--  `COMPANY_TITLE` — название компании,
+- `COMPANY_TITLE` — название компании
 
--  `PHONE` — телефон,
+- `PHONE` — телефон
 
--  `EMAIL` — электронная почта.
+- `EMAIL` — электронная почта
 
-При отправке форма передает данные в обработчик `form.php`.
+Форма передает данные методом `POST` в обработчик.
 
-```html
-<form id="form_to_crm" method="POST" action="form.php">
-    <!-- Имя (обязательное поле) -->
-    <input type="text" name="NAME" placeholder="Имя" required>
-    <!-- Фамилия -->
-    <input type="text" name="LAST_NAME" placeholder="Фамилия">
-    <!-- Название компании -->
-    <input type="text" name="COMPANY_TITLE" placeholder="Название компании">
-    <!-- Email -->
-    <input type="text" name="EMAIL" placeholder="Почта">
-    <!-- Телефон -->
-    <input type="text" name="PHONE" placeholder="Телефон">
-    <!-- Кнопка отправки -->
-    <input type="submit" value="Отправить">
-</form>
+{% include [Сноска о примерах](../../../_includes/examples.md) %}
 
-<!-- Подключаем jQuery для AJAX-запроса -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#form_to_crm').on('submit', function(el) {
+{% list tabs %}
+
+- JS
+
+    ```html
+    <form id="form_to_crm">
+        <!-- Имя (обязательное поле) -->
+        <input type="text" name="NAME" placeholder="Имя" required>
+        <!-- Фамилия -->
+        <input type="text" name="LAST_NAME" placeholder="Фамилия">
+        <!-- Название компании -->
+        <input type="text" name="COMPANY_TITLE" placeholder="Название компании">
+        <!-- Email -->
+        <input type="text" name="EMAIL" placeholder="Почта">
+        <!-- Телефон -->
+        <input type="text" name="PHONE" placeholder="Телефон">
+        <!-- Кнопка отправки -->
+        <input type="submit" value="Отправить">
+    </form>
+
+    <script>
+        document.getElementById('form_to_crm').addEventListener('submit', async (el) => {
             el.preventDefault(); // Отменяем стандартную отправку формы
-            var formData = $(this).serialize(); // Собираем данные формы
-            // Отправляем данные на сервер
-            $.ajax({
-                'method': 'POST',
-                'dataType': 'json',
-                'url': 'form.php', // Файл-обработчик
-                'data': formData,
-                success: function(data) {
-                    alert(data.message); // Показываем результат
-                }
+            // Собираем данные формы в JSON
+            const formData = Object.fromEntries(new FormData(el.currentTarget).entries());
+            // Отправляем данные на сервер (эндпоинт обработчика на Node.js)
+            const response = await fetch('/form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+            const data = await response.json();
+            alert(data.message); // Показываем результат
+        });
+    </script>
+    ```
+
+- PHP
+
+    ```html
+    <form id="form_to_crm" method="POST" action="form.php">
+        <!-- Имя (обязательное поле) -->
+        <input type="text" name="NAME" placeholder="Имя" required>
+        <!-- Фамилия -->
+        <input type="text" name="LAST_NAME" placeholder="Фамилия">
+        <!-- Название компании -->
+        <input type="text" name="COMPANY_TITLE" placeholder="Название компании">
+        <!-- Email -->
+        <input type="text" name="EMAIL" placeholder="Почта">
+        <!-- Телефон -->
+        <input type="text" name="PHONE" placeholder="Телефон">
+        <!-- Кнопка отправки -->
+        <input type="submit" value="Отправить">
+    </form>
+
+    <!-- Подключаем jQuery для AJAX-запроса -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#form_to_crm').on('submit', function(el) {
+                el.preventDefault(); // Отменяем стандартную отправку формы
+                var formData = $(this).serialize(); // Собираем данные формы
+                // Отправляем данные на сервер
+                $.ajax({
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'url': 'form.php', // Файл-обработчик
+                    'data': formData,
+                    success: function(data) {
+                        alert(data.message); // Показываем результат
+                    }
+                });
             });
         });
-    });
-</script>
-```
+    </script>
+    ```
+
+- Python
+
+    ```html
+    <form id="form_to_crm">
+        <!-- Имя (обязательное поле) -->
+        <input type="text" name="NAME" placeholder="Имя" required>
+        <!-- Фамилия -->
+        <input type="text" name="LAST_NAME" placeholder="Фамилия">
+        <!-- Название компании -->
+        <input type="text" name="COMPANY_TITLE" placeholder="Название компании">
+        <!-- Email -->
+        <input type="text" name="EMAIL" placeholder="Почта">
+        <!-- Телефон -->
+        <input type="text" name="PHONE" placeholder="Телефон">
+        <!-- Кнопка отправки -->
+        <input type="submit" value="Отправить">
+    </form>
+
+    <!-- Подключаем jQuery для AJAX-запроса -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#form_to_crm').on('submit', function(el) {
+                el.preventDefault(); // Отменяем стандартную отправку формы
+                var formData = $(this).serialize(); // Собираем данные формы
+                // Отправляем данные на сервер (маршрут обработчика на Flask)
+                $.ajax({
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'url': '/form', // Маршрут-обработчик
+                    'data': formData,
+                    success: function(data) {
+                        alert(data.message); // Показываем результат
+                    }
+                });
+            });
+        });
+    </script>
+    ```
+
+{% endlist %}
 
 ## 2. Создаем обработчик формы
 
-Создадим файл `form.php`, который будет:
-
--  принимать данные из формы,
-
--  создавать лид,
-
--  определять режим CRM,
-
--  добавлять дело с напоминанием о звонке в лид или сделку.
+Обработчик принимает значения полей формы, создает лид, проверяет его статус и добавляет дело с напоминанием о звонке в лид или в сделку.
 
 ### Подготавливаем данные из формы
 
-Получаем и очищаем от HTML-тегов данные из формы.
+Читаем поля `NAME`, `LAST_NAME`, `COMPANY_TITLE`, `PHONE`, `EMAIL` и приводим их к строке. Если поле не заполнено, получаем пустую строку, а не `undefined` или `None`.
 
-```php
-// Получаем и очищаем данные из формы
-$sName = htmlspecialchars($_POST["NAME"]);
-$sLastName = htmlspecialchars($_POST["LAST_NAME"]);
-$sCompanyTitle = htmlspecialchars($_POST["COMPANY_TITLE"]);
-$sPhone = htmlspecialchars($_POST["PHONE"]);
-$sEmail = htmlspecialchars($_POST["EMAIL"]);
-```
+Форму заполняет посетитель сайта, поэтому значения нельзя считать безопасными. В примере на PHP их дополнительно пропускаем через `htmlspecialchars`. Если вы возвращаете эти значения обратно на страницу, экранируйте их и в остальных примерах.
 
-Телефон и email система хранит как массив объектов [crm_multifield](../../../api-reference/crm/data-types#crm_multifield), поэтому их нужно привести к формату массива.
+{% list tabs %}
 
-1. Если значение есть, добавляем его первым элементом `VALUE` в массив, а вторым значением указываем тип  `VALUE_TYPE`, например:
+- JS
 
-   -  `WORK` — для телефона,
+    ```javascript
+    // Получаем данные из формы
+    const sName = String(req.body.NAME ?? '')
+    const sLastName = String(req.body.LAST_NAME ?? '')
+    const sCompanyTitle = String(req.body.COMPANY_TITLE ?? '')
+    const sPhone = String(req.body.PHONE ?? '')
+    const sEmail = String(req.body.EMAIL ?? '')
+    ```
 
-   -  `HOME` — для email.
+- PHP
 
-2. Если значения нет, передаем пустой массив.
+    ```php
+    // Получаем и очищаем данные из формы
+    $sName = htmlspecialchars($_POST["NAME"]);
+    $sLastName = htmlspecialchars($_POST["LAST_NAME"]);
+    $sCompanyTitle = htmlspecialchars($_POST["COMPANY_TITLE"]);
+    $sPhone = htmlspecialchars($_POST["PHONE"]);
+    $sEmail = htmlspecialchars($_POST["EMAIL"]);
+    ```
 
-```php
-// Форматируем телефон и почту для Битрикс24 в формат crm_multifield
-$arPhone = (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'WORK')) : array();
-$arEmail = (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array();
-```
+- Python
+
+    ```python
+    # Получаем данные из формы
+    s_name = request.form.get("NAME", "")
+    s_last_name = request.form.get("LAST_NAME", "")
+    s_company_title = request.form.get("COMPANY_TITLE", "")
+    s_phone = request.form.get("PHONE", "")
+    s_email = request.form.get("EMAIL", "")
+    ```
+
+{% endlist %}
+
+Телефон и почту система хранит как массив объектов [crm_multifield](../../../api-reference/crm/data-types.md#crm_multifield), поэтому их нужно привести к формату массива.
+
+1. Если значение есть, записываем его в поле `VALUE`, а в поле `VALUE_TYPE` передаем [тип](../../../api-reference/crm/data-types.md#crm_multifield), например `WORK` для телефона и `HOME` для почты
+
+2. Если значения нет, передаем пустой массив
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    // Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+    const arPhone = sPhone ? [{ VALUE: sPhone, VALUE_TYPE: 'WORK' }] : []
+    const arEmail = sEmail ? [{ VALUE: sEmail, VALUE_TYPE: 'HOME' }] : []
+    ```
+
+- PHP
+
+    ```php
+    // Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+    $arPhone = (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'WORK')) : array();
+    $arEmail = (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array();
+    ```
+
+- Python
+
+    ```python
+    # Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+    ar_phone = [{"VALUE": s_phone, "VALUE_TYPE": "WORK"}] if s_phone else []
+    ar_email = [{"VALUE": s_email, "VALUE_TYPE": "HOME"}] if s_email else []
+    ```
+
+{% endlist %}
 
 Заголовок лида сформируем из имени и фамилии. Для компаний добавим в заголовок название компании.
 
-```php
-// Формируем заголовок лида из имени и фамилии
-$sTitle = 'С сайта: ' . trim($sName . ' ' . $sLastName);
-// Если есть название компании — добавляем его через тире после имени и фамилии
-if (!empty($sCompanyTitle)) {
-    $sTitle .= ' — ' . $sCompanyTitle;
-}
-```
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    // Формируем заголовок лида из имени и фамилии
+    let sTitle = 'С сайта: ' + `${sName} ${sLastName}`.trim()
+    // Если есть название компании — добавляем его через тире после имени и фамилии
+    if (sCompanyTitle) {
+        sTitle += ' — ' + sCompanyTitle
+    }
+    ```
+
+- PHP
+
+    ```php
+    // Формируем заголовок лида из имени и фамилии
+    $sTitle = 'С сайта: ' . trim($sName . ' ' . $sLastName);
+    // Если есть название компании — добавляем его через тире после имени и фамилии
+    if (!empty($sCompanyTitle)) {
+        $sTitle .= ' — ' . $sCompanyTitle;
+    }
+    ```
+
+- Python
+
+    ```python
+    # Формируем заголовок лида из имени и фамилии
+    s_title = "С сайта: " + f"{s_name} {s_last_name}".strip()
+    # Если есть название компании — добавляем его через тире после имени и фамилии
+    if s_company_title:
+        s_title += " — " + s_company_title
+    ```
+
+{% endlist %}
 
 ### Создаем лид и получаем данные лида
 
-Используем пакетный метод [CRest::callBatch()](../../../settings/how-to-call-rest-api/batch.md) для последовательного выполнения двух методов в одном запросе: создания лида и получения данных лида. Методы соберем в массив `$arData[]`.
+Последовательно выполним два метода: создадим лид и получим его данные.
 
 Для добавления лида используем метод [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md). В объекте `fields` передаем поля:
 
--  `TITLE` — заголовок лида,
+- `TITLE` — заголовок лида из переменной `$sTitle`
 
--  `NAME` — имя лида,
+- `NAME` — имя из поля формы `NAME`
 
--  `LAST_NAME` — фамилия,
+- `LAST_NAME` — фамилия из поля формы `LAST_NAME`
 
--  `COMPANY_TITLE` — название компании,
+- `COMPANY_TITLE` — название компании из поля формы `COMPANY_TITLE`
 
--  `PHONE` — номер телефона,
+- `PHONE` — телефон в формате `crm_multifield` из переменной `$arPhone`
 
--  `EMAIL` — электронная почта.
+- `EMAIL` — почта в формате `crm_multifield` из переменной `$arEmail`
+
+Метод вернет идентификатор нового лида — сохраняем его в переменную `$leadId`. Он нужен на следующих шагах: чтобы получить статус лида и чтобы найти сделку, если лид сконвертирован.
 
 {% note warning "" %}
 
@@ -177,279 +338,634 @@ if (!empty($sCompanyTitle)) {
 
 {% endnote %}
 
-```php
-'add_lead' => [
-    'method' => 'crm.lead.add',
-    'params' => [
-        'fields' => [
-            'TITLE' => $sTitle, // Заголовок лида
-            'NAME' => $sName, // Имя
-            'LAST_NAME' => $sLastName, // Фамилия
-            'COMPANY_TITLE' => $sCompanyTitle, // Название компании
-            'PHONE' => $arPhone, // Телефон
-            'EMAIL' => $arEmail, // Email
-        ]
-    ]
-],
-```
+{% list tabs %}
 
-Для получения данных лида используем метод [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md). В параметр `ID` передаем идентификатор созданного лида `$result[add_lead]` из результата метода [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md).
+- JS
 
-```php
-'get_lead' => [
-    'method' => 'crm.lead.get',
-    'params' => [
-        'id' => $result[add_lead] // ID из результата выполнения метода crm.lead.add
-    ]
-]
-```
+    ```javascript
+    const addLead = await $b24.actions.v2.call.make({
+        method: 'crm.lead.add',
+        params: {
+            fields: {
+                TITLE: sTitle, // Заголовок лида
+                NAME: sName, // Имя
+                LAST_NAME: sLastName, // Фамилия
+                COMPANY_TITLE: sCompanyTitle, // Название компании
+                PHONE: arPhone, // Телефон
+                EMAIL: arEmail, // Email
+            }
+        },
+        requestId: 'add-lead'
+    })
+    const leadId = addLead.getData().result
+    ```
 
-Массив с запросами `$arData` передаем в метод `CRest::callBatch`. Результат выполнения метода сохраняем в переменную `$result`.
+- PHP
 
-```php
-$result = CRest::callBatch($arData);
-```
+    ```php
+    $leadId = $sb->getCRMScope()->lead()->add([
+        'TITLE' => $sTitle, // Заголовок лида
+        'NAME' => $sName, // Имя
+        'LAST_NAME' => $sLastName, // Фамилия
+        'COMPANY_TITLE' => $sCompanyTitle, // Название компании
+        'PHONE' => $arPhone, // Телефон
+        'EMAIL' => $arEmail, // Email
+    ])->getId();
+    ```
 
-В результате получим идентификатор нового лида `add_lead` и данные о лиде `get_lead`.
+- Python
+
+    ```python
+    lead_id = client.crm.lead.add(fields={
+        "TITLE": s_title,  # Заголовок лида
+        "NAME": s_name,  # Имя
+        "LAST_NAME": s_last_name,  # Фамилия
+        "COMPANY_TITLE": s_company_title,  # Название компании
+        "PHONE": ar_phone,  # Телефон
+        "EMAIL": ar_email,  # Email
+    }).result
+    ```
+
+{% endlist %}
+
+Для получения данных лида используем метод [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md). В параметр `ID` передаем идентификатор лида, полученный из результата метода [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md).
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const getLead = await $b24.actions.v2.call.make({
+        method: 'crm.lead.get',
+        params: { id: leadId }, // ID из результата выполнения метода crm.lead.add
+        requestId: 'get-lead'
+    })
+    const leadStatus = getLead.getData().result.STATUS_ID
+    ```
+
+- PHP
+
+    ```php
+    $lead = $sb->getCRMScope()->lead()->get($leadId)->lead(); // ID из результата crm.lead.add
+    $leadStatus = $lead->STATUS_ID;
+    ```
+
+- Python
+
+    ```python
+    lead = client.crm.lead.get(bitrix_id=lead_id).result  # ID из результата crm.lead.add
+    lead_status = lead["STATUS_ID"]
+    ```
+
+{% endlist %}
+
+В результате метод [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) вернет идентификатор нового лида, а метод [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md) — данные лида, включая поле `STATUS_ID`.
 
 ```json
 {
     "result": {
-        "result": {
-            "add_lead": 22, // результат выполнения метода crm.lead.add
-            "get_lead": { // результат выполнения метода crm.lead.get
-                "ID": "22",
-                "TITLE": "Иван Иванов",
-                "HONORIFIC": null,
-                "NAME": "Иван",
-                "SECOND_NAME": null,
-                "LAST_NAME": "Иванов",
-                "COMPANY_TITLE": null,
-                ...,
-                "STATUS_ID": "CONVERTED",
-                ...
-            }
-        },
-        "result_error": [],
-        ...
+        "ID": "22",
+        "TITLE": "С сайта: Иван Иванов",
+        "HONORIFIC": null,
+        "NAME": "Иван",
+        "SECOND_NAME": null,
+        "LAST_NAME": "Иванов",
+        "COMPANY_TITLE": null,
+        "STATUS_ID": "CONVERTED"
+    }
 }
 ```
 
-### Определяем режим CRM и создаем дело
+Ответ сокращен: метод возвращает все поля лида. Для сценария важно только `STATUS_ID`.
 
-Если система создала лид успешно, сохраним в переменные:
+### Определяем, куда добавить дело
 
--  `$leadId` — идентификатор лида,
+По значению переменной `$leadStatus` выбираем ветку сценария.
 
--  `$leadStatus` — статус лида `STATUS_ID`.
+- `CONVERTED` — лид уже сконвертирован в сделку. Находим сделку и добавляем дело в нее
 
-```php
-if (empty($result['result']['result_error']['add_lead']) && !empty($result['result']['result']['get_lead'])) {
-    $leadId = $result['result']['result']['add_lead'];
-    $leadStatus = $result['result']['result']['get_lead']['STATUS_ID'];
-    ...
-}
-```
+- любое другое значение, например `NEW` — лид остался лидом. Добавляем дело прямо в него
+
+В обеих ветках дело добавляет метод [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md). Передаем поля:
+
+- `ownerTypeId` — идентификатор типа объекта CRM. Получить идентификаторы можно методом [crm.enum.ownertype](../../../api-reference/crm/auxiliary/enum/crm-enum-owner-type.md). Значение зависит от ветки: `1` — лид, `2` — сделка
+
+- `ownerId` — идентификатор элемента CRM. Зависит от ветки: идентификатор лида или сделки
+
+- `deadline` — крайний срок дела. Передаем время в формате `2026-08-19 15:00:00` или `2026-08-19T15:00:00`, метод принимает оба
+
+- `title` — название дела
+
+- `description` — описание дела
 
 #### Простой режим
 
-В простом режиме при создании лида с заполненным именем система автоматически конвертирует его в сделку. Поле лида `STATUS_ID` принимает значение `CONVERTED`.
+Сам лид уже не нужен — дело добавим в сделку. Чтобы получить ее идентификатор, используем метод [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md). Укажем в `select` поле `ID`, а в фильтр `filter` передадим поле `LEAD_ID` с идентификатором лида из переменной `$leadId`.
 
-Проверяем значение переменной `$leadStatus`. Если значение равно `'CONVERTED'` — CRM работает в простом режиме и лид уже сконвертирован в сделку.
+{% list tabs %}
 
-{% note warning "" %}
+- JS
 
-В классическом режиме новый лид тоже можно автоматически сконвертировать в сделку с помощью инструментов автоматизации.
-
-Точно узнать режим работы CRM можно специальным методом [crm.settings.mode.get](../../../api-reference/crm/crm-settings-mode-get.md).
-
-{% endnote %}
-
-Чтобы получить идентификатор сделки, используем метод [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md). Укажем в `select` поле `ID`, а в фильтр `filter` передадим поле `LEAD_ID` с идентификатором лида из переменной `$leadId`.
-
-```php
-if ($leadStatus == 'CONVERTED') {
+    ```javascript
     // Простой режим: ищем сделку, созданную из лида
-    $resultDeal = CRest::call('crm.deal.list', [
-        'select' => [
-            'ID'
-        ] 
-        'filter' => [
-            'LEAD_ID' => $leadId
-        ]
-    ]);
-```
+    const resultDeal = await $b24.actions.v2.callList.make({
+        method: 'crm.deal.list',
+        params: { select: ['ID'], filter: { LEAD_ID: leadId } },
+        requestId: 'deal-list'
+    })
+    const deals = resultDeal.getData().result
+    ```
 
-В результате получим идентификатор сделки.
+- PHP
+
+    ```php
+    // Простой режим: ищем сделку, созданную из лида
+    $deals = $sb->getCRMScope()->deal()->list(
+        order: [],
+        filter: ['LEAD_ID' => $leadId],
+        select: ['ID']
+    )->getDeals();
+    ```
+
+- Python
+
+    ```python
+    # Простой режим: ищем сделку, созданную из лида
+    deals = client.crm.deal.list(
+        filter={"LEAD_ID": lead_id}, select=["ID"],
+    ).as_list().result
+    ```
+
+{% endlist %}
+
+В результате получим массив сделок. Из одного лида получается одна сделка, поэтому берем первый элемент.
 
 ```json
-"result": [
-    {
-        "ID": "1811"
-    }
-],
+{
+    "result": [
+        {
+            "ID": "1811"
+        }
+    ],
+    "total": 1
+}
 ```
 
-Для добавления дела в сделку используем метод [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md). Передаем поля:
+Дело добавляем в сделку: в `ownerTypeId` передаем `2`, в `ownerId` — идентификатор сделки из переменной `$deals`.
 
--  `ownerTypeId` — идентификатор типа объекта CRM. Получить идентификаторы можно методом [crm.enum.ownertype](../../../api-reference/crm/auxiliary/enum/crm-enum-owner-type.md). Укажем значение — `2`, то есть сделка,
+{% list tabs %}
 
--  `ownerId` — идентификатор элемента CRM. Укажем идентификатор сделки, который получили в прошлом запросе,
+- JS
 
--  `deadline` — крайний срок дела,
+    ```javascript
+    if (deals.length && deals[0].ID) {
+        const dealId = deals[0].ID
+        // Привязываем дело к сделке
+        await $b24.actions.v2.call.make({
+            method: 'crm.activity.todo.add',
+            params: {
+                ownerTypeId: 2, // тип объекта — сделка
+                ownerId: dealId, // идентификатор сделки
+                deadline: new Date(Date.now() + 3600 * 1000).toISOString(), // текущее время + 1 час
+                title: 'Позвонить клиенту',
+                description: 'Заполнил заявку на сайте',
+            },
+            requestId: 'todo-deal'
+        })
+    }
+    ```
 
--  `title` — название дела,
+- PHP
 
--  `description` — описание дела.
-
-```php
-if (!empty($resultDeal['result'][0]['ID'])) {
-    $dealId = $resultDeal['result'][0]['ID'];
-    // Привязываем дело к сделке
-    CRest::call(
-        'crm.activity.todo.add',
-        [
+    ```php
+    if (!empty($deals)) {
+        $dealId = $deals[0]->ID;
+        // Привязываем дело к сделке — для crm.activity.todo.add в SDK нет обертки, вызываем напрямую
+        $sb->core->call('crm.activity.todo.add', [
             'ownerTypeId' => 2, // тип объекта — сделка
             'ownerId' => $dealId, // идентификатор сделки
             'deadline' => date("Y-m-d H:i:s", time() + 3600), // текущее время + 1 час
             'title' => 'Позвонить клиенту',
             'description' => 'Заполнил заявку на сайте',
-        ]
-    );
-}
-```
+        ]);
+    }
+    ```
+
+- Python
+
+    ```python
+    from datetime import datetime, timedelta
+
+    if deals:
+        deal_id = deals[0]["ID"]
+        deadline = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")  # +1 час
+        # Привязываем дело к сделке — метод crm.activity.todo.add вызываем напрямую
+        token.call_method("crm.activity.todo.add", {
+            "ownerTypeId": 2,  # тип объекта — сделка
+            "ownerId": int(deal_id),  # идентификатор сделки
+            "deadline": deadline,
+            "title": "Позвонить клиенту",
+            "description": "Заполнил заявку на сайте",
+        })
+    ```
+
+{% endlist %}
 
 #### Классический режим
 
-В классическом режиме система не конвертирует лид, поэтому дело привязываем к созданному лиду.
+Сделки нет, поэтому дело привязываем к самому лиду. Дополнительный запрос не нужен: идентификатор лида уже лежит в переменной `$leadId`.
 
-Для добавления дела в лид используем метод [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md). Передаем поля:
+Дело добавляем в лид: в `ownerTypeId` передаем `1`, в `ownerId` — идентификатор нового лида из переменной `$leadId`.
 
--  `ownerTypeId` — идентификатор типа объекта CRM. Получить идентификаторы можно методом [crm.enum.ownertype](../../../api-reference/crm/auxiliary/enum/crm-enum-owner-type.md). Укажем значение — `1`, то есть лид,
+{% list tabs %}
 
--  `ownerId` — идентификатор элемента CRM. Укажем идентификатор нового лида,
+- JS
 
--  `deadline` — крайний срок дела,
+    ```javascript
+    // Классический режим: привязываем дело к лиду
+    await $b24.actions.v2.call.make({
+        method: 'crm.activity.todo.add',
+        params: {
+            ownerTypeId: 1, // тип объекта — лид
+            ownerId: leadId, // идентификатор лида
+            deadline: new Date(Date.now() + 3600 * 1000).toISOString(), // текущее время + 1 час
+            title: 'Позвонить клиенту',
+            description: 'Заполнил заявку на сайте',
+        },
+        requestId: 'todo-lead'
+    })
+    ```
 
--  `title` — название дела,
+- PHP
 
--  `description` — описание дела.
-
-```php
-// Классический режим: привязываем дело к лиду
-CRest::call(
-    'crm.activity.todo.add',
-    [
+    ```php
+    // Классический режим: привязываем дело к лиду
+    $sb->core->call('crm.activity.todo.add', [
         'ownerTypeId' => 1, // тип объекта — лид
         'ownerId' => $leadId, // идентификатор лида
         'deadline' => date("Y-m-d H:i:s", time() + 3600), // текущее время + 1 час
         'title' => 'Позвонить клиенту',
         'description' => 'Заполнил заявку на сайте',
-    ]
-);
+    ]);
+    ```
+
+- Python
+
+    ```python
+    from datetime import datetime, timedelta
+
+    deadline = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")  # +1 час
+    # Классический режим: привязываем дело к лиду — метод crm.activity.todo.add вызываем напрямую
+    token.call_method("crm.activity.todo.add", {
+        "ownerTypeId": 1,  # тип объекта — лид
+        "ownerId": lead_id,  # идентификатор лида
+        "deadline": deadline,
+        "title": "Позвонить клиенту",
+        "description": "Заполнил заявку на сайте",
+    })
+    ```
+
+{% endlist %}
+
+Метод вернет идентификатор созданного дела.
+
+```json
+{
+    "result": {
+        "id": 999
+    }
+}
 ```
 
-## Полный пример кода обработчика
+### Полный пример кода обработчика
 
-{% include [Сноска о примерах](../../../_includes/examples.md) %}
+{% list tabs %}
 
-```php
-<?php
-// Получаем и очищаем данные из формы
-$sName = htmlspecialchars($_POST["NAME"]);
-$sLastName = htmlspecialchars($_POST["LAST_NAME"]);
-$sCompanyTitle = htmlspecialchars($_POST["COMPANY_TITLE"]);
-$sPhone = htmlspecialchars($_POST["PHONE"]);
-$sEmail = htmlspecialchars($_POST["EMAIL"]);
+- JS
 
-// Форматируем телефон и почту для Битрикс24 в формат crm_multifield
-$arPhone = (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'WORK')) : array();
-$arEmail = (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array();
+    ```javascript
+    import express from 'express'
+    import { B24Hook } from '@bitrix24/b24jssdk'
 
-// Формируем заголовок лида из имени и фамилии
-$sTitle = 'С сайта: ' . trim($sName . ' ' . $sLastName);
-// Если есть название компании — добавляем его через тире после имени и фамилии
-if (!empty($sCompanyTitle)) {
-    $sTitle .= ' — ' . $sCompanyTitle;
-}
+    const $b24 = B24Hook.fromWebhookUrl(process.env.B24_HOOK)
+    // B24_HOOK = 'https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/'
 
-$arData = [
-    'add_lead' => [
-        'method' => 'crm.lead.add',
-        'params' => [
-            'fields' => [
-	            'TITLE' => $sTitle, // Заголовок лида
-	            'NAME' => $sName, // Имя
-	            'LAST_NAME' => $sLastName, // Фамилия
-	            'COMPANY_TITLE' => $sCompanyTitle, // Название компании
-	            'PHONE' => $arPhone, // Телефон
-	            'EMAIL' => $arEmail, // Email
-	        ]
-   	 	]
-    ],
-    'get_lead' => [
-        'method' => 'crm.lead.get',
-        'params' => [
-            'id' => '$result[add_lead]' // ID из результата выполнения метода crm.lead.add
-        ]
-    ]
-];
+    const app = express()
+    app.use(express.json())
 
-$result = CRest::callBatch($arData);
+    // Обработчик принимает данные формы по маршруту /form
+    app.post('/form', async (req, res) => {
+        // Получаем и очищаем данные из формы
+        const sName = String(req.body.NAME ?? '')
+        const sLastName = String(req.body.LAST_NAME ?? '')
+        const sCompanyTitle = String(req.body.COMPANY_TITLE ?? '')
+        const sPhone = String(req.body.PHONE ?? '')
+        const sEmail = String(req.body.EMAIL ?? '')
 
-if (empty($result['result']['result_error']['add_lead']) && !empty($result['result']['result']['get_lead'])) {
-    $leadId = $result['result']['result']['add_lead']; // сохраняем в переменную идентификатор лида
-    $leadStatus = $result['result']['result']['get_lead']['STATUS_ID']; // сохраняем в переменную статус лида
+        // Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+        const arPhone = sPhone ? [{ VALUE: sPhone, VALUE_TYPE: 'WORK' }] : []
+        const arEmail = sEmail ? [{ VALUE: sEmail, VALUE_TYPE: 'HOME' }] : []
 
-    if ($leadStatus == 'CONVERTED') {
-        // Простой режим: ищем сделку, созданную из лида
-        $resultDeal = CRest::call('crm.deal.list', [
-			'select' => [
-                'ID'
-            ] 
-            'filter' => [
-                'LEAD_ID' => $leadId
-            ]
-        ]);
-
-        if (!empty($resultDeal['result'][0]['ID'])) {
-            $dealId = $resultDeal['result'][0]['ID'];
-            CRest::call(
-                // Добавляем дело в сделку
-				'crm.activity.todo.add',
-			    [
-			        'ownerTypeId' => 2, // тип объекта — сделка
-			        'ownerId' => $dealId, // идентификатор сделки
-			        'deadline' => date("Y-m-d H:i:s", time() + 3600), // текущее время + 1 час
-			        'title' => 'Позвонить клиенту',
-			        'description' => 'Заполнил заявку на сайте',
-			    ]
-			);
+        // Формируем заголовок лида из имени и фамилии
+        let sTitle = 'С сайта: ' + `${sName} ${sLastName}`.trim()
+        if (sCompanyTitle) {
+            sTitle += ' — ' + sCompanyTitle
         }
-    } else {
-            CRest::call(
+
+        try {
+            // Создаем лид
+            const addLead = await $b24.actions.v2.call.make({
+                method: 'crm.lead.add',
+                params: {
+                    fields: {
+                        TITLE: sTitle, NAME: sName, LAST_NAME: sLastName,
+                        COMPANY_TITLE: sCompanyTitle, PHONE: arPhone, EMAIL: arEmail,
+                    }
+                },
+                requestId: 'add-lead'
+            })
+            const leadId = addLead.getData().result
+
+            // Получаем данные лида
+            const getLead = await $b24.actions.v2.call.make({
+                method: 'crm.lead.get', params: { id: leadId }, requestId: 'get-lead'
+            })
+            const leadStatus = getLead.getData().result.STATUS_ID
+
+            const deadline = new Date(Date.now() + 3600 * 1000).toISOString() // текущее время + 1 час
+
+            if (leadStatus === 'CONVERTED') {
+                // Простой режим: ищем сделку, созданную из лида
+                const resultDeal = await $b24.actions.v2.callList.make({
+                    method: 'crm.deal.list',
+                    params: { select: ['ID'], filter: { LEAD_ID: leadId } },
+                    requestId: 'deal-list'
+                })
+                const deals = resultDeal.getData().result
+                if (deals.length && deals[0].ID) {
+                    // Добавляем дело в сделку
+                    await $b24.actions.v2.call.make({
+                        method: 'crm.activity.todo.add',
+                        params: {
+                            ownerTypeId: 2, ownerId: deals[0].ID, deadline,
+                            title: 'Позвонить клиенту', description: 'Заполнил заявку на сайте',
+                        },
+                        requestId: 'todo-deal'
+                    })
+                }
+            } else {
                 // Классический режим: добавляем дело в новый лид
-				'crm.activity.todo.add',
-			    [
-			        'ownerTypeId' => 1, // тип объекта — лид
-			        'ownerId' => $leadId, // идентификатор лида
-			        'deadline' => date("Y-m-d H:i:s", time() + 3600), // текущее время + 1 час
-			        'title' => 'Позвонить клиенту',
-			        'description' => 'Заполнил заявку на сайте',
-			    ]
-			);
+                await $b24.actions.v2.call.make({
+                    method: 'crm.activity.todo.add',
+                    params: {
+                        ownerTypeId: 1, ownerId: leadId, deadline,
+                        title: 'Позвонить клиенту', description: 'Заполнил заявку на сайте',
+                    },
+                    requestId: 'todo-lead'
+                })
+            }
+
+            res.json({ message: 'Дело добавлено в лид или сделку' })
+        } catch (e) {
+            res.json({ message: e.message })
+        }
+    })
+
+    app.listen(3000)
+    ```
+
+- PHP
+
+    ```php
+    <?php
+    // composer require bitrix24/b24phpsdk:"^3.0"
+    require_once 'vendor/autoload.php';
+
+    use Bitrix24\SDK\Services\ServiceBuilderFactory;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use Psr\Log\NullLogger;
+
+    $sb = (new ServiceBuilderFactory(new EventDispatcher(), new NullLogger()))
+        ->initFromWebhook(getenv('B24_HOOK'));
+    // B24_HOOK = 'https://your-domain.bitrix24.ru/rest/USER_ID/TOKEN/'
+    $crm = $sb->getCRMScope();
+
+    // Получаем и очищаем данные из формы
+    $sName = htmlspecialchars($_POST["NAME"]);
+    $sLastName = htmlspecialchars($_POST["LAST_NAME"]);
+    $sCompanyTitle = htmlspecialchars($_POST["COMPANY_TITLE"]);
+    $sPhone = htmlspecialchars($_POST["PHONE"]);
+    $sEmail = htmlspecialchars($_POST["EMAIL"]);
+
+    // Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+    $arPhone = (!empty($sPhone)) ? array(array('VALUE' => $sPhone, 'VALUE_TYPE' => 'WORK')) : array();
+    $arEmail = (!empty($sEmail)) ? array(array('VALUE' => $sEmail, 'VALUE_TYPE' => 'HOME')) : array();
+
+    // Формируем заголовок лида из имени и фамилии
+    $sTitle = 'С сайта: ' . trim($sName . ' ' . $sLastName);
+    if (!empty($sCompanyTitle)) {
+        $sTitle .= ' — ' . $sCompanyTitle;
     }
 
-    echo json_encode(['message' => 'Дело добавлено в лид или сделку']);
-} else {
-    $errors = [];
-    if (!empty($result['result']['result_error']['add_lead'])) {
-        $errors[] = 'Error adding lead: ' . $result['result']['result_error']['add_lead']['error_description'];
+    try {
+        // Создаем лид
+        $leadId = $crm->lead()->add([
+            'TITLE' => $sTitle, 'NAME' => $sName, 'LAST_NAME' => $sLastName,
+            'COMPANY_TITLE' => $sCompanyTitle, 'PHONE' => $arPhone, 'EMAIL' => $arEmail,
+        ])->getId();
+
+        // Получаем данные лида
+        $leadStatus = $crm->lead()->get($leadId)->lead()->STATUS_ID;
+
+        $deadline = date("Y-m-d H:i:s", time() + 3600); // текущее время + 1 час
+
+        if ($leadStatus == 'CONVERTED') {
+            // Простой режим: ищем сделку, созданную из лида
+            $deals = $crm->deal()->list(order: [], filter: ['LEAD_ID' => $leadId], select: ['ID'])->getDeals();
+            if (!empty($deals)) {
+                // Добавляем дело в сделку — у crm.activity.todo.add нет обертки, вызываем напрямую
+                $sb->core->call('crm.activity.todo.add', [
+                    'ownerTypeId' => 2, 'ownerId' => $deals[0]->ID, 'deadline' => $deadline,
+                    'title' => 'Позвонить клиенту', 'description' => 'Заполнил заявку на сайте',
+                ]);
+            }
+        } else {
+            // Классический режим: добавляем дело в новый лид
+            $sb->core->call('crm.activity.todo.add', [
+                'ownerTypeId' => 1, 'ownerId' => $leadId, 'deadline' => $deadline,
+                'title' => 'Позвонить клиенту', 'description' => 'Заполнил заявку на сайте',
+            ]);
+        }
+
+        echo json_encode(['message' => 'Дело добавлено в лид или сделку']);
+    } catch (\Throwable $e) {
+        echo json_encode(['message' => $e->getMessage()]);
     }
-    if (!empty($result['result']['result_error']['get_lead'])) {
-        $errors[] = 'Error getting lead: ' . $result['result']['result_error']['get_lead']['error_description'];
-    }
-    echo json_encode(['message' => !empty($errors) ? implode('; ', $errors) : 'Неизвестная ошибка']);
-}
-?>
-```
+    ```
+
+- Python
+
+    ```python
+    # pip install b24pysdk flask
+    import os
+    from datetime import datetime, timedelta
+    from flask import Flask, request, jsonify
+    from b24pysdk import BitrixWebhook, Client
+
+    app = Flask(__name__)
+
+    token = BitrixWebhook(
+        domain="your-domain.bitrix24.ru",
+        webhook_token=os.environ["B24_HOOK_TOKEN"],
+    )
+    # B24_HOOK_TOKEN = 'USER_ID/TOKEN' — только user_id и токен, без https://
+    client = Client(token)
+
+
+    @app.route("/form", methods=["POST"])
+    def handle_form():
+        # Получаем и очищаем данные из формы
+        s_name = request.form.get("NAME", "")
+        s_last_name = request.form.get("LAST_NAME", "")
+        s_company_title = request.form.get("COMPANY_TITLE", "")
+        s_phone = request.form.get("PHONE", "")
+        s_email = request.form.get("EMAIL", "")
+
+        # Форматируем телефон и почту для Битрикс24 в формат crm_multifield
+        ar_phone = [{"VALUE": s_phone, "VALUE_TYPE": "WORK"}] if s_phone else []
+        ar_email = [{"VALUE": s_email, "VALUE_TYPE": "HOME"}] if s_email else []
+
+        # Формируем заголовок лида из имени и фамилии
+        s_title = "С сайта: " + f"{s_name} {s_last_name}".strip()
+        if s_company_title:
+            s_title += " — " + s_company_title
+
+        try:
+            # Создаем лид
+            lead_id = client.crm.lead.add(fields={
+                "TITLE": s_title, "NAME": s_name, "LAST_NAME": s_last_name,
+                "COMPANY_TITLE": s_company_title, "PHONE": ar_phone, "EMAIL": ar_email,
+            }).result
+
+            # Получаем данные лида
+            lead_status = client.crm.lead.get(bitrix_id=lead_id).result["STATUS_ID"]
+
+            deadline = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")  # +1 час
+
+            if lead_status == "CONVERTED":
+                # Простой режим: ищем сделку, созданную из лида
+                deals = client.crm.deal.list(filter={"LEAD_ID": lead_id}, select=["ID"]).as_list().result
+                if deals:
+                    # Добавляем дело в сделку (crm.activity.todo.add — вызываем напрямую)
+                    token.call_method("crm.activity.todo.add", {
+                        "ownerTypeId": 2, "ownerId": int(deals[0]["ID"]), "deadline": deadline,
+                        "title": "Позвонить клиенту", "description": "Заполнил заявку на сайте",
+                    })
+            else:
+                # Классический режим: добавляем дело в новый лид
+                token.call_method("crm.activity.todo.add", {
+                    "ownerTypeId": 1, "ownerId": lead_id, "deadline": deadline,
+                    "title": "Позвонить клиенту", "description": "Заполнил заявку на сайте",
+                })
+
+            return jsonify({"message": "Дело добавлено в лид или сделку"})
+        except Exception as e:
+            return jsonify({"message": str(e)})
+    ```
+
+{% endlist %}
+
+## Проверим результат
+
+Откройте созданный лид в Битрикс24. Если CRM работает в классическом режиме, в таймлайне лида появится дело «Позвонить клиенту» с крайним сроком через час. В простом режиме лид будет сконвертирован, а дело окажется в таймлайне сделки.
+
+Через REST дела объекта проверяет метод [crm.activity.list](../../../api-reference/crm/timeline/activities/activity-base/crm-activity-list.md) с фильтром по владельцу: `OWNER_TYPE_ID` — `1` для лида и `2` для сделки, `OWNER_ID` — идентификатор объекта.
+
+{% list tabs %}
+
+- JS
+
+    ```javascript
+    const checkResponse = await $b24.actions.v2.callList.make({
+        method: 'crm.activity.list',
+        params: {
+            filter: { OWNER_TYPE_ID: 1, OWNER_ID: leadId },
+            select: ['ID', 'SUBJECT', 'OWNER_TYPE_ID', 'OWNER_ID']
+        },
+        requestId: 'activity-list'
+    })
+
+    console.dir(checkResponse.getData().result)
+    ```
+
+- PHP
+
+    ```php
+    $activities = $sb->getCRMScope()->activity()->list(
+        [],
+        ['OWNER_TYPE_ID' => 1, 'OWNER_ID' => $leadId],
+        ['ID', 'SUBJECT', 'OWNER_TYPE_ID', 'OWNER_ID'],
+        0
+    )->getActivities();
+    ```
+
+- Python
+
+    ```python
+    activities = client.crm.activity.list(
+        filter={"OWNER_TYPE_ID": 1, "OWNER_ID": lead_id},
+        select=["ID", "SUBJECT", "OWNER_TYPE_ID", "OWNER_ID"],
+    ).response.result
+    ```
+
+{% endlist %}
+
+Сценарий выполнен, если:
+
+- метод [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md) вернул идентификатор лида
+
+- метод [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) вернул объект с идентификатором дела `id`
+
+- в списке дел объекта есть дело с темой «Позвонить клиенту», а его `OWNER_TYPE_ID` и `OWNER_ID` указывают на лид или на сделку — в зависимости от того, по какой ветке пошел сценарий
+
+## Ошибки и диагностика
+
+Если метод вернул ошибку, проверьте данные запроса.
+
+#|
+|| **Код** | **Причина и действие** ||
+|| Пустое значение `Access denied` | У пользователя нет прав на создание лидов. Проверьте, от имени какого пользователя создан вебхук ||
+|| `ACCESS_DENIED` | У пользователя нет прав на редактирование объекта, в который добавляется дело. Право нужно и на лид, и на сделку ||
+|| `100` | В [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) не переданы обязательные поля `ownerTypeId`, `ownerId` или `deadline` ||
+|| `OWNER_NOT_FOUND` | Объект, указанный в `ownerId`, не найден. Чаще всего это значит, что в `ownerId` попал идентификатор лида, а в `ownerTypeId` — значение `2` ||
+|| `WRONG_DATETIME_FORMAT` | Значение `deadline` не распознано как дата. Передавайте время в формате `2026-08-19 15:00:00` или `2026-08-19T15:00:00` ||
+|#
+
+Лид может создаться, а дело — не появиться там, где вы его ждете. Проверьте по порядку:
+
+- [crm.lead.get](../../../api-reference/crm/leads/crm-lead-get.md) вернул `STATUS_ID` со значением `NEW`, хотя CRM работает в простом режиме. Лид не сконвертирован — проверьте, что поле `NAME` заполнено
+
+- статус равен `CONVERTED`, но [crm.deal.list](../../../api-reference/crm/deals/crm-deal-list.md) вернул пустой список. У пользователя вебхука нет прав на чтение сделок. Сделка создана, но в выборку не попала
+
+- дело добавилось в лид, хотя вы ожидали его в сделке. Значит, на момент проверки лид еще не был сконвертирован
+
+Повторяйте сценарий с того шага, который вернул ошибку. Получение лида и списка сделок ничего не создают, их можно выполнять сколько угодно раз. Если ошибку вернул [crm.lead.add](../../../api-reference/crm/leads/crm-lead-add.md), лид не создан: исправьте `fields` и повторите только этот вызов. Если ошибку вернул [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md), лид уже существует — повторяйте только добавление дела, иначе получите дубликат лида.
+
+## Что важно учитывать
+
+- вебхуку нужны права сразу на два типа объектов. Ветку выбирает система, и заранее неизвестно, попадет дело в лид или в сделку
+
+- у метода [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) нет типизированной обертки в B24PhpSDK и b24pysdk, поэтому его вызываем через ядро SDK
+
+- повторная отправка формы с теми же данными каждый раз создает новый лид. Дубликаты не отсеиваются. Чтобы связывать повторные обращения, используйте сценарий [{#T}](./how-to-add-repeat-lead.md)
+
+- напоминание о звонке можно настроить точнее: передайте в [crm.activity.todo.add](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md) параметр `pingOffsets`, например `[0, 15]` — уведомления придут за 15 минут до крайнего срока и в момент его наступления
+
+## Продолжите изучение
+
+- [{#T}](../../../api-reference/crm/leads/crm-lead-add.md)
+- [{#T}](../../../api-reference/crm/leads/crm-lead-get.md)
+- [{#T}](../../../api-reference/crm/deals/crm-deal-list.md)
+- [{#T}](../../../api-reference/crm/timeline/activities/todo/crm-activity-todo-add.md)
+- [{#T}](../../../api-reference/crm/crm-settings-mode-get.md)
+- [{#T}](../../../api-reference/crm/data-types.md)

@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -48,7 +48,7 @@
 
 ### Параметр fields {#parameter-fields}
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -58,7 +58,7 @@
 
 Идентификатор можно получить с помощью метода [crm.item.list](../../universal/crm-item-list.md) по `entityTypeId = 3` ||
 || **IS_PRIMARY**
-[`char`](../../../data-types.md#char) | Является ли привязка первичной. Возможные значения:
+[`char`](../../../data-types.md#standart-types) | Является ли привязка первичной. Возможные значения:
 - `Y` — да
 - `N` — нет
 
@@ -211,6 +211,40 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.company.contact.add(
+            bitrix_id=32,
+            fields={
+                "CONTACT_ID": 54,
+                "IS_PRIMARY": "Y",
+                "SORT": 1000,
+            },
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -253,6 +287,29 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.company.contact.add", b24.Params{
+    	"id": 32,
+    	"fields": b24.Params{
+    		"CONTACT_ID": 54,
+    		"IS_PRIMARY": "Y",
+    		"SORT":       1000,
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.company.contact.add: %w", err)
+    }
+
+    var ok bool
+    if err := json.Unmarshal(res.Result, &ok); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    fmt.Println("выполнено:", ok)
     ```
 
 {% endlist %}
@@ -306,11 +363,11 @@ HTTP-статус: **400**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-`     | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше или равен 0 или не передан вовсе ||
-|| `-`     | `The parameter 'fields' must be array` | В `fields` передан не объект ||
+|| Пустое значение | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше или равен 0 или не передан вовсе ||
+|| Пустое значение | `The parameter 'fields' must be array` | В `fields` передан не объект ||
 || `ACCESS_DENIED` | `Access denied!` | У пользователя нет прав на изменение компании ||
-|| `-`     | `Not found` | Компания с переданным `id` не найдена ||
-|| `-`     | `The parameter 'fields' is not valid` | Может возникать из-за нескольких причин:
+|| Пустое значение | `Not found` | Компания с переданным `id` не найдена ||
+|| Пустое значение | `The parameter 'fields' is not valid` | Может возникать из-за нескольких причин:
 - если не передан обязательный параметр `fields.CONTACT_ID`
 - если переданный параметр `fields.CONTACT_ID` меньше или равен 0 ||
 |#

@@ -17,7 +17,7 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -103,108 +103,24 @@
       https://**put_your_bitrix24_address**/rest/imbot.v2.Chat.add
     ```
 
-- JS (TS)
+- JS
 
-    ```ts
-    // This snippet is an ES module: top-level await requires type="module" or a bundler.
-    // $b24 is an already-initialized SDK instance (see the SDK "Get started" guide).
-    import { Text } from '@bitrix24/b24jssdk'
-    import type { B24Frame, ISODate } from '@bitrix24/b24jssdk'
-
-    declare const $b24: B24Frame
-
-    // Shape of the payload returned in result (match the "response handling" section of the page)
-    type ChatAddResult = {
-      chat: {
-        id: number
-        dialogId: string
-        name: string
-        description: string
-        type: string
-        owner: number
-        color: string | null
-        avatar: string
-        role: string
-        dateCreate: ISODate | null
-        lastMessageId: number | null
-        muteList: number[]
-        managerList: number[]
-      }
-      users: Array<{
-        id: number
-        active: boolean
-        name: string
-        type: string
-      }>
-    }
-
+    ```js
     try {
-      const response = await $b24.actions.v2.call.make<ChatAddResult>({
-        method: 'imbot.v2.Chat.add',
-        params: {
-          botId: 456,
-          fields: {
-            title: 'Support Chat',
-            color: 'mint',
-            userIds: [1, 2],
-          },
+      const response = await $b24.callMethod('imbot.v2.Chat.add', {
+        botId: 456,
+        fields: {
+          title: 'Support Chat',
+          color: 'mint',
+          userIds: [1, 2],
         },
-        requestId: Text.getUuidRfc4122()
-      })
+      });
 
-      // The payload is available only on a successful response
-      if (!response.isSuccess) {
-        console.error(response.getErrorMessages().join('; '))
-      } else {
-        const result = response.getData()!.result
-        console.info('Created chat ID:', result.chat.id, 'Members:', result.users.length)
-      }
+      const { result } = response.getData();
+      console.log('result:', result);
     } catch (error) {
-      // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-      console.error(error)
+      console.error('Error:', error);
     }
-    ```
-
-- JS (UMD)
-
-    ```html
-    <!-- Load the SDK (UMD build); it is exposed as the global B24Js -->
-    <script src="https://unpkg.com/@bitrix24/b24jssdk@1/dist/umd/index.min.js"></script>
-    <script>
-      async function addChat() {
-        try {
-          // Initialize the SDK inside a Bitrix24 frame
-          const $b24 = await B24Js.initializeB24Frame()
-
-          const response = await $b24.actions.v2.call.make({
-            method: 'imbot.v2.Chat.add',
-            params: {
-              botId: 456,
-              fields: {
-                title: 'Support Chat',
-                color: 'mint',
-                userIds: [1, 2],
-              },
-            },
-            requestId: B24Js.Text.getUuidRfc4122()
-          })
-
-          // The payload is available only on a successful response
-          if (!response.isSuccess) {
-            console.error(response.getErrorMessages().join('; '))
-            return
-          }
-
-          const result = response.getData().result
-          console.info('Created chat ID:', result.chat.id, 'Members:', result.users.length)
-        } catch (error) {
-          // Thrown on transport or SDK failures (AjaxError, SdkError, etc.)
-          console.error(error)
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', addChat)
-    </script>
     ```
 
 - PHP
@@ -281,6 +197,27 @@
     } else {
         echo 'Chat ID: '. $result['result']['chat']['id'];
     }
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "imbot.v2.Chat.add", b24.Params{
+    	"botId":    456,
+    	"botToken": "my_bot_token",
+    	"fields": b24.Params{
+    		"title":   "Support Chat",
+    		"color":   "mint",
+    		"userIds": []int{1, 2},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("imbot.v2.Chat.add: %w", err)
+    }
+
+    // Форма ответа показана ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}
@@ -423,15 +360,15 @@ HTTP-статус: **200**
 || **owner**
 [`integer`](../../../../data-types.md) | ID владельца чата ||
 || **color**
-[`string\|null`](../../../../data-types.md) | Цвет чата в формате HEX ||
+[```string|null```](../../../../data-types.md) | Цвет чата в формате HEX ||
 || **avatar**
 [`string`](../../../../data-types.md) | URL аватара чата. Пустая строка, если не установлен ||
 || **role**
 [`string`](../../../../data-types.md) | Роль текущего пользователя: `owner`, `manager`, `member`, `guest`, `none` ||
 || **dateCreate**
-[`string\|null`](../../../../data-types.md) | Дата создания чата в формате ISO 8601 ||
+[```string|null```](../../../../data-types.md) | Дата создания чата в формате ISO 8601 ||
 || **lastMessageId**
-[`integer\|null`](../../../../data-types.md) | ID последнего сообщения ||
+[```integer|null```](../../../../data-types.md) | ID последнего сообщения ||
 || **muteList**
 [`array`](../../../../data-types.md) | Список ID пользователей, отключивших уведомления ||
 || **managerList**

@@ -266,6 +266,50 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.item.productrow.set(
+            owner_type="D",
+            owner_id=13143,
+            product_rows=[
+                {
+                    "productId": 9621,
+                    "price": 99999.99,
+                    "quantity": 1,
+                    "sort": 10,
+                },
+                {
+                    "productId": 9623,
+                    "price": 15900,
+                    "quantity": 2,
+                    "sort": 10,
+                },
+            ],
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -328,6 +372,54 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.item.productrow.set", b24.Params{
+    	"ownerType": "D",
+    	"ownerId":   13143,
+    	"productRows": []b24.Params{
+    		{
+    			"productId": 9621,
+    			"price":     99999.99,
+    			"quantity":  1,
+    			"sort":      10,
+    		},
+    		{
+    			"productId": 9623,
+    			"price":     15900,
+    			"quantity":  2,
+    			"sort":      10,
+    		},
+    	},
+    })
+    if err != nil {
+    	return fmt.Errorf("crm.item.productrow.set: %w", err)
+    }
+
+    // Метод заворачивает ответ в объект с ключом "productRows".
+    raw, ok := b24.Unwrap(res.Result, "productRows")
+    if !ok {
+    	return fmt.Errorf("в ответе нет ключа productRows")
+    }
+
+    var items []struct {
+    	ID          b24.ID  `json:"id"`
+    	OwnerID     b24.ID  `json:"ownerId"`
+    	OwnerType   string  `json:"ownerType"`
+    	ProductID   b24.ID  `json:"productId"`
+    	ProductName string  `json:"productName"`
+    	Price       float64 `json:"price"`
+    }
+    if err := json.Unmarshal(raw, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.ID)
+    }
     ```
 
 {% endlist %}

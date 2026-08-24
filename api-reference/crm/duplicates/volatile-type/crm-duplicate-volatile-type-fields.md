@@ -11,13 +11,13 @@
 
 > Scope: [`crm`](../../../scopes/permissions.md)
 >
-> Кто может выполнять метод: администратор
+> Кто может выполнять метод: администратор Битрикс24 или администратор CRM
 
 Метод `crm.duplicate.volatileType.fields` возвращает список стандартных и пользовательcких полей, которые можно использовать для поиска дубликатов в лидах, контактах и компаниях.
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
@@ -164,6 +164,33 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.duplicate.volatile_type.fields(
+            entity_type_id=1,
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -196,6 +223,22 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.duplicate.volatileType.fields", b24.Params{
+    	"entityTypeId": 1,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.duplicate.volatileType.fields: %w", err)
+    }
+
+    // Ответ приходит как json.RawMessage — разберите его
+    // в структуру под форму ответа, показанную ниже на этой странице.
+    fmt.Printf("%s\n", res.Result)
     ```
 
 {% endlist %}
@@ -252,12 +295,28 @@ HTTP-статус: **200**
 
 ## Обработка ошибок
 
-Специфичные ошибки метода не выделены.
+HTTP-статус: **400**
+
+```json
+{
+    "error": "ACCESS_DENIED",
+    "error_description": "Access denied"
+}
+```
+
+{% include notitle [обработка ошибок](../../../../_includes/error-info.md) %}
+
+### Возможные коды ошибок
+
+#|
+|| **Код** | **Описание** | **Значение** ||
+|| `ACCESS_DENIED` | Access denied | Метод доступен только администратору Битрикс24 или администратору CRM ||
+|#
 
 {% include [системные ошибки](./../../../../_includes/system-errors.md) %}
 
 ## Продолжите изучение
 
-- [crm.duplicate.volatileType.list](./crm-duplicate-volatile-type-list.md)
-- [crm.duplicate.volatileType.register](./crm-duplicate-volatile-type-register.md)
-- [crm.duplicate.volatileType.unregister](./crm-duplicate-volatile-type-unregister.md) 
+- [{#T}](./crm-duplicate-volatile-type-list.md)
+- [{#T}](./crm-duplicate-volatile-type-register.md)
+- [{#T}](./crm-duplicate-volatile-type-unregister.md)

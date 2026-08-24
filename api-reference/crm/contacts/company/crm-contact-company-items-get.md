@@ -17,13 +17,13 @@
 
 ## Параметры метода
 
-{% include [Сноска о параметрах](../../../../_includes/required.md) %}
+{% include [Сноска об обязательных параметрах](../../../../_includes/required.md) %}
 
 #|
 || **Название**
 `тип` | **Описание** ||
 || **id***
-[`integer`][1] | Идентификатор контакта.
+[`integer`](../../../data-types.md) | Идентификатор контакта.
 
 Идентификатор можно получить с помощью методов [crm.contact.list](../crm-contact-list.md) или [crm.contact.add](../crm-contact-add.md) ||
 |#
@@ -163,6 +163,35 @@
     }
     ```
 
+- Python
+
+    Пример
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.contact.company.items.get(
+            bitrix_id=54,
+        ).response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -195,6 +224,31 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.contact.company.items.get", b24.Params{
+    	"id": 54,
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.contact.company.items.get: %w", err)
+    }
+
+    var items []struct {
+    	CompanyID b24.ID `json:"COMPANY_ID"`
+    	Sort      int    `json:"SORT"`
+    	RoleID    b24.ID `json:"ROLE_ID"`
+    	IsPrimary string `json:"IS_PRIMARY"`
+    }
+    if err := json.Unmarshal(res.Result, &items); err != nil {
+    	return fmt.Errorf("разбор ответа: %w", err)
+    }
+    for _, it := range items {
+    	fmt.Println(it.CompanyID, it.Sort)
+    }
     ```
 
 {% endlist %}
@@ -244,7 +298,7 @@ HTTP-статус: **200**
 || **result**
 [`contact_company_binding[]`](#contact_company_binding) | Корневой элемент ответа. Содержит массив с информацией о привязанных к контакту компаниях ||
 || **time**
-[`time`][1] | Информация о времени выполнения запроса ||
+[`time`](../../../data-types.md) | Информация о времени выполнения запроса ||
 |#
 
 ### Параметр contact_company_binding {#contact_company_binding}
@@ -253,13 +307,13 @@ HTTP-статус: **200**
 || **Название**
 `тип` | **Описание** ||
 || **COMPANY_ID**
-[`integer`][1] | Идентификатор компании ||
+[`integer`](../../../data-types.md) | Идентификатор компании ||
 || **SORT**
-[`integer`][1] | Индекс сортировки ||
+[`integer`](../../../data-types.md) | Индекс сортировки ||
 || **ROLE_ID**
-[`integer`][1] | Идентификатор роли (зарезервировано) ||
+[`integer`](../../../data-types.md) | Идентификатор роли (зарезервировано) ||
 || **IS_PRIMARY**
-[`boolean`][1] | Является ли привязка первичной. Возможные значения:
+[`boolean`](../../../data-types.md) | Является ли привязка первичной. Возможные значения:
 - `Y` — да
 - `N` — нет ||
 |#
@@ -281,7 +335,7 @@ HTTP-статус: **200**
 
 #|
 || **Код** | **Описание** | **Значение** ||
-|| `-`     | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше 0 или не передан вовсе ||
+|| Пустое значение | `The parameter 'ownerEntityID' is invalid or not defined` | Передан `id` меньше 0 или не передан вовсе ||
 || `ACCESS_DENIED` | `Access denied!` | У пользователя нет прав на чтение контактов ||
 |#
 
@@ -294,5 +348,3 @@ HTTP-статус: **200**
 - [{#T}](./crm-contact-company-fields.md)
 - [{#T}](./crm-contact-company-items-set.md)
 - [{#T}](./crm-contact-company-items-delete.md)
-
-[1]: ../../../data-types.md

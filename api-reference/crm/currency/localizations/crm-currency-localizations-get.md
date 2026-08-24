@@ -163,6 +163,31 @@
     }
     ```
 
+- Python
+
+    ```python
+    from b24pysdk.client import BaseClient
+    from b24pysdk.errors import BitrixAPIError, BitrixSDKException
+
+    client: BaseClient
+
+    try:
+        bitrix_response = client.crm.currency.localizations.get(bitrix_id="RUB").response
+        result = bitrix_response.result
+        print(result)
+    except BitrixAPIError as error:
+        print(
+            "Ошибка Bitrix API",
+            f"error: {error.error}",
+            f"error_description: {error.error_description}",
+            sep="\n",
+        )
+    except BitrixSDKException as error:
+        print(f"Ошибка Bitrix SDK: {error.message}")
+    except Exception as error:
+        print(f"Непредвиденная ошибка: {error}")
+    ```
+
 - BX24.js
 
     ```js
@@ -206,6 +231,24 @@
     echo '<PRE>';
     print_r($result);
     echo '</PRE>';
+    ```
+
+- Go
+
+    ```go
+    // client и ctx уже созданы — см. раздел «SDK для Go»
+    res, err := client.Core().Call(ctx, "crm.currency.localizations.get", b24.Params{
+    	"id": "RUB",
+    }, b24.WithIdempotent())
+    if err != nil {
+    	return fmt.Errorf("crm.currency.localizations.get: %w", err)
+    }
+
+    keys, ok := b24.Keys(res.Result)
+    if !ok {
+    	return fmt.Errorf("ожидался объект в ответе")
+    }
+    fmt.Println("полей в ответе:", len(keys))
     ```
 
 {% endlist %}
